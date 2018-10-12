@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Cuenta de Bancos</string>
+    <string name="action_settings">Refrescar</string>
+    <string name="title_activity_second">SecondActivity</string>
+</resources>
