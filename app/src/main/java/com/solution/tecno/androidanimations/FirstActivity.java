@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -17,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ShareActionProvider;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -37,6 +39,7 @@ import org.json.simple.parser.JSONParser;
 public class FirstActivity extends AppCompatActivity {
 
     TableLayout main_table;
+    ImageView wsp_icon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +48,13 @@ public class FirstActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        wsp_icon=findViewById(R.id.wsp_icon);
+        wsp_icon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startNewActivity(FirstActivity.this,"com.whatsapp");
+            }
+        });
         main_table = findViewById(R.id.main_table);
         TableRow tr_head = new TableRow(this);
         tr_head.setBackgroundColor(Color.parseColor("#fcdd9e"));
@@ -197,6 +207,17 @@ public class FirstActivity extends AppCompatActivity {
         if (childCount > 1) {
             table.removeViews(1, childCount - 1);
         }
+    }
+
+    public void startNewActivity(Context context, String packageName) {
+        Intent intent = context.getPackageManager().getLaunchIntentForPackage(packageName);
+        if (intent == null) {
+            // Bring user to the market or let them choose an app?
+            intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse("market://details?id=" + packageName));
+        }
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
     }
 
     public void getAccounts() {

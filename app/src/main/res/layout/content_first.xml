@@ -15,4 +15,16 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent">
     </TableLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/wsp_icon"
+            android:src="@drawable/whats_app_icon"
+            android:maxHeight="24px"
+            android:maxWidth="24px"
+            android:layout_gravity="center_horizontal"/>
+    </LinearLayout>
 </android.support.constraint.ConstraintLayout>
