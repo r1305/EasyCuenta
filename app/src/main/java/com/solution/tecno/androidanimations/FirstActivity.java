@@ -5,6 +5,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -15,6 +16,8 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
+import android.widget.ShareActionProvider;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -44,23 +47,28 @@ public class FirstActivity extends AppCompatActivity {
 
         main_table = findViewById(R.id.main_table);
         TableRow tr_head = new TableRow(this);
-        tr_head.setBackgroundColor(Color.GRAY);
+        tr_head.setBackgroundColor(Color.parseColor("#fcdd9e"));
+        tr_head.setGravity(Gravity.LEFT);
         tr_head.setLayoutParams(new TableLayout.LayoutParams(
                 TableLayout.LayoutParams.FILL_PARENT,
                 TableLayout.LayoutParams.WRAP_CONTENT));
 
         TextView label_bank_header = new TextView(this);
         label_bank_header.setText("Banco");
-        label_bank_header.setTextColor(Color.WHITE);
+        label_bank_header.setTextColor(Color.BLACK);
         label_bank_header.setPadding(5, 5, 5, 5);
+        label_bank_header.setHeight(100);
         label_bank_header.setGravity(Gravity.CENTER);
+        label_bank_header.setTypeface(Typeface.SANS_SERIF,Typeface.BOLD);
         tr_head.addView(label_bank_header);// add the column to the table row here
 
         TextView label_account_header = new TextView(this);
         label_account_header.setText("Num. Cuenta"); // set the text for the header
-        label_account_header.setTextColor(Color.WHITE); // set the color
+        label_account_header.setTextColor(Color.BLACK); // set the color
         label_account_header.setPadding(5, 5, 5, 5); // set the padding (if required)
+        label_bank_header.setHeight(100);
         label_account_header.setGravity(Gravity.CENTER);
+        label_account_header.setTypeface(Typeface.SANS_SERIF,Typeface.BOLD);
         tr_head.addView(label_account_header); // add the column to the table row here
 
         main_table.addView(tr_head, new TableLayout.LayoutParams(
@@ -85,7 +93,7 @@ public class FirstActivity extends AppCompatActivity {
         Integer count= main_table.getChildCount();
         // Create the table row
         final TableRow tr = new TableRow(this);
-        if(count%2!=0) tr.setBackgroundColor(Color.BLACK);
+        if(count%2!=0) tr.setBackgroundColor(Color.GRAY);
         tr.setId(id);
         tr.setLayoutParams(new TableRow.LayoutParams(
                 TableRow.LayoutParams.FILL_PARENT,
@@ -98,7 +106,7 @@ public class FirstActivity extends AppCompatActivity {
         labelBank.setPadding(50, 0, 0, 0);
         labelBank.setHeight(100);
         labelBank.setGravity(Gravity.LEFT);
-        if(count%2!=0) labelBank.setTextColor(Color.WHITE); else labelBank.setTextColor(Color.BLUE);
+        if(count%2!=0) labelBank.setTextColor(Color.WHITE); else labelBank.setTextColor(Color.BLACK);
         tr.addView(labelBank);
 
         //create column account
@@ -107,13 +115,40 @@ public class FirstActivity extends AppCompatActivity {
         labelAccount.setPadding(2, 0, 5, 0);
         labelAccount.setHeight(100);
         labelAccount.setGravity(Gravity.CENTER);
-        if(count%2!=0) labelAccount.setTextColor(Color.WHITE); else labelAccount.setTextColor(Color.BLUE);
+        if(count%2!=0) labelAccount.setTextColor(Color.WHITE); else labelAccount.setTextColor(Color.BLACK);
         tr.addView(labelAccount);
 
-        //do row clickeable
-        tr.setOnLongClickListener(new View.OnLongClickListener() {
+        //create share bank+account icon
+        ImageButton share_icon = new ImageButton(this);
+        share_icon.setImageResource(R.drawable.baseline_share_black_24dp);
+        share_icon.setPadding(0, 20, 35, 0);
+        share_icon.setClickable(true);
+        share_icon.setBackgroundColor(Color.parseColor("#00000000"));
+        share_icon.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onLongClick(View v) {
+            public void onClick(View v) {
+                TextView tv_bank = (TextView)tr.getChildAt(0);
+                TextView tv_account = (TextView)tr.getChildAt(1);
+                String bank=tv_bank.getText().toString();
+                String account=tv_account.getText().toString();
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, bank+": "+account);
+                sendIntent.setType("text/plain");
+                startActivity(sendIntent);
+            }
+        });
+        tr.addView(share_icon);
+
+        //create copy_account icon
+        ImageButton copy_icon = new ImageButton(this);
+        copy_icon.setImageResource(R.drawable.baseline_file_copy_black_24dp);
+        copy_icon.setPadding(0, 20, 35, 0);
+        copy_icon.setClickable(true);
+        copy_icon.setBackgroundColor(Color.parseColor("#00000000"));
+        copy_icon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 TextView tv_bank = (TextView)tr.getChildAt(0);
                 TextView tv_account = (TextView)tr.getChildAt(1);
                 String bank=tv_bank.getText().toString();
@@ -121,9 +156,9 @@ public class FirstActivity extends AppCompatActivity {
                 ClipboardManager cm = (ClipboardManager)FirstActivity.this.getSystemService(Context.CLIPBOARD_SERVICE);
                 cm.setText(account);
                 Toast.makeText(FirstActivity.this, "Cuenta copiada", Toast.LENGTH_SHORT).show();
-                return false;
             }
         });
+        tr.addView(copy_icon);
 
         // finally add this to the table row
         main_table.addView(tr, new TableLayout.LayoutParams(
