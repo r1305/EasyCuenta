@@ -1,6 +1,5 @@
 package com.solution.tecno.androidanimations;
 
-import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
@@ -19,7 +18,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ShareActionProvider;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -40,11 +38,16 @@ public class FirstActivity extends AppCompatActivity {
 
     TableLayout main_table;
     ImageView wsp_icon;
+    Context ctx;
+    String user_id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_first);
+        ctx=FirstActivity.this;
+        new Credentials(ctx);
+        user_id=new Credentials(ctx).getUserId();
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -52,18 +55,18 @@ public class FirstActivity extends AppCompatActivity {
         wsp_icon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startNewActivity(FirstActivity.this,"com.whatsapp");
+                startNewActivity(ctx,"com.whatsapp");
             }
         });
         main_table = findViewById(R.id.main_table);
-        TableRow tr_head = new TableRow(this);
+        TableRow tr_head = new TableRow(ctx);
         tr_head.setBackgroundColor(Color.parseColor("#fcdd9e"));
         tr_head.setGravity(Gravity.LEFT);
         tr_head.setLayoutParams(new TableLayout.LayoutParams(
                 TableLayout.LayoutParams.FILL_PARENT,
                 TableLayout.LayoutParams.WRAP_CONTENT));
 
-        TextView label_bank_header = new TextView(this);
+        TextView label_bank_header = new TextView(ctx);
         label_bank_header.setText("Banco");
         label_bank_header.setTextColor(Color.BLACK);
         label_bank_header.setPadding(5, 5, 5, 5);
@@ -85,15 +88,15 @@ public class FirstActivity extends AppCompatActivity {
                 TableRow.LayoutParams.FILL_PARENT,
                 TableRow.LayoutParams.WRAP_CONTENT));
 
-        getAccounts();
-
+        getAccounts(user_id);
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 FirstActivity.this.overridePendingTransition(R.anim.fadeout,R.anim.fadein);
-                Snackbar.make(view, "Pronto nuevas funcionalidades", Snackbar.LENGTH_LONG).show();
+                new Credentials(ctx).logout();
+//                Snackbar.make(view, "Pronto nuevas funcionalidades", Snackbar.LENGTH_LONG).show();
             }
         });
     }
@@ -102,7 +105,7 @@ public class FirstActivity extends AppCompatActivity {
 
         Integer count= main_table.getChildCount();
         // Create the table row
-        final TableRow tr = new TableRow(this);
+        final TableRow tr = new TableRow(ctx);
         if(count%2!=0) tr.setBackgroundColor(Color.GRAY);
         tr.setId(id);
         tr.setLayoutParams(new TableRow.LayoutParams(
@@ -111,7 +114,7 @@ public class FirstActivity extends AppCompatActivity {
 
         //Create two columns to add as table data
         //create column bank
-        TextView labelBank = new TextView(this);
+        TextView labelBank = new TextView(ctx);
         labelBank.setText(bank.toUpperCase());
         labelBank.setPadding(50, 0, 0, 0);
         labelBank.setHeight(100);
@@ -120,8 +123,8 @@ public class FirstActivity extends AppCompatActivity {
         tr.addView(labelBank);
 
         //create column account
-        TextView labelAccount = new TextView(this);
-        labelAccount.setText(account.toString());
+        TextView labelAccount = new TextView(ctx);
+        labelAccount.setText(account);
         labelAccount.setPadding(2, 0, 5, 0);
         labelAccount.setHeight(100);
         labelAccount.setGravity(Gravity.CENTER);
@@ -129,7 +132,7 @@ public class FirstActivity extends AppCompatActivity {
         tr.addView(labelAccount);
 
         //create share bank+account icon
-        ImageButton share_icon = new ImageButton(this);
+        ImageButton share_icon = new ImageButton(ctx);
         share_icon.setImageResource(R.drawable.baseline_share_black_24dp);
         share_icon.setPadding(0, 20, 35, 0);
         share_icon.setClickable(true);
@@ -163,9 +166,9 @@ public class FirstActivity extends AppCompatActivity {
                 TextView tv_account = (TextView)tr.getChildAt(1);
                 String bank=tv_bank.getText().toString();
                 String account=tv_account.getText().toString();
-                ClipboardManager cm = (ClipboardManager)FirstActivity.this.getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipboardManager cm = (ClipboardManager)ctx.getSystemService(Context.CLIPBOARD_SERVICE);
                 cm.setText(account);
-                Toast.makeText(FirstActivity.this, "Cuenta copiada", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ctx, "Cuenta copiada", Toast.LENGTH_SHORT).show();
             }
         });
         tr.addView(copy_icon);
@@ -192,7 +195,7 @@ public class FirstActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            getAccounts();
+            getAccounts(user_id);
             return true;
         }
 
@@ -220,16 +223,18 @@ public class FirstActivity extends AppCompatActivity {
         context.startActivity(intent);
     }
 
-    public void getAccounts() {
+    public void getAccounts(String user_id) {
         cleanTable(main_table);
 
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "http://taimu.pe/php_connection/select_accounts.php";
+        RequestQueue queue = Volley.newRequestQueue(ctx);
+        String params="?user_id="+Integer.parseInt(user_id);
+        String url = "http://taimu.pe/php_connection/app_bancos/getUserAccounts.php"+params;
 
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        Toast.makeText(ctx,response,Toast.LENGTH_LONG);
                         JSONParser jp = new JSONParser();
                         try {
                             JSONArray ja=(JSONArray)jp.parse(response);
@@ -237,11 +242,11 @@ public class FirstActivity extends AppCompatActivity {
                                 JSONObject item=(JSONObject)ja.get(i);
                                 int id=Integer.parseInt(item.get("id").toString());
                                 String bank=item.get("bank").toString();
-                                String account=item.get("account").toString();
+                                String account=item.get("account_number").toString();
                                 addNewTableRow(id,bank,account);
                             }
                         } catch (Exception e) {
-                            Toast.makeText(FirstActivity.this,"Intente luego", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ctx,"Intente luego", Toast.LENGTH_SHORT).show();
                             e.printStackTrace();
                         }
                     }
@@ -251,7 +256,7 @@ public class FirstActivity extends AppCompatActivity {
                     public void onErrorResponse(VolleyError error) {
                         // error
                         Log.d("Error.Response", error.toString());
-                        Toast.makeText(FirstActivity.this, error.toString(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
                     }
                 }
         );
