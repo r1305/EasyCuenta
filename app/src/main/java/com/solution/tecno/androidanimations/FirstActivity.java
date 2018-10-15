@@ -7,8 +7,6 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -89,16 +87,6 @@ public class FirstActivity extends AppCompatActivity {
                 TableRow.LayoutParams.WRAP_CONTENT));
 
         getAccounts(user_id);
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                FirstActivity.this.overridePendingTransition(R.anim.fadeout,R.anim.fadein);
-                new Credentials(ctx).logout();
-//                Snackbar.make(view, "Pronto nuevas funcionalidades", Snackbar.LENGTH_LONG).show();
-            }
-        });
     }
 
     public void addNewTableRow(int id,String bank,String account){
@@ -199,6 +187,10 @@ public class FirstActivity extends AppCompatActivity {
             return true;
         }
 
+        if(id == R.id.action_log_out){
+            new Credentials(ctx).logout();
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -262,4 +254,5 @@ public class FirstActivity extends AppCompatActivity {
         );
         queue.add(postRequest);
     }
+
 }
