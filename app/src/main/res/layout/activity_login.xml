@@ -47,8 +47,8 @@
                 app:progressWidth="4dp"
                 android:background="#3333ff"
                 android:padding="16dp"
-                android:layout_weight="1"/>
-                />
+                android:layout_weight="1"
+                android:gravity="center"/>
 
             <com.alirezaahmadi.progressbutton.ProgressButtonComponent
                 android:id="@+id/btn_register"
