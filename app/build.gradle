@@ -31,9 +31,11 @@ dependencies {
     implementation 'com.android.volley:volley:1.0.0'
     implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
     //edit text material design
-    compile 'com.rengwuxian.materialedittext:library:2.1.4'
+    implementation 'com.rengwuxian.materialedittext:library:2.1.4'
     //progress button
     implementation 'com.alirezaahmadi:progress-button:1.1.2'
     //progress bar
     implementation 'com.jackandphantom.android:circularprogressbar:1.2.0'
+    //input dialog
+    implementation 'com.github.Haegon:EasyNativeDialog-for-Android:0.3.0'
 }
