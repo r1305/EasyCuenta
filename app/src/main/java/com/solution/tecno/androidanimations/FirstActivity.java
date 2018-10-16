@@ -352,9 +352,8 @@ public class FirstActivity extends AppCompatActivity {
         cleanTable(main_table);
 
         RequestQueue queue = Volley.newRequestQueue(ctx);
-        String params="?user_id="+Integer.parseInt(user_id)+"&bank="+bank+"&account="+number;
+        String params="?user_id="+Integer.parseInt(user_id)+"&bank="+Uri.encode(bank)+"&account="+number;
         String url = "http://taimu.pe/php_connection/app_bancos/addAccount.php"+params;
-        Log.i("*******",url);
 
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
@@ -387,7 +386,7 @@ public class FirstActivity extends AppCompatActivity {
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?id="+id+"&bank="+bank+"&account="+number;
         String url = "http://taimu.pe/php_connection/app_bancos/updateAccount.php"+params;
-        Log.i("*******",url);
+
 
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {

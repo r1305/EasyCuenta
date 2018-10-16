@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
         circleProgressbar.setForegroundProgressColor(Color.RED);
         circleProgressbar.setBackgroundProgressWidth(15);
         circleProgressbar.setForegroundProgressWidth(20);
-        circleProgressbar.enabledTouch(true);
+        circleProgressbar.enabledTouch(false);
         circleProgressbar.setRoundedCorner(true);
         circleProgressbar.setClockwise(true);
         circleProgressbar.setMaxProgress(100);

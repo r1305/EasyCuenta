@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,14 +7,23 @@
     tools:context=".MainActivity"
     android:gravity="center">
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/ic_bank_app_loader" />
+
     <com.jackandphantom.circularprogressbar.CircleProgressbar
         android:id="@+id/main_progress_bar"
         android:layout_width="250dp"
         android:layout_height="250dp"
-        app:cpb_progress="100"
-        app:cpb_roundedCorner="true"
-        app:cpb_foregroundProgressWidth="15"
+        android:layout_centerInParent="true"
         app:cpb_foregroundProgressColor="#1864c2"
-        app:cpb_touchEnabled="true"/>
+        app:cpb_foregroundProgressWidth="15"
+        app:cpb_progress="100"
+        app:cpb_roundedCorner="true" />
 
-</LinearLayout>
+</RelativeLayout>
