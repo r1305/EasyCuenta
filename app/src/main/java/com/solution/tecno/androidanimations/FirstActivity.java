@@ -7,13 +7,17 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Layout;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TableLayout;
@@ -21,12 +25,16 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
+import com.github.javiersantos.materialstyleddialogs.enums.Style;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -38,6 +46,7 @@ public class FirstActivity extends AppCompatActivity {
     ImageView wsp_icon;
     Context ctx;
     String user_id;
+    EditText diag_et_bank,diag_et_number;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +55,7 @@ public class FirstActivity extends AppCompatActivity {
         ctx=FirstActivity.this;
         new Credentials(ctx);
         user_id=new Credentials(ctx).getUserId();
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -161,6 +171,58 @@ public class FirstActivity extends AppCompatActivity {
         });
         tr.addView(copy_icon);
 
+        //create edit_row icon
+        ImageButton edit_row = new ImageButton(this);
+        edit_row.setImageResource(R.drawable.ic_edit_row);
+        edit_row.setPadding(0, 20, 35, 0);
+        edit_row.setClickable(true);
+        edit_row.setBackgroundColor(Color.parseColor("#00000000"));
+        edit_row.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TextView tv_bank = (TextView)tr.getChildAt(0);
+                TextView tv_account = (TextView)tr.getChildAt(1);
+                String bank=tv_bank.getText().toString();
+                String account=tv_account.getText().toString();
+
+                final View layout=LayoutInflater.from(ctx).inflate(R.layout.edit_account_view,null);
+                diag_et_bank=layout.findViewById(R.id.diag_et_bank);
+                diag_et_number=layout.findViewById(R.id.diag_et_account);
+
+                diag_et_bank.setText(bank);
+                diag_et_number.setText(account);
+
+
+                new MaterialStyledDialog.Builder(ctx)
+                        .setStyle(Style.HEADER_WITH_TITLE)
+                        .setTitle("Editar cuenta")
+                        .setDescription("Añade una nueva cuenta para compartirla rápidamente")
+                        .setPositiveText("Guardar")
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                dialog.dismiss();
+                                int id=tr.getId();
+                                String bank = diag_et_bank.getText().toString();
+                                String number = diag_et_number.getText().toString();
+                                Toast.makeText(ctx,bank+" - "+number,Toast.LENGTH_SHORT).show();
+                                updateAccount(id,bank,number);
+                            }
+                        })
+                        .setNegativeText("Cancelar")
+                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .setCustomView(layout) // Old standard padding: .setCustomView(your_custom_view, 20, 20, 20, 0)
+                        //.setCustomView(your_custom_view, 10, 20, 10, 20) // int left, int top, int right, int bottom
+                        .show();
+            }
+        });
+        tr.addView(edit_row);
+
         // finally add this to the table row
         main_table.addView(tr, new TableLayout.LayoutParams(
                 TableRow.LayoutParams.FILL_PARENT,
@@ -189,6 +251,37 @@ public class FirstActivity extends AppCompatActivity {
 
         if(id == R.id.action_log_out){
             new Credentials(ctx).logout();
+        }
+
+        if(id == R.id.action_add_new_account){
+            final View layout=LayoutInflater.from(ctx).inflate(R.layout.new_account_view,null);
+            new MaterialStyledDialog.Builder(this)
+                    .setStyle(Style.HEADER_WITH_TITLE)
+                    .setTitle("Nueva cuenta")
+                    .setDescription("Añade una nueva cuenta para compartirla rápidamente")
+                    .setPositiveText("Agregar")
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            dialog.dismiss();
+                            EditText diag_et_bank=layout.findViewById(R.id.diag_et_bank);
+                            EditText diag_et_number=layout.findViewById(R.id.diag_et_account);
+                            String bank = diag_et_bank.getText().toString();
+                            String number = diag_et_number.getText().toString();
+                            Toast.makeText(ctx,bank+" - "+number,Toast.LENGTH_SHORT).show();
+                            addAccount(user_id,bank,number);
+                        }
+                    })
+                    .setNegativeText("Cancelar")
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .setCustomView(layout) // Old standard padding: .setCustomView(your_custom_view, 20, 20, 20, 0)
+                    //.setCustomView(your_custom_view, 10, 20, 10, 20) // int left, int top, int right, int bottom
+                    .show();
         }
 
         return super.onOptionsItemSelected(item);
@@ -237,6 +330,72 @@ public class FirstActivity extends AppCompatActivity {
                                 String account=item.get("account_number").toString();
                                 addNewTableRow(id,bank,account);
                             }
+                        } catch (Exception e) {
+                            Toast.makeText(ctx,"Intente luego", Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // error
+                        Log.d("Error.Response", error.toString());
+                        Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+        queue.add(postRequest);
+    }
+
+    public void addAccount(final String user_id, String bank, String number) {
+        cleanTable(main_table);
+
+        RequestQueue queue = Volley.newRequestQueue(ctx);
+        String params="?user_id="+Integer.parseInt(user_id)+"&bank="+bank+"&account="+number;
+        String url = "http://taimu.pe/php_connection/app_bancos/addAccount.php"+params;
+        Log.i("*******",url);
+
+        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Toast.makeText(ctx,response,Toast.LENGTH_LONG);
+                        try {
+                            getAccounts(user_id);
+                        } catch (Exception e) {
+                            Toast.makeText(ctx,"Intente luego", Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // error
+                        Log.d("Error.Response", error.toString());
+                        Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+        queue.add(postRequest);
+    }
+
+    public void updateAccount(int id,String bank, String number) {
+        cleanTable(main_table);
+
+        RequestQueue queue = Volley.newRequestQueue(ctx);
+        String params="?id="+id+"&bank="+bank+"&account="+number;
+        String url = "http://taimu.pe/php_connection/app_bancos/updateAccount.php"+params;
+        Log.i("*******",url);
+
+        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Toast.makeText(ctx,response,Toast.LENGTH_LONG);
+                        try {
+                            getAccounts(user_id);
                         } catch (Exception e) {
                             Toast.makeText(ctx,"Intente luego", Toast.LENGTH_SHORT).show();
                             e.printStackTrace();

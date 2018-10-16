@@ -31,17 +31,37 @@
         app:met_iconPadding="0dp"
         android:inputType="textPassword"/>
 
-    <com.alirezaahmadi.progressbutton.ProgressButtonComponent
-        android:id="@+id/btn_login"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:buttonText="Ingresar"
-        app:buttonTextSize="20dp"
-        app:buttonTextColor="#FFF"
-        app:progressColor="#FF00"
-        app:progressWidth="4dp"
-        android:background="#3333ff"
-        android:padding="16dp"
-        />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
+            <com.alirezaahmadi.progressbutton.ProgressButtonComponent
+                android:id="@+id/btn_login"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:buttonText="Ingresar"
+                app:buttonTextSize="20dp"
+                app:buttonTextColor="#FFF"
+                app:progressColor="#FF00"
+                app:progressWidth="4dp"
+                android:background="#3333ff"
+                android:padding="16dp"
+                android:layout_weight="1"/>
+                />
+
+            <com.alirezaahmadi.progressbutton.ProgressButtonComponent
+                android:id="@+id/btn_register"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:buttonText="Nuevo"
+                app:buttonTextSize="20dp"
+                app:buttonTextColor="#000"
+                app:progressColor="#FF00"
+                app:progressWidth="4dp"
+                android:background="#FFFFFF"
+                android:padding="16dp"
+                android:layout_weight="1"
+                android:gravity="center"/>
+        </LinearLayout>
 </LinearLayout>
