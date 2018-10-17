@@ -39,10 +39,11 @@ import com.github.javiersantos.materialstyleddialogs.enums.Style;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.w3c.dom.Text;
 
 public class FirstActivity extends AppCompatActivity {
 
-    TableLayout main_table;
+    TableLayout data_table;
     ImageView wsp_icon;
     Context ctx;
     String user_id;
@@ -66,42 +67,14 @@ public class FirstActivity extends AppCompatActivity {
                 startNewActivity(ctx,"com.whatsapp");
             }
         });
-        main_table = findViewById(R.id.main_table);
-        TableRow tr_head = new TableRow(ctx);
-        tr_head.setBackgroundColor(Color.parseColor("#fcdd9e"));
-        tr_head.setGravity(Gravity.LEFT);
-        tr_head.setLayoutParams(new TableLayout.LayoutParams(
-                TableLayout.LayoutParams.FILL_PARENT,
-                TableLayout.LayoutParams.WRAP_CONTENT));
-
-        TextView label_bank_header = new TextView(ctx);
-        label_bank_header.setText("Banco");
-        label_bank_header.setTextColor(Color.BLACK);
-        label_bank_header.setPadding(5, 5, 5, 5);
-        label_bank_header.setHeight(100);
-        label_bank_header.setGravity(Gravity.CENTER);
-        label_bank_header.setTypeface(Typeface.SANS_SERIF,Typeface.BOLD);
-        tr_head.addView(label_bank_header);// add the column to the table row here
-
-        TextView label_account_header = new TextView(this);
-        label_account_header.setText("Num. Cuenta"); // set the text for the header
-        label_account_header.setTextColor(Color.BLACK); // set the color
-        label_account_header.setPadding(5, 5, 5, 5); // set the padding (if required)
-        label_bank_header.setHeight(100);
-        label_account_header.setGravity(Gravity.CENTER);
-        label_account_header.setTypeface(Typeface.SANS_SERIF,Typeface.BOLD);
-        tr_head.addView(label_account_header); // add the column to the table row here
-
-        main_table.addView(tr_head, new TableLayout.LayoutParams(
-                TableRow.LayoutParams.FILL_PARENT,
-                TableRow.LayoutParams.WRAP_CONTENT));
+        data_table = findViewById(R.id.data_table);
 
         getAccounts(user_id);
     }
 
     public void addNewTableRow(int id,String bank,String account){
 
-        Integer count= main_table.getChildCount();
+        Integer count= data_table.getChildCount();
         // Create the table row
         final TableRow tr = new TableRow(ctx);
         if(count%2!=0) tr.setBackgroundColor(Color.GRAY);
@@ -192,7 +165,6 @@ public class FirstActivity extends AppCompatActivity {
                 diag_et_bank.setText(bank);
                 diag_et_number.setText(account);
 
-
                 new MaterialStyledDialog.Builder(ctx)
                         .setStyle(Style.HEADER_WITH_TITLE)
                         .setTitle("Editar cuenta")
@@ -205,7 +177,6 @@ public class FirstActivity extends AppCompatActivity {
                                 int id=tr.getId();
                                 String bank = diag_et_bank.getText().toString();
                                 String number = diag_et_number.getText().toString();
-                                Toast.makeText(ctx,bank+" - "+number,Toast.LENGTH_SHORT).show();
                                 updateAccount(id,bank,number);
                             }
                         })
@@ -224,7 +195,7 @@ public class FirstActivity extends AppCompatActivity {
         tr.addView(edit_row);
 
         // finally add this to the table row
-        main_table.addView(tr, new TableLayout.LayoutParams(
+        data_table.addView(tr, new TableLayout.LayoutParams(
                 TableRow.LayoutParams.FILL_PARENT,
                 TableRow.LayoutParams.WRAP_CONTENT));
     }
@@ -288,13 +259,8 @@ public class FirstActivity extends AppCompatActivity {
     }
 
     private void cleanTable(TableLayout table) {
-
         int childCount = table.getChildCount();
-
-        // Remove all rows except the first one
-        if (childCount > 1) {
-            table.removeViews(1, childCount - 1);
-        }
+        table.removeViews(0, childCount);
     }
 
     public void startNewActivity(Context context, String packageName) {
@@ -309,7 +275,7 @@ public class FirstActivity extends AppCompatActivity {
     }
 
     public void getAccounts(String user_id) {
-        cleanTable(main_table);
+        cleanTable(data_table);
 
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?user_id="+Integer.parseInt(user_id);
@@ -349,7 +315,7 @@ public class FirstActivity extends AppCompatActivity {
     }
 
     public void addAccount(final String user_id, String bank, String number) {
-        cleanTable(main_table);
+        cleanTable(data_table);
 
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?user_id="+Integer.parseInt(user_id)+"&bank="+Uri.encode(bank)+"&account="+number;
@@ -381,18 +347,16 @@ public class FirstActivity extends AppCompatActivity {
     }
 
     public void updateAccount(int id,String bank, String number) {
-        cleanTable(main_table);
+        cleanTable(data_table);
 
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?id="+id+"&bank="+bank+"&account="+number;
         String url = "http://taimu.pe/php_connection/app_bancos/updateAccount.php"+params;
 
-
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Toast.makeText(ctx,response,Toast.LENGTH_LONG);
                         try {
                             getAccounts(user_id);
                         } catch (Exception e) {
