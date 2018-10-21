@@ -1,9 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".RegisterActivity">
+    android:paddingRight="16dp"
+    android:paddingLeft="16dp"
+    android:paddingTop="16dp"
+    tools:context=".FirstActivity"
+    android:orientation="vertical"
+    android:gravity="center">
 
-</android.support.constraint.ConstraintLayout>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_bank_app_loader"/>
+
+    <com.rengwuxian.materialedittext.MaterialEditText
+        android:id="@+id/diag_et_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Nombre completo"
+        app:met_floatingLabel="highlight"
+        app:met_iconLeft="@drawable/ic_user"
+        app:met_iconPadding="0dp"
+        android:inputType="text|textCapWords"/>
+
+    <com.rengwuxian.materialedittext.MaterialEditText
+        android:id="@+id/diag_et_user"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Usuario"
+        app:met_floatingLabel="highlight"
+        app:met_iconLeft="@drawable/ic_username"
+        app:met_iconPadding="0dp"
+        android:inputType="text"/>
+
+    <com.rengwuxian.materialedittext.MaterialEditText
+        android:id="@+id/diag_et_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Contraseña"
+        app:met_iconLeft="@drawable/ic_psw"
+        app:met_floatingLabel="highlight"
+        app:met_iconPadding="0dp"
+        android:inputType="textPassword"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <com.alirezaahmadi.progressbutton.ProgressButtonComponent
+            android:id="@+id/reg_btn_register"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:buttonText="Registrar"
+            app:buttonTextSize="20dp"
+            app:buttonTextColor="#FFF"
+            app:progressColor="#FF00"
+            app:progressWidth="4dp"
+            android:background="#3333ff"
+            android:padding="16dp"
+            android:layout_weight="1"
+            android:gravity="center"/>
+
+        <com.alirezaahmadi.progressbutton.ProgressButtonComponent
+            android:id="@+id/reg_btn_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:buttonText="Cancelar"
+            app:buttonTextSize="20dp"
+            app:buttonTextColor="#000"
+            app:progressColor="#FF00"
+            app:progressWidth="4dp"
+            android:background="#FFFFFF"
+            android:padding="16dp"
+            android:layout_weight="1"
+            android:gravity="center"/>
+    </LinearLayout>
+
+</LinearLayout>

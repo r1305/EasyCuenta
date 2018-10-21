@@ -3,9 +3,11 @@ package com.solution.tecno.androidanimations;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.TextView;
 
 import com.jackandphantom.circularprogressbar.CircleProgressbar;
 
@@ -13,11 +15,17 @@ public class MainActivity extends AppCompatActivity {
 
     Context ctx;
     Class activity;
+    TextView version_name;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ctx=MainActivity.this;
+        version_name=findViewById(R.id.tv_version);
+        version_name.setText("V."+BuildConfig.VERSION_NAME);
+        version_name.setTextColor(Color.BLACK);
+        version_name.setTypeface(version_name.getTypeface(),Typeface.BOLD);
+
 
         CircleProgressbar circleProgressbar = findViewById(R.id.main_progress_bar);
         circleProgressbar.setForegroundProgressColor(Color.RED);

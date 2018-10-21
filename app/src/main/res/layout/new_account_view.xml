@@ -12,7 +12,7 @@
     android:gravity="center">
 
     <com.rengwuxian.materialedittext.MaterialEditText
-        android:id="@+id/diag_et_bank_edit"
+        android:id="@+id/diag_et_bank"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Banco"
@@ -22,7 +22,7 @@
         android:inputType="text|textCapWords"/>
 
     <com.rengwuxian.materialedittext.MaterialEditText
-        android:id="@+id/diag_et_account_edit"
+        android:id="@+id/diag_et_account"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Número de cuenta"

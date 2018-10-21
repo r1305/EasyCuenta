@@ -1,13 +1,16 @@
 package com.solution.tecno.androidanimations;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Selection;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,17 +51,37 @@ public class LoginActivity extends AppCompatActivity {
         login_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                login_btn.setInProgress(true);
                 final String username=et_user.getText().toString();
                 final String psw=et_psw.getText().toString();
 
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        login_btn.setInProgress(false);
-                        login(username,psw);
-                    }
-                }, 3000);
+                if(username.isEmpty() && psw.isEmpty()){
+                    et_user.setError("Complete el usuario");
+                    et_user.requestFocus();
+                    et_psw.setError("Ingrese contraseña");
+                    et_psw.requestFocus();
+                    return;
+                }
+                if(username.isEmpty()){
+                    et_user.setError("Complete el usuario");
+                    et_user.requestFocus();
+                    return;
+                }
+                if(psw.isEmpty()){
+                    et_psw.setError("Ingrese contraseña");
+                    et_psw.requestFocus();
+                    return;
+                }
+
+                if(!username.isEmpty() && !psw.isEmpty()){
+                    login_btn.setInProgress(true);
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            login_btn.setInProgress(false);
+                            login(username,psw);
+                        }
+                    }, 3000);
+                }
             }
         });
 
@@ -66,41 +89,9 @@ public class LoginActivity extends AppCompatActivity {
         register_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final View layout=LayoutInflater.from(ctx).inflate(R.layout.new_user_view,null);
-
-
-                new MaterialStyledDialog.Builder(ctx)
-                        .setStyle(Style.HEADER_WITH_TITLE)
-                        .setTitle("Nuevo Usuario")
-                        .setDescription("Registrate y disfruta de tus cuentas en un solo lado")
-                        .setPositiveText("Registrar")
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                EditText diag_et_name=layout.findViewById(R.id.diag_et_name);
-                                EditText diag_et_user=layout.findViewById(R.id.diag_et_user);
-                                EditText diag_et_psw=layout.findViewById(R.id.diag_et_password);
-
-                                String name = diag_et_name.getText().toString();
-                                String username = diag_et_user.getText().toString();
-                                String psw = diag_et_psw.getText().toString();
-
-                                Toast.makeText(ctx,name+" - "+username+" - "+psw,Toast.LENGTH_SHORT).show();
-                                register(username,psw,name);
-
-                                dialog.dismiss();
-                            }
-                        })
-                        .setNegativeText("Cancelar")
-                        .onNegative(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                dialog.dismiss();
-                            }
-                        })
-                        .setCustomView(layout) // Old standard padding: .setCustomView(your_custom_view, 20, 20, 20, 0)
-                        //.setCustomView(your_custom_view, 10, 20, 10, 20) // int left, int top, int right, int bottom
-                        .show();
+                Intent i = new Intent(ctx,RegisterActivity.class);
+                startActivity(i);
+                LoginActivity.this.finish();
             }
         });
     }
@@ -114,9 +105,7 @@ public class LoginActivity extends AppCompatActivity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-
                         JSONParser jp = new JSONParser();
-
                         try {
                             JSONArray ja=(JSONArray)jp.parse(response);
                             JSONObject item=(JSONObject)ja.get(0);
@@ -126,9 +115,10 @@ public class LoginActivity extends AppCompatActivity {
 
                             Intent i=new Intent(ctx,FirstActivity.class);
                             startActivity(i);
+                            LoginActivity.this.finish();
 
                         } catch (Exception e) {
-                            Toast.makeText(ctx,"Intente luego", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ctx,"Usuario o Contraseña incorrecta", Toast.LENGTH_SHORT).show();
                             e.printStackTrace();
                         }
                     }
@@ -150,39 +140,6 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferences.Editor Ed=sp.edit();
         Ed.putString("user_id",user_id);
         Ed.commit();
-    }
-
-    public void register(final String user,final String psw,String name) {
-        RequestQueue queue = Volley.newRequestQueue(ctx);
-        String params="?username="+user+"&psw="+psw+"&name="+ Uri.encode(name);
-        String url = "http://taimu.pe/php_connection/app_bancos/registerUser.php"+params;
-        Log.d("*********",url);
-        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            if(response.equals("true")){
-                                login(user,psw);
-                            }else{
-                                Toast.makeText(ctx,"Ocurrió un error", Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (Exception e) {
-                            Toast.makeText(ctx,"Intente luego", Toast.LENGTH_SHORT).show();
-                            e.printStackTrace();
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // error
-                        Log.d("Error.Response", error.toString());
-                        Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
-                    }
-                }
-        );
-        queue.add(postRequest);
     }
 }
 

@@ -159,8 +159,8 @@ public class FirstActivity extends AppCompatActivity {
                 String account=tv_account.getText().toString();
 
                 final View layout=LayoutInflater.from(ctx).inflate(R.layout.edit_account_view,null);
-                diag_et_bank=layout.findViewById(R.id.diag_et_bank);
-                diag_et_number=layout.findViewById(R.id.diag_et_account);
+                diag_et_bank=layout.findViewById(R.id.diag_et_bank_edit);
+                diag_et_number=layout.findViewById(R.id.diag_et_account_edit);
 
                 diag_et_bank.setText(bank);
                 diag_et_number.setText(account);
@@ -193,6 +193,43 @@ public class FirstActivity extends AppCompatActivity {
             }
         });
         tr.addView(edit_row);
+
+        //create edit_row icon
+        ImageButton delete_row = new ImageButton(this);
+        delete_row.setImageResource(R.drawable.ic_delete);
+        delete_row.setPadding(0, 20, 35, 0);
+        delete_row.setClickable(true);
+        delete_row.setBackgroundColor(Color.parseColor("#00000000"));
+        delete_row.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TextView tv_bank = (TextView)tr.getChildAt(0);
+                String bank=tv_bank.getText().toString();
+
+                new MaterialStyledDialog.Builder(ctx)
+                        .setStyle(Style.HEADER_WITH_TITLE)
+                        .setTitle("Eliminar cuenta")
+                        .setDescription("¿Está seguro de eliminar la cuenta: "+bank+"?")
+                        .setPositiveText("Eliminar")
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                dialog.dismiss();
+                                int id=tr.getId();
+                                deleteAccount(id);
+                            }
+                        })
+                        .setNegativeText("Cancelar")
+                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .show();
+            }
+        });
+        tr.addView(delete_row);
 
         // finally add this to the table row
         data_table.addView(tr, new TableLayout.LayoutParams(
@@ -350,8 +387,39 @@ public class FirstActivity extends AppCompatActivity {
         cleanTable(data_table);
 
         RequestQueue queue = Volley.newRequestQueue(ctx);
-        String params="?id="+id+"&bank="+bank+"&account="+number;
+        String params="?id="+id+"&bank="+Uri.encode(bank)+"&account="+number;
         String url = "http://taimu.pe/php_connection/app_bancos/updateAccount.php"+params;
+
+        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            getAccounts(user_id);
+                        } catch (Exception e) {
+                            Toast.makeText(ctx,"Intente luego", Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // error
+                        Log.d("Error.Response", error.toString());
+                        Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+        queue.add(postRequest);
+    }
+
+    public void deleteAccount(int id) {
+        cleanTable(data_table);
+
+        RequestQueue queue = Volley.newRequestQueue(ctx);
+        String params="?id="+id;
+        String url = "http://taimu.pe/php_connection/app_bancos/deleteAccount.php"+params;
 
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
