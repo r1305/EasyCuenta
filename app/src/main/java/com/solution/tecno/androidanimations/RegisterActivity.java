@@ -59,9 +59,6 @@ public class RegisterActivity extends AppCompatActivity {
                 String username = reg_username.getText().toString();
                 String psw = reg_psw.getText().toString();
 
-                Toast.makeText(ctx, "click", Toast.LENGTH_SHORT).show();
-                System.out.println("validation: "+(!name.isEmpty() && !username.isEmpty() && !psw.isEmpty()));
-
                 if(name.isEmpty() && username.isEmpty() && psw.isEmpty()){
                     reg_full_name.setError("Complete el nombre");
                     reg_full_name.requestFocus();
@@ -84,7 +81,6 @@ public class RegisterActivity extends AppCompatActivity {
                 }
 
                 if(!name.isEmpty() && !username.isEmpty() && !psw.isEmpty()){
-                    Toast.makeText(ctx, "registro", Toast.LENGTH_SHORT).show();
                     register(username,psw,name);
                 }
             }
