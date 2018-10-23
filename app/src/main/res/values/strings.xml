@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Mis Cuentas </string>
+    <string name="app_name">Easy Cuenta</string>
     <string name="action_settings">Refrescar</string>
     <string name="title_activity_second">SecondActivity</string>
 </resources>
