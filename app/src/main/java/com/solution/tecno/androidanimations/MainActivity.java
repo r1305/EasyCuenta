@@ -51,5 +51,6 @@ public class MainActivity extends AppCompatActivity {
     public void redirect(Class activity_class){
         Intent i=new Intent(this,activity_class);
         startActivity(i);
+        this.finish();
     }
 }

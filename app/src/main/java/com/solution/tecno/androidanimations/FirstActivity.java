@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -35,6 +36,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.github.javiersantos.materialstyleddialogs.enums.Style;
+import com.jackandphantom.circularprogressbar.CircleProgressbar;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -44,10 +46,14 @@ import org.w3c.dom.Text;
 public class FirstActivity extends AppCompatActivity {
 
     TableLayout data_table;
-    ImageView wsp_icon;
     Context ctx;
     String user_id;
-    EditText diag_et_bank,diag_et_number;
+    EditText diag_et_bank,diag_et_number,diag_et_user_name;
+
+    String bank_edit,account_edit,titular_edit;
+
+    MaterialStyledDialog msd;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,15 +66,27 @@ public class FirstActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        wsp_icon=findViewById(R.id.wsp_icon);
-        wsp_icon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startNewActivity(ctx,"com.whatsapp");
-            }
-        });
         data_table = findViewById(R.id.data_table);
 
+        final View layout_loader=LayoutInflater.from(ctx).inflate(R.layout.floating_loader,null);
+        msd=new MaterialStyledDialog.Builder(ctx).
+                setStyle(Style.HEADER_WITH_TITLE)
+                .setTitle("Cargando...")
+                .setCustomView(layout_loader)
+                .build();
+
+        CircleProgressbar circleProgressbar = layout_loader.findViewById(R.id.first_progress_bar);
+        circleProgressbar.setForegroundProgressColor(Color.RED);
+        circleProgressbar.setBackgroundProgressWidth(15);
+        circleProgressbar.setForegroundProgressWidth(20);
+        circleProgressbar.enabledTouch(false);
+        circleProgressbar.setRoundedCorner(true);
+        circleProgressbar.setClockwise(true);
+        circleProgressbar.setMaxProgress(100);
+        int animationDuration = 8000; // 2500ms = 2,5s
+        circleProgressbar.setProgressWithAnimation(-100, animationDuration); // Default duration = 1500ms
+
+//        showLoader(1,"Cargando...");
         getAccounts(user_id);
     }
 
@@ -153,43 +171,16 @@ public class FirstActivity extends AppCompatActivity {
         edit_row.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TextView tv_bank = (TextView)tr.getChildAt(0);
-                TextView tv_account = (TextView)tr.getChildAt(1);
-                String bank=tv_bank.getText().toString();
-                String account=tv_account.getText().toString();
+                final int account_id=tr.getId();
+                showLoader(1,"Obteniendo datos...");
 
-                final View layout=LayoutInflater.from(ctx).inflate(R.layout.edit_account_view,null);
-                diag_et_bank=layout.findViewById(R.id.diag_et_bank_edit);
-                diag_et_number=layout.findViewById(R.id.diag_et_account_edit);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        getAccountDetail(account_id);
+                    }
+                }, 3000);
 
-                diag_et_bank.setText(bank);
-                diag_et_number.setText(account);
-
-                new MaterialStyledDialog.Builder(ctx)
-                        .setStyle(Style.HEADER_WITH_TITLE)
-                        .setTitle("Editar cuenta")
-                        .setDescription("Añade una nueva cuenta para compartirla rápidamente")
-                        .setPositiveText("Guardar")
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                dialog.dismiss();
-                                int id=tr.getId();
-                                String bank = diag_et_bank.getText().toString();
-                                String number = diag_et_number.getText().toString();
-                                updateAccount(id,bank,number);
-                            }
-                        })
-                        .setNegativeText("Cancelar")
-                        .onNegative(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                dialog.dismiss();
-                            }
-                        })
-                        .setCustomView(layout) // Old standard padding: .setCustomView(your_custom_view, 20, 20, 20, 0)
-                        //.setCustomView(your_custom_view, 10, 20, 10, 20) // int left, int top, int right, int bottom
-                        .show();
             }
         });
         tr.addView(edit_row);
@@ -274,10 +265,11 @@ public class FirstActivity extends AppCompatActivity {
                             dialog.dismiss();
                             EditText diag_et_bank=layout.findViewById(R.id.diag_et_bank);
                             EditText diag_et_number=layout.findViewById(R.id.diag_et_account);
+                            EditText diag_et_user_name=layout.findViewById(R.id.diag_et_titular);
                             String bank = diag_et_bank.getText().toString();
                             String number = diag_et_number.getText().toString();
-                            Toast.makeText(ctx,bank+" - "+number,Toast.LENGTH_SHORT).show();
-                            addAccount(user_id,bank,number);
+                            String user_name = diag_et_user_name.getText().toString();
+                            addAccount(user_id,bank,number,user_name);
                         }
                     })
                     .setNegativeText("Cancelar")
@@ -322,9 +314,9 @@ public class FirstActivity extends AppCompatActivity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Toast.makeText(ctx,response,Toast.LENGTH_LONG);
                         JSONParser jp = new JSONParser();
                         try {
+                            System.out.println(1);
                             JSONArray ja=(JSONArray)jp.parse(response);
                             for(int i=0;i<ja.size();i++){
                                 JSONObject item=(JSONObject)ja.get(i);
@@ -333,9 +325,11 @@ public class FirstActivity extends AppCompatActivity {
                                 String account=item.get("account_number").toString();
                                 addNewTableRow(id,bank,account);
                             }
+                            System.out.println(2);
+                            showLoader(0,"");
                         } catch (Exception e) {
+                            showLoader(0,"");
                             Toast.makeText(ctx,"Intente luego", Toast.LENGTH_SHORT).show();
-                            e.printStackTrace();
                         }
                     }
                 },
@@ -343,6 +337,7 @@ public class FirstActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         // error
+                        showLoader(0,"");
                         Log.d("Error.Response", error.toString());
                         Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
                     }
@@ -351,11 +346,11 @@ public class FirstActivity extends AppCompatActivity {
         queue.add(postRequest);
     }
 
-    public void addAccount(final String user_id, String bank, String number) {
+    public void addAccount(final String user_id, String bank, String number,String user_name) {
         cleanTable(data_table);
 
         RequestQueue queue = Volley.newRequestQueue(ctx);
-        String params="?user_id="+Integer.parseInt(user_id)+"&bank="+Uri.encode(bank)+"&account="+number;
+        String params="?user_id="+Integer.parseInt(user_id)+"&bank="+Uri.encode(bank)+"&account="+number+"&name="+user_name;
         String url = "http://taimu.pe/php_connection/app_bancos/addAccount.php"+params;
 
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
@@ -383,13 +378,13 @@ public class FirstActivity extends AppCompatActivity {
         queue.add(postRequest);
     }
 
-    public void updateAccount(int id,String bank, String number) {
+    public void updateAccount(int id,String bank, String number, String user_name) {
         cleanTable(data_table);
 
         RequestQueue queue = Volley.newRequestQueue(ctx);
-        String params="?id="+id+"&bank="+Uri.encode(bank)+"&account="+number;
+        String params="?id="+id+"&bank="+Uri.encode(bank)+"&account="+number+"&name="+Uri.parse(user_name);
         String url = "http://taimu.pe/php_connection/app_bancos/updateAccount.php"+params;
-
+        System.out.println(url);
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
@@ -445,4 +440,95 @@ public class FirstActivity extends AppCompatActivity {
         queue.add(postRequest);
     }
 
+    public void getAccountDetail(final int id) {
+//        cleanTable(data_table);
+        RequestQueue queue = Volley.newRequestQueue(ctx);
+        String params="?account_id="+id;
+        String url = "http://taimu.pe/php_connection/app_bancos/getAccountDetail.php"+params;
+        System.out.println(url);
+
+        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Toast.makeText(ctx,response,Toast.LENGTH_LONG);
+                        JSONParser jp = new JSONParser();
+                        try {
+                            JSONArray ja=(JSONArray)jp.parse(response);
+                            for(int i=0;i<ja.size();i++){
+                                JSONObject item=(JSONObject)ja.get(i);
+                                System.out.println(item);
+                                bank_edit=item.get("bank").toString();
+                                account_edit=item.get("account_number").toString();
+                                titular_edit=item.get("user_name").toString();
+
+                                final View layout=LayoutInflater.from(ctx).inflate(R.layout.edit_account_view,null);
+                                diag_et_bank=layout.findViewById(R.id.diag_et_bank_edit);
+                                diag_et_number=layout.findViewById(R.id.diag_et_account_edit);
+                                diag_et_user_name=layout.findViewById(R.id.diag_et_titular_edit);
+
+                                diag_et_bank.setText(bank_edit);
+                                diag_et_number.setText(account_edit);
+                                diag_et_user_name.setText(titular_edit);
+
+                                new MaterialStyledDialog.Builder(ctx)
+                                        .setStyle(Style.HEADER_WITH_TITLE)
+                                        .setTitle("Editar cuenta")
+                                        .setDescription("Edita tu cuenta para compartirla rápidamente")
+                                        .setPositiveText("Guardar")
+                                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                                            @Override
+                                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                                dialog.dismiss();
+                                                String bank = diag_et_bank.getText().toString();
+                                                String number = diag_et_number.getText().toString();
+                                                String user_name =diag_et_user_name.getText().toString();
+                                                updateAccount(id,bank,number,user_name);
+                                            }
+                                        })
+                                        .setNegativeText("Cancelar")
+                                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                                            @Override
+                                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                                dialog.dismiss();
+                                            }
+                                        })
+                                        .setCustomView(layout)
+                                        .show();
+                                showLoader(0,"");
+                            }
+                        } catch (Exception e) {
+                            showLoader(0,"");
+                            Toast.makeText(ctx,"Intente luego", Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // error
+                        showLoader(0,"");
+                        Log.d("Error.Response", error.toString());
+                        Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+        queue.add(postRequest);
+    }
+
+    public void showLoader(int visibility,String message){
+        // create floating loader
+        msd.setTitle(message);
+        System.out.println("visibility: "+visibility);
+        if(visibility==1){
+            System.out.println("if: "+visibility);
+            msd.show();
+        }else{
+            System.out.println("else: "+visibility);
+            msd.hide();
+            msd.dismiss();
+            msd.cancel();
+        }
+    }
 }
