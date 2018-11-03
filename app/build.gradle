@@ -6,7 +6,11 @@ android {
         applicationId "com.solution.tecno.androidanimations"
         minSdkVersion 15
         targetSdkVersion 27
+<<<<<<< HEAD
         versionCode 9
+=======
+        versionCode 8
+>>>>>>> e2d3685605857a15337e3b57cb403030e533b4c1
         versionName "1.7"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
