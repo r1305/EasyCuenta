@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@color/colorPrimary">
+
+    <com.jackandphantom.circularimageview.CircleImage
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_launcher_background"
+        app:border_width="3dp"
+        app:border_color="#ed2e2e"
+        app:add_shadow="true"
+        app:shadow_color="#a10909"
+        app:shadow_radius="20"
+        android:id="@+id/nav_header_img"
+        android:layout_weight="1"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textColor="#fff"
+        android:text="Usuario"
+        android:layout_weight="3"
+        android:gravity="center"/>
+
+
+
+</LinearLayout>
