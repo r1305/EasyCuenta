@@ -13,6 +13,10 @@ import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeErrorDialog;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeInfoDialog;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeProgressDialog;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
 import com.jackandphantom.circularprogressbar.CircleProgressbar;
 
 public class MainActivity extends AppCompatActivity {
@@ -21,11 +25,51 @@ public class MainActivity extends AppCompatActivity {
     Class activity;
     TextView version_name;
     public static int MY_PERMISSIONS_REQUEST_ACCESS= 1;
+    AwesomeProgressDialog apd;
+    AwesomeSuccessDialog asd;
+    AwesomeErrorDialog aed;
+    AwesomeInfoDialog aid;
+    Credentials cred;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ctx=MainActivity.this;
+        cred = new Credentials(ctx);
+
+        //create progress dialog
+        apd=new AwesomeProgressDialog(ctx)
+                .setTitle(R.string.app_name)
+                .setMessage("Cargando")
+                .setColoredCircle(R.color.dialogInfoBackgroundColor)
+                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
+                .setCancelable(false);
+
+        //create success dialog
+        asd=new AwesomeSuccessDialog(ctx)
+                .setTitle(R.string.app_name)
+                .setMessage("Listo!")
+                .setColoredCircle(R.color.dialogSuccessBackgroundColor)
+                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
+                .setCancelable(false);
+
+        //create error dialog
+        aed=new AwesomeErrorDialog(ctx)
+                .setTitle(R.string.app_name)
+                .setMessage("Ocurrió un error")
+                .setColoredCircle(R.color.dialogErrorBackgroundColor)
+                .setDialogIconAndColor(R.drawable.ic_dialog_error,R.color.white)
+                .setCancelable(false);
+
+        //create info dialog
+        aid=new AwesomeInfoDialog(ctx)
+                .setTitle(R.string.app_name)
+                .setMessage("Inicie sesión nuevamente por favor")
+                .setColoredCircle(R.color.dialogInfoBackgroundColor)
+                .setDialogIconAndColor(R.drawable.ic_dialog_info,R.color.white)
+                .setCancelable(false);
+
+
         version_name=findViewById(R.id.tv_version);
         version_name.setText("V."+BuildConfig.VERSION_NAME);
         version_name.setTextColor(Color.BLACK);
@@ -35,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void redirect(Class activity_class){
-        Intent i=new Intent(this,activity_class);
+        Intent i=new Intent(ctx,activity_class);
         startActivity(i);
         this.finish();
     }
@@ -55,9 +99,22 @@ public class MainActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                String user_id=new Credentials(ctx).getUserId();
-                activity=(user_id.equals("0") || user_id==null)?LoginActivity.class:FirstActivity.class;
-                redirect(activity);
+                String user_id=cred.getUserId();
+                String full_name=cred.getFullName();
+                if(full_name.equals("0")){
+                    aid.setMessage("Inicie sesión nuevamente por favor");
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            aid.hide();
+                            cred.logout();
+                        }
+                    }, 1500);
+
+                }else{
+                    activity=(user_id.equals("0") || user_id==null)?LoginActivity.class:FirstActivity.class;
+                    redirect(activity);
+                }
             }
         }, 3000);
     }
@@ -96,11 +153,15 @@ public class MainActivity extends AppCompatActivity {
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     validateSession();
                 } else {
-                    checkPermissions();
-                    Toast.makeText(getApplicationContext(),
-                            "Permisos necesarios.\nDebe aceptar para continuar",
-                            Toast.LENGTH_SHORT
-                    ).show();
+                    aid.setMessage("Permisos necesarios.\nDebe aceptar para continuar");
+                    aid.show();
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            aid.hide();
+                            checkPermissions();
+                        }
+                    }, 1500);
                 }
                 return;
             }

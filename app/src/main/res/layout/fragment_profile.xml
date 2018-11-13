@@ -17,7 +17,7 @@
         android:src="@drawable/ic_bank_app_loader"/>
 
     <com.rengwuxian.materialedittext.MaterialEditText
-        android:id="@+id/diag_et_name"
+        android:id="@+id/profile_et_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Nombre completo"
@@ -27,7 +27,7 @@
         android:inputType="text|textCapWords"/>
 
     <com.rengwuxian.materialedittext.MaterialEditText
-        android:id="@+id/diag_et_user"
+        android:id="@+id/profile_et_user"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Usuario"
@@ -37,7 +37,7 @@
         android:inputType="text"/>
 
     <com.rengwuxian.materialedittext.MaterialEditText
-        android:id="@+id/diag_et_phone"
+        android:id="@+id/profile_et_phone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Celular"
@@ -47,7 +47,7 @@
         android:inputType="number|phone"/>
 
     <com.rengwuxian.materialedittext.MaterialEditText
-        android:id="@+id/diag_et_password"
+        android:id="@+id/profile_et_password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Contraseña"
@@ -61,33 +61,13 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <com.alirezaahmadi.progressbutton.ProgressButtonComponent
-            android:id="@+id/reg_btn_register"
-            android:layout_width="wrap_content"
+        <in.shadowfax.proswipebutton.ProSwipeButton
+            android:id="@+id/profile_btn_save"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:buttonText="Registrar"
-            app:buttonTextSize="20dp"
-            app:buttonTextColor="#FFF"
-            app:progressColor="#FF00"
-            app:progressWidth="4dp"
-            android:background="#3333ff"
-            android:padding="16dp"
-            android:layout_weight="1"
-            android:gravity="center"/>
-
-        <com.alirezaahmadi.progressbutton.ProgressButtonComponent
-            android:id="@+id/reg_btn_cancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:buttonText="Cancelar"
-            app:buttonTextSize="20dp"
-            app:buttonTextColor="#000"
-            app:progressColor="#FF00"
-            app:progressWidth="4dp"
-            android:background="#FFFFFF"
-            android:padding="16dp"
-            android:layout_weight="1"
-            android:gravity="center"/>
+            android:layout_margin="8dp"
+            app:bg_color="@android:color/holo_blue_dark"
+            app:btn_text="Actualizar" />
     </LinearLayout>
 
 </LinearLayout>

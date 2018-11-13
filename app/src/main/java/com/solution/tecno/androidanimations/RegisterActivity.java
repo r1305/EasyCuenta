@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +20,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeErrorDialog;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeProgressDialog;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -26,9 +30,13 @@ import org.json.simple.parser.JSONParser;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    EditText reg_username,reg_psw,reg_full_name;
+    EditText reg_username,reg_psw,reg_full_name,reg_phone;
     Context ctx;
     ProgressButtonComponent reg_button,cancel_button;
+    String base_url="https://www.jadconsultores.com.pe/php_connection/app/bancos_resumen/";
+    AwesomeProgressDialog apd;
+    AwesomeSuccessDialog asd;
+    AwesomeErrorDialog aed;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,9 +44,34 @@ public class RegisterActivity extends AppCompatActivity {
 
         ctx = this;
 
+        //create progress dialog
+        apd=new AwesomeProgressDialog(ctx)
+                .setTitle(R.string.app_name)
+                .setMessage("Cargando")
+                .setColoredCircle(R.color.dialogInfoBackgroundColor)
+                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
+                .setCancelable(false);
+
+        //create success dialog
+        asd=new AwesomeSuccessDialog(ctx)
+                .setTitle(R.string.app_name)
+                .setMessage("Listo!")
+                .setColoredCircle(R.color.dialogSuccessBackgroundColor)
+                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
+                .setCancelable(false);
+
+        //create error dialog
+        aed=new AwesomeErrorDialog(ctx)
+                .setTitle(R.string.app_name)
+                .setMessage("Ocurrió un error")
+                .setColoredCircle(R.color.dialogErrorBackgroundColor)
+                .setDialogIconAndColor(R.drawable.ic_dialog_error,R.color.white)
+                .setCancelable(false);
+
         reg_full_name = findViewById(R.id.diag_et_name);
         reg_username = findViewById(R.id.diag_et_user);
         reg_psw = findViewById(R.id.diag_et_password);
+        reg_phone = findViewById(R.id.diag_et_phone);
 
         reg_button = findViewById(R.id.reg_btn_register);
         cancel_button = findViewById(R.id.reg_btn_cancel);
@@ -58,6 +91,7 @@ public class RegisterActivity extends AppCompatActivity {
                 String name = reg_full_name.getText().toString();
                 String username = reg_username.getText().toString();
                 String psw = reg_psw.getText().toString();
+                String phone = reg_phone.getText().toString();
 
                 if(name.isEmpty() && username.isEmpty() && psw.isEmpty()){
                     reg_full_name.setError("Complete el nombre");
@@ -75,13 +109,19 @@ public class RegisterActivity extends AppCompatActivity {
                     reg_username.setError("Complete el usuario");
                     reg_username.requestFocus();
                 }
+                if(phone.isEmpty()){
+                    reg_phone.setError("Complete su celular");
+                    reg_phone.requestFocus();
+                }
                 if(psw.isEmpty()){
                     reg_psw.setError("Ingrese contraseña");
                     reg_psw.requestFocus();
                 }
 
-                if(!name.isEmpty() && !username.isEmpty() && !psw.isEmpty()){
-                    register(username,psw,name);
+                if(!name.isEmpty() && !username.isEmpty() && !phone.isEmpty() && !psw.isEmpty()){
+                    apd.setMessage("Registrando...");
+                    apd.show();
+                    register(username,psw,name,phone);
                 }
             }
         });
@@ -89,9 +129,11 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     public void login(String user,String psw) {
+        apd.setMessage("Ingresando...");
+        apd.show();
         RequestQueue queue = Volley.newRequestQueue(this);
         String params="?username="+user+"&psw="+psw;
-        String url = "http://taimu.pe/php_connection/app_bancos/login.php"+params;
+        String url = base_url+"login.php"+params;
 
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
@@ -104,13 +146,28 @@ public class RegisterActivity extends AppCompatActivity {
                             String id=item.get("id").toString();
 
                             save_credentials(id);
+                            apd.hide();
+                            asd.show();
 
-                            Intent i=new Intent(ctx,FirstActivity.class);
-                            startActivity(i);
-                            RegisterActivity.this.finish();
-
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    asd.hide();
+                                    Intent i=new Intent(ctx,FirstActivity.class);
+                                    startActivity(i);
+                                    RegisterActivity.this.finish();
+                                }
+                            }, 3000);
                         } catch (Exception e) {
-                            Toast.makeText(ctx,"Usuario o Contraseña incorrecta", Toast.LENGTH_SHORT).show();
+                            apd.hide();
+                            aed.setMessage("Ocurrió un error al registrar\n"+e.getMessage());
+                            aed.show();
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    aed.hide();
+                                }
+                            }, 3000);
                             e.printStackTrace();
                         }
                     }
@@ -118,9 +175,17 @@ public class RegisterActivity extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        apd.hide();
+                        aed.setMessage("Ocurrió un error al registrar\n"+error.toString());
+                        aed.show();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                aed.hide();
+                            }
+                        }, 3000);
                         // error
                         Log.d("Error.Response", error.toString());
-                        Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
                     }
                 }
         );
@@ -134,22 +199,47 @@ public class RegisterActivity extends AppCompatActivity {
         Ed.commit();
     }
 
-    public void register(final String user,final String psw,String name) {
+    public void register(final String user,final String psw,String name,String phone) {
         RequestQueue queue = Volley.newRequestQueue(ctx);
-        String params="?username="+user+"&psw="+psw+"&name="+ Uri.encode(name);
-        String url = "http://taimu.pe/php_connection/app_bancos/registerUser.php"+params;
+        String params="?username="+user+"&psw="+psw+"&name="+ Uri.encode(name)+ "&phone"+Uri.encode(phone);
+        String url = base_url+"registerUser.php"+params;
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         try {
                             if(response.equals("true")){
-                                login(user,psw);
+                                apd.hide();
+                                asd.show();
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        asd.hide();
+                                        login(user,psw);
+                                    }
+                                }, 3000);
+
                             }else{
-                                Toast.makeText(ctx,"Ocurrió un error", Toast.LENGTH_SHORT).show();
+                                apd.hide();
+                                aed.setMessage("Ocurrió un error");
+                                aed.show();
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        aed.hide();
+                                    }
+                                }, 3000);
                             }
                         } catch (Exception e) {
-                            Toast.makeText(ctx,"Intente luego", Toast.LENGTH_SHORT).show();
+                            apd.hide();
+                            aed.setMessage(e.getMessage());
+                            aed.show();
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    aed.hide();
+                                }
+                            }, 3000);
                             e.printStackTrace();
                         }
                     }

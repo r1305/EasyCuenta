@@ -9,23 +9,36 @@
     <com.jackandphantom.circularimageview.CircleImage
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_launcher_background"
+        android:src="@drawable/ic_bank_app_loader"
         app:border_width="3dp"
         app:border_color="#ed2e2e"
         app:add_shadow="true"
         app:shadow_color="#a10909"
         app:shadow_radius="20"
         android:id="@+id/nav_header_img"
-        android:layout_weight="1"/>
-
-    <TextView
+        android:layout_weight="1"
+        android:visibility="gone"/>
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:textColor="#fff"
-        android:text="Usuario"
-        android:layout_weight="3"
-        android:gravity="center"/>
-
-
+        android:layout_height="100dp"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/nav_header_name"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:textColor="#fff"
+            android:layout_weight="3"
+            android:gravity="center"
+            android:typeface="monospace"
+            android:textStyle="bold"
+            android:textSize="28dp"/>
+        <TextView
+            android:id="@+id/nav_header_username"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:textColor="#fff"
+            android:layout_weight="3"
+            android:gravity="center"/>
+    </LinearLayout>
 
 </LinearLayout>

@@ -27,6 +27,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeErrorDialog;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeProgressDialog;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.github.javiersantos.materialstyleddialogs.enums.Style;
 
@@ -39,12 +42,39 @@ public class LoginActivity extends AppCompatActivity {
     ProgressButtonComponent login_btn,register_btn;
     EditText et_user,et_psw;
     Context ctx;
-
+    String base_url="https://www.jadconsultores.com.pe/php_connection/app/bancos_resumen/";
+    AwesomeProgressDialog apd;
+    AwesomeSuccessDialog asd;
+    AwesomeErrorDialog aed;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         ctx=LoginActivity.this;
+        //create progress dialog
+        apd=new AwesomeProgressDialog(ctx)
+                .setTitle(R.string.app_name)
+                .setMessage("Cargando")
+                .setColoredCircle(R.color.dialogInfoBackgroundColor)
+                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
+                .setCancelable(false);
+
+        //create success dialog
+        asd=new AwesomeSuccessDialog(ctx)
+                .setTitle(R.string.app_name)
+                .setMessage("Listo!")
+                .setColoredCircle(R.color.dialogSuccessBackgroundColor)
+                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
+                .setCancelable(false);
+
+        //create error dialog
+        aed=new AwesomeErrorDialog(ctx)
+                .setTitle(R.string.app_name)
+                .setMessage("Ocurrió un error")
+                .setColoredCircle(R.color.dialogErrorBackgroundColor)
+                .setDialogIconAndColor(R.drawable.ic_dialog_error,R.color.white)
+                .setCancelable(false);
+
         et_user=findViewById(R.id.et_user);
         et_psw=findViewById(R.id.et_psw);
         login_btn = findViewById(R.id.btn_login);
@@ -73,6 +103,7 @@ public class LoginActivity extends AppCompatActivity {
                 }
 
                 if(!username.isEmpty() && !psw.isEmpty()){
+                    apd.show();
                     login_btn.setInProgress(true);
                     new Handler().postDelayed(new Runnable() {
                         @Override
@@ -96,10 +127,10 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    public void login(String user,String psw) {
+    public void login(final String user, String psw) {
         RequestQueue queue = Volley.newRequestQueue(this);
         String params="?username="+user+"&psw="+psw;
-        String url = "http://taimu.pe/php_connection/app_bancos/login.php"+params;
+        String url = base_url+"login.php"+params;
 
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
@@ -110,15 +141,34 @@ public class LoginActivity extends AppCompatActivity {
                             JSONArray ja=(JSONArray)jp.parse(response);
                             JSONObject item=(JSONObject)ja.get(0);
                             String id=item.get("id").toString();
+                            String full_name=item.get("full_name").toString();
+                            String user_name=item.get("username").toString();
+                            String phone_number=item.get("phone_number").toString();
 
-                            save_credentials(id);
+                            save_credentials(id,full_name,user_name,phone_number);
+                            apd.hide();
+                            asd.show();
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    asd.hide();
+                                    Intent i=new Intent(ctx,FirstActivity.class);
+                                    startActivity(i);
+                                    LoginActivity.this.finish();
+                                }
+                            }, 1500);
 
-                            Intent i=new Intent(ctx,FirstActivity.class);
-                            startActivity(i);
-                            LoginActivity.this.finish();
 
                         } catch (Exception e) {
-                            Toast.makeText(ctx,"Usuario o Contraseña incorrecta", Toast.LENGTH_SHORT).show();
+                            apd.hide();
+                            aed.setMessage("Usuario o Contraseña incorrecta");
+                            aed.show();
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    aed.hide();
+                                }
+                            }, 2000);
                             e.printStackTrace();
                         }
                     }
@@ -126,6 +176,15 @@ public class LoginActivity extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        apd.hide();
+                        aed.setMessage(error.toString());
+                        aed.show();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                aed.hide();
+                            }
+                        }, 2000);
                         // error
                         Log.d("Error.Response", error.toString());
                         Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
@@ -135,10 +194,13 @@ public class LoginActivity extends AppCompatActivity {
         queue.add(postRequest);
     }
 
-    public void save_credentials(String user_id){
+    public void save_credentials(String user_id,String full_name,String username,String phone_number){
         SharedPreferences sp=getSharedPreferences("Login", MODE_PRIVATE);
         SharedPreferences.Editor Ed=sp.edit();
         Ed.putString("user_id",user_id);
+        Ed.putString("full_name",full_name);
+        Ed.putString("username",username);
+        Ed.putString("phone_number",phone_number);
         Ed.commit();
     }
 }

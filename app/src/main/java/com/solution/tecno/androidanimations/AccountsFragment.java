@@ -30,6 +30,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeErrorDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeProgressDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
@@ -56,6 +57,8 @@ public class AccountsFragment extends Fragment {
     View v;
     AwesomeProgressDialog apd;
     AwesomeSuccessDialog asd;
+    AwesomeErrorDialog aed;
+    String base_url="https://www.jadconsultores.com.pe/php_connection/app/bancos_resumen/";
 
     public AccountsFragment() {
     }
@@ -70,6 +73,29 @@ public class AccountsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ctx = this.getContext();
+        //create progress dialog
+        apd=new AwesomeProgressDialog(ctx)
+                .setTitle(R.string.app_name)
+                .setMessage("Cargando")
+                .setColoredCircle(R.color.dialogInfoBackgroundColor)
+                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
+                .setCancelable(false);
+
+        //create success dialog
+        asd=new AwesomeSuccessDialog(ctx)
+                .setTitle(R.string.app_name)
+                .setMessage("Listo!")
+                .setColoredCircle(R.color.dialogSuccessBackgroundColor)
+                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
+                .setCancelable(false);
+
+        //create error dialog
+        aed=new AwesomeErrorDialog(ctx)
+                .setTitle(R.string.app_name)
+                .setMessage("Ocurrió un error")
+                .setColoredCircle(R.color.dialogErrorBackgroundColor)
+                .setDialogIconAndColor(R.drawable.ic_dialog_error,R.color.white)
+                .setCancelable(false);
     }
 
     @Override
@@ -88,22 +114,6 @@ public class AccountsFragment extends Fragment {
             }
         });
 
-        //create progress dialog
-        apd=new AwesomeProgressDialog(ctx)
-                .setTitle(R.string.app_name)
-                .setMessage("Cargando")
-                .setColoredCircle(R.color.dialogInfoBackgroundColor)
-                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
-                .setCancelable(false);
-
-        //create success dialog
-        asd=new AwesomeSuccessDialog(ctx)
-                .setTitle(R.string.app_name)
-                .setMessage("Listo!")
-                .setColoredCircle(R.color.dialogSuccessBackgroundColor)
-                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
-                .setCancelable(false);
-
         getAccounts(user_id);
         return v;
     }
@@ -115,13 +125,11 @@ public class AccountsFragment extends Fragment {
 
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?user_id="+Integer.parseInt(user_id);
-        String url = "http://taimu.pe/php_connection/app_bancos/getUserAccounts.php"+params;
-        System.out.println("**** url_frament: "+url);
+        String url = base_url+"getUserAccounts.php"+params;
         StringRequest postRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        System.out.println("**** response: "+response);
                         JSONParser jp = new JSONParser();
                         try {
                             JSONArray ja=(JSONArray)jp.parse(response);
@@ -141,18 +149,36 @@ public class AccountsFragment extends Fragment {
                                 public void run() {
                                     asd.hide();
                                 }
-                            }, 3000);   //3 seconds
+                            }, 1500);   //3 seconds
                         } catch (Exception e) {
-                            Toast.makeText(ctx,"Intente luego", Toast.LENGTH_SHORT).show();
+                            asd.hide();
+                            aed.setMessage(e.getMessage());
+                            aed.show();
+                            //wait 3 seconds to hide success dialog
+                            Handler handler = new Handler();
+                            handler.postDelayed(new Runnable() {
+                                public void run() {
+                                    aed.hide();
+                                }
+                            }, 3000);
                         }
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        asd.hide();
+                        aed.setMessage(error.toString());
+                        aed.show();
+                        //wait 3 seconds to hide success dialog
+                        Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            public void run() {
+                                aed.hide();
+                            }
+                        }, 3000);
                         // error
                         Log.d("Error.Response", error.toString());
-                        Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
                     }
                 }
         );
@@ -310,7 +336,7 @@ public class AccountsFragment extends Fragment {
 
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?id="+id;
-        String url = "http://taimu.pe/php_connection/app_bancos/deleteAccount.php"+params;
+        String url = base_url+"deleteAccount.php"+params;
 
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
@@ -340,7 +366,7 @@ public class AccountsFragment extends Fragment {
     public void getAccountDetail(final int id) {
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?account_id="+id;
-        String url = "http://taimu.pe/php_connection/app_bancos/getAccountDetail.php"+params;
+        String url = base_url+"getAccountDetail.php"+params;
 
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
@@ -426,7 +452,7 @@ public class AccountsFragment extends Fragment {
 
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?user_id="+Integer.parseInt(user_id)+"&bank="+Uri.encode(bank)+"&account="+number+"&name="+user_name;
-        String url = "http://taimu.pe/php_connection/app_bancos/addAccount.php"+params;
+        String url = base_url+"addAccount.php"+params;
 
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
@@ -458,7 +484,7 @@ public class AccountsFragment extends Fragment {
 
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?id="+id+"&bank="+Uri.encode(bank)+"&account="+number+"&name="+Uri.parse(user_name);
-        String url = "http://taimu.pe/php_connection/app_bancos/updateAccount.php"+params;
+        String url = base_url+"updateAccount.php"+params;
         System.out.println(url);
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {

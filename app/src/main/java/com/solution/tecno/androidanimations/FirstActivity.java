@@ -19,6 +19,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
@@ -41,19 +42,22 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
     Context ctx;
     Toolbar toolbar;
     DrawerLayout drawer;
-    String user_id;
-    MaterialStyledDialog msd;
-
+    String user_id,full_name,user_name;
+    String base_url="https://www.jadconsultores.com.pe/php_connection/app/bancos_resumen/";
+    Credentials cred;
+    TextView header_name,header_username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_first);
         ctx=FirstActivity.this;
-        new Credentials(ctx);
+        cred = new Credentials(ctx);
         MyFirebaseInstanceIdService serv=new MyFirebaseInstanceIdService();
         serv.onTokenRefresh2(ctx);
-        user_id=new Credentials(ctx).getUserId();
+        user_id=cred.getUserId();
+        full_name=cred.getFullName();
+        user_name=cred.getUserName();
         toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_menu_white);
         setSupportActionBar(toolbar);
@@ -80,6 +84,7 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
 
             }
         });
+
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -94,6 +99,11 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
         });
 
         NavigationView navigationView = findViewById(R.id.nav_view);
+        View headerView = navigationView.getHeaderView(0);
+        header_name = headerView.findViewById(R.id.nav_header_name);
+        header_username = headerView.findViewById(R.id.nav_header_username);
+        header_name.setText(full_name);
+        header_username.setText(user_name);
         navigationView.setNavigationItemSelectedListener(this);
 
         FragmentManager fm = getSupportFragmentManager();
@@ -184,6 +194,10 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
                 fr=ContactFragment.newInstance();
                 fragmentTransaction.replace(R.id.container,fr);
             break;
+            case R.id.menu_profile:
+                fr=ProfileFragment.newInstance();
+                fragmentTransaction.replace(R.id.container,fr);
+            break;
             default:
                 fr=AccountsFragment.newInstance();
                 fragmentTransaction.replace(R.id.container,fr);
@@ -198,7 +212,7 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
 
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?user_id="+Integer.parseInt(user_id)+"&bank="+Uri.encode(bank)+"&account="+number+"&name="+user_name;
-        String url = "http://taimu.pe/php_connection/app_bancos/addAccount.php"+params;
+        String url = base_url+"addAccount.php"+params;
         StringRequest postRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -234,4 +248,10 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
         );
         queue.add(postRequest);
     }
+
+    public void updateHeader(String name,String username) {
+        header_name.setText(name); //str OR whatvever you need to set.
+        header_username.setText(username); //str OR whatvever you need to set.
+    }
+
 }
