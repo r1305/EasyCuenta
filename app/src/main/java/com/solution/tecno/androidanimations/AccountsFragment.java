@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -29,6 +30,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeProgressDialog;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.github.javiersantos.materialstyleddialogs.enums.Style;
 import com.jackandphantom.circularprogressbar.CircleProgressbar;
@@ -49,9 +52,14 @@ public class AccountsFragment extends Fragment {
 
     MaterialStyledDialog msd;
 
+    SwipeRefreshLayout swipe_refresh;
+    View v;
+    AwesomeProgressDialog apd;
+    AwesomeSuccessDialog asd;
+
     public AccountsFragment() {
-        // Required empty public constructor
     }
+
     // TODO: Rename and change types and number of parameters
     public static AccountsFragment newInstance() {
         AccountsFragment fragment = new AccountsFragment();
@@ -67,48 +75,55 @@ public class AccountsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_accounts, container, false);
+        v = inflater.inflate(R.layout.fragment_accounts, container, false);
         user_id=new Credentials(ctx).getUserId();
         // Inflate the layout for this fragment
+        swipe_refresh = v.findViewById(R.id.swipe_refresh_account);
         data_table = v.findViewById(R.id.data_table);
 
-        final View layout_loader=LayoutInflater.from(ctx).inflate(R.layout.floating_loader,null);
-        msd=new MaterialStyledDialog.Builder(ctx).
-                setStyle(Style.HEADER_WITH_TITLE)
-                .setTitle("Cargando...")
-                .setCustomView(layout_loader)
-                .build();
+        swipe_refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getAccounts(user_id);
+            }
+        });
 
-        CircleProgressbar circleProgressbar = layout_loader.findViewById(R.id.first_progress_bar);
-        circleProgressbar.setForegroundProgressColor(Color.RED);
-        circleProgressbar.setBackgroundProgressWidth(15);
-        circleProgressbar.setForegroundProgressWidth(20);
-        circleProgressbar.enabledTouch(false);
-        circleProgressbar.setRoundedCorner(true);
-        circleProgressbar.setClockwise(true);
-        circleProgressbar.setMaxProgress(100);
-        int animationDuration = 8000; // 2500ms = 2,5s
-        circleProgressbar.setProgressWithAnimation(-100, animationDuration); // Default duration = 1500ms
+        //create progress dialog
+        apd=new AwesomeProgressDialog(ctx)
+                .setTitle(R.string.app_name)
+                .setMessage("Cargando")
+                .setColoredCircle(R.color.dialogInfoBackgroundColor)
+                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
+                .setCancelable(false);
 
-//        showLoader(1,"Cargando...");
+        //create success dialog
+        asd=new AwesomeSuccessDialog(ctx)
+                .setTitle(R.string.app_name)
+                .setMessage("Listo!")
+                .setColoredCircle(R.color.dialogSuccessBackgroundColor)
+                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
+                .setCancelable(false);
+
         getAccounts(user_id);
         return v;
     }
 
     public void getAccounts(String user_id) {
+        apd.setMessage("Cargando...");
+        apd.show();
         cleanTable(data_table);
 
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?user_id="+Integer.parseInt(user_id);
         String url = "http://taimu.pe/php_connection/app_bancos/getUserAccounts.php"+params;
-
-        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+        System.out.println("**** url_frament: "+url);
+        StringRequest postRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        System.out.println("**** response: "+response);
                         JSONParser jp = new JSONParser();
                         try {
-                            System.out.println(1);
                             JSONArray ja=(JSONArray)jp.parse(response);
                             for(int i=0;i<ja.size();i++){
                                 JSONObject item=(JSONObject)ja.get(i);
@@ -117,10 +132,17 @@ public class AccountsFragment extends Fragment {
                                 String account=item.get("account_number").toString();
                                 addNewTableRow(id,bank,account);
                             }
-                            System.out.println(2);
-                            showLoader(0,"");
+                            swipe_refresh.setRefreshing(false);
+                            asd.show();
+                            apd.hide();
+                            //wait 3 seconds to hide success dialog
+                            Handler handler = new Handler();
+                            handler.postDelayed(new Runnable() {
+                                public void run() {
+                                    asd.hide();
+                                }
+                            }, 3000);   //3 seconds
                         } catch (Exception e) {
-                            showLoader(0,"");
                             Toast.makeText(ctx,"Intente luego", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -129,7 +151,6 @@ public class AccountsFragment extends Fragment {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         // error
-                        showLoader(0,"");
                         Log.d("Error.Response", error.toString());
                         Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
                     }
@@ -225,7 +246,8 @@ public class AccountsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 final int account_id=tr.getId();
-                showLoader(1,"Obteniendo datos...");
+                apd.setMessage("Obteniendo datos...");
+                apd.show();
 
                 new Handler().postDelayed(new Runnable() {
                     @Override
@@ -282,6 +304,8 @@ public class AccountsFragment extends Fragment {
     }
 
     public void deleteAccount(int id) {
+        apd.setMessage("Eliminando...");
+        apd.show();
         cleanTable(data_table);
 
         RequestQueue queue = Volley.newRequestQueue(ctx);
@@ -293,6 +317,7 @@ public class AccountsFragment extends Fragment {
                     @Override
                     public void onResponse(String response) {
                         try {
+                            apd.hide();
                             getAccounts(user_id);
                         } catch (Exception e) {
                             Toast.makeText(ctx,"Intente luego", Toast.LENGTH_SHORT).show();
@@ -313,11 +338,9 @@ public class AccountsFragment extends Fragment {
     }
 
     public void getAccountDetail(final int id) {
-//        cleanTable(data_table);
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?account_id="+id;
         String url = "http://taimu.pe/php_connection/app_bancos/getAccountDetail.php"+params;
-        System.out.println(url);
 
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
@@ -343,34 +366,44 @@ public class AccountsFragment extends Fragment {
                                 diag_et_number.setText(account_edit);
                                 diag_et_user_name.setText(titular_edit);
 
-                                new MaterialStyledDialog.Builder(ctx)
-                                        .setStyle(Style.HEADER_WITH_TITLE)
-                                        .setTitle("Editar cuenta")
-                                        .setDescription("Edita tu cuenta para compartirla rápidamente")
-                                        .setPositiveText("Guardar")
-                                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                            @Override
-                                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                                dialog.dismiss();
-                                                String bank = diag_et_bank.getText().toString();
-                                                String number = diag_et_number.getText().toString();
-                                                String user_name =diag_et_user_name.getText().toString();
-                                                updateAccount(id,bank,number,user_name);
-                                            }
-                                        })
-                                        .setNegativeText("Cancelar")
-                                        .onNegative(new MaterialDialog.SingleButtonCallback() {
-                                            @Override
-                                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                                dialog.dismiss();
-                                            }
-                                        })
-                                        .setCustomView(layout)
-                                        .show();
-                                showLoader(0,"");
+                                apd.hide();
+                                asd.show();
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        asd.hide();
+                                        new MaterialStyledDialog.Builder(ctx)
+                                                .setStyle(Style.HEADER_WITH_TITLE)
+                                                .setTitle("Editar cuenta")
+                                                .setDescription("Edita tu cuenta para compartirla rápidamente")
+                                                .setPositiveText("Guardar")
+                                                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                                                    @Override
+                                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                                        dialog.dismiss();
+                                                        String bank = diag_et_bank.getText().toString();
+                                                        String number = diag_et_number.getText().toString();
+                                                        String user_name =diag_et_user_name.getText().toString();
+                                                        updateAccount(id,bank,number,user_name);
+                                                    }
+                                                })
+                                                .setNegativeText("Cancelar")
+                                                .onNegative(new MaterialDialog.SingleButtonCallback() {
+                                                    @Override
+                                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                                        dialog.dismiss();
+                                                    }
+                                                })
+                                                .setCustomView(layout)
+                                                .show();
+                                    }
+                                },1000);//1 sec
+
+
+
+
                             }
                         } catch (Exception e) {
-                            showLoader(0,"");
                             Toast.makeText(ctx,"Intente luego", Toast.LENGTH_SHORT).show();
                             e.printStackTrace();
                         }
@@ -380,28 +413,12 @@ public class AccountsFragment extends Fragment {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         // error
-                        showLoader(0,"");
                         Log.d("Error.Response", error.toString());
                         Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
                     }
                 }
         );
         queue.add(postRequest);
-    }
-
-    public void showLoader(int visibility,String message){
-        // create floating loader
-        msd.setTitle(message);
-        System.out.println("visibility: "+visibility);
-        if(visibility==1){
-            System.out.println("if: "+visibility);
-            msd.show();
-        }else{
-            System.out.println("else: "+visibility);
-            msd.hide();
-            msd.dismiss();
-            msd.cancel();
-        }
     }
 
     public void addAccount(final String user_id, String bank, String number,String user_name) {

@@ -19,11 +19,4 @@
         app:showAsAction="ifRoom"
         />
 
-    <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="1"
-        android:title="@string/action_settings"
-        app:showAsAction="always"
-        android:icon="@drawable/baseline_sync_white_24dp"
-        />
 </menu>

@@ -1,13 +1,9 @@
 package com.solution.tecno.androidanimations;
 
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -16,7 +12,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Layout;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -24,11 +19,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TableLayout;
-import android.widget.TableRow;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
@@ -39,16 +29,12 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeErrorDialog;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.github.javiersantos.materialstyleddialogs.enums.Style;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.jackandphantom.circularprogressbar.CircleProgressbar;
 import com.solution.tecno.androidanimations.Firebase.MyFirebaseInstanceIdService;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.w3c.dom.Text;
 
 public class FirstActivity extends AppCompatActivity  implements NavigationView.OnNavigationItemSelectedListener{
 
@@ -56,6 +42,7 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
     Toolbar toolbar;
     DrawerLayout drawer;
     String user_id;
+    MaterialStyledDialog msd;
 
 
     @Override
@@ -131,11 +118,6 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
         if(id == R.id.action_log_out){
             new Credentials(ctx).logout();
         }
@@ -157,7 +139,7 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
                             String bank = diag_et_bank.getText().toString();
                             String number = diag_et_number.getText().toString();
                             String user_name = diag_et_user_name.getText().toString();
-//                            addAccount(user_id,bank,number,user_name);
+                            addAccount(user_id,bank,number,user_name);
                         }
                     })
                     .setNegativeText("Cancelar")
@@ -188,6 +170,68 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        return false;
+        int id = item.getItemId();
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fm.beginTransaction();
+        Fragment fr;
+
+        switch (id){
+            case R.id.menu_accounts:
+                fr=AccountsFragment.newInstance();
+                fragmentTransaction.replace(R.id.container,fr);
+            break;
+            case R.id.menu_contacts:
+                fr=ContactFragment.newInstance();
+                fragmentTransaction.replace(R.id.container,fr);
+            break;
+            default:
+                fr=AccountsFragment.newInstance();
+                fragmentTransaction.replace(R.id.container,fr);
+            break;
+        }
+        drawer.closeDrawer(Gravity.START);
+        fragmentTransaction.commit();
+        return true;
+    }
+
+    public void addAccount(final String user_id, String bank, String number,String user_name) {
+
+        RequestQueue queue = Volley.newRequestQueue(ctx);
+        String params="?user_id="+Integer.parseInt(user_id)+"&bank="+Uri.encode(bank)+"&account="+number+"&name="+user_name;
+        String url = "http://taimu.pe/php_connection/app_bancos/addAccount.php"+params;
+        StringRequest postRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        if(response.equals("true")){
+                            new AwesomeSuccessDialog(ctx)
+                                    .setTitle(R.string.app_name)
+                                    .setMessage("Registro existoso!\nDeslice hacia abajo para refrescar sus cuentas")
+                                    .setColoredCircle(R.color.dialogSuccessBackgroundColor)
+                                    .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
+                                    .setCancelable(true)
+                                    .show();
+                            Toast.makeText(ctx,"Registro correcto!\nDeslice hacia abajo para refrescar",Toast.LENGTH_LONG);
+                        }else{
+                            new AwesomeErrorDialog(ctx)
+                                    .setTitle(R.string.app_name)
+                                    .setMessage("Ocurrió un error al registrar su cuenta!\nIntentelo nuevamente")
+                                    .setColoredCircle(R.color.dialogErrorBackgroundColor)
+                                    .setDialogIconAndColor(R.drawable.ic_dialog_error, R.color.white)
+                                    .setCancelable(true).setButtonText(getString(R.string.dialog_ok_button))
+                                    .show();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // error
+                        Log.d("Error.Response", error.toString());
+                        Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+        queue.add(postRequest);
     }
 }

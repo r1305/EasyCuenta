@@ -3,8 +3,39 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AccountsFragment">
+    tools:context=".AccountsFragment"
+    android:id="@+id/fragment_accounts">
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_account"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-    <include layout="@layout/content_first" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
+                <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:stretchColumns="0,1"
+                    android:id="@+id/data_table"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent">
+                </TableLayout>
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/wsp_icon"
+                    android:src="@drawable/whats_app_icon"
+                    android:maxHeight="24px"
+                    android:maxWidth="24px"
+                    android:visibility="gone"
+                    android:layout_gravity="center_horizontal"/>
+            </LinearLayout>
+        </ScrollView>
+
+    </android.support.v4.widget.SwipeRefreshLayout>
 </FrameLayout>
