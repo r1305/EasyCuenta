@@ -86,6 +86,7 @@ public class ContactFragment extends Fragment {
     public void getAllContacts(){
         Cursor phones = ctx.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,null,null, null);
         List<String> contacs=new ArrayList<String>();
+        contacs.clear();
         while (phones.moveToNext())
         {
             String name=phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY));
@@ -96,15 +97,13 @@ public class ContactFragment extends Fragment {
             phoneNumber=phoneNumber.replace("(01)","");
 
             name = name.replace("-"," ");
-
-            contacs.add(name+"-"+phoneNumber);
+            if(phoneNumber.length()>=9)
+                contacs.add(name+","+phoneNumber);
         }
         phones.close();
         l.clear();
         for(int i=0;i<contacs.size();i++){
-            String[] obj = contacs.get(i).split("-");
-            if(obj[1].length()>=9)
-                l.add(contacs.get(i));
+            l.add(contacs.get(i));
         }
         apd.hide();
         asd.show();

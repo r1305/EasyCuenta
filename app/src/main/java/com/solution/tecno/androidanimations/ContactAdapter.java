@@ -34,7 +34,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         String obj=l.get(position);
-        String[] item=obj.split("-");
+        String[] item=obj.split(",");
         holder.name.setText(item[0]);
         holder.phone.setText(item[1]);
     }
