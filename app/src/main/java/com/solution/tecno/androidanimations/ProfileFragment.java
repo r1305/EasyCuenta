@@ -226,7 +226,6 @@ public class ProfileFragment extends Fragment {
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?id="+Integer.parseInt(user_id);
         String url = base_url+"getUserProfile.php"+params;
-        System.out.println("*** "+url);
         StringRequest postRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -236,7 +235,6 @@ public class ProfileFragment extends Fragment {
                             JSONArray ja=(JSONArray)jp.parse(response);
                             for(int i=0;i<ja.size();i++){
                                 JSONObject item=(JSONObject)ja.get(i);
-                                System.out.println("*** "+item);
                                 String name=item.get("full_name").toString();
                                 String user=item.get("username").toString();
                                 String psw=item.get("clave").toString();

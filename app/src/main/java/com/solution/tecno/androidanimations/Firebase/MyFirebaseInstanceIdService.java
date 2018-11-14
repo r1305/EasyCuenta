@@ -41,7 +41,6 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?id="+user_id+"&fcm="+token;
         String url = base_url+"updateFCM.php"+params;
-        System.out.println(url);
 
         StringRequest postRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>()

@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.alirezaahmadi.progressbutton.ProgressButtonComponent;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -152,7 +153,7 @@ public class LoginActivity extends AppCompatActivity {
 
                         } catch (Exception e) {
                             apd.hide();
-                            aed.setMessage("Usuario o Contraseña incorrecta");
+                            aed.setMessage(e.getMessage());
                             aed.show();
                             new Handler().postDelayed(new Runnable() {
                                 @Override
@@ -160,7 +161,7 @@ public class LoginActivity extends AppCompatActivity {
                                     aed.hide();
                                 }
                             }, 2000);
-                            e.printStackTrace();
+                            System.out.println(e);
                         }
                     }
                 },
@@ -178,10 +179,22 @@ public class LoginActivity extends AppCompatActivity {
                         }, 2000);
                         // error
                         Log.d("Error.Response", error.toString());
-                        Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
+                        apd.hide();
+                        aed.setMessage(error.toString());
+                        aed.show();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                aed.hide();
+                            }
+                        }, 2000);
                     }
                 }
         );
+        postRequest.setRetryPolicy(new DefaultRetryPolicy(
+                50000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         queue.add(postRequest);
     }
 }

@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -182,6 +183,10 @@ public class AccountsFragment extends Fragment {
                     }
                 }
         );
+        postRequest.setRetryPolicy(new DefaultRetryPolicy(
+                50000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         queue.add(postRequest);
     }
 
@@ -360,6 +365,10 @@ public class AccountsFragment extends Fragment {
                     }
                 }
         );
+        postRequest.setRetryPolicy(new DefaultRetryPolicy(
+                50000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         queue.add(postRequest);
     }
 
@@ -424,10 +433,6 @@ public class AccountsFragment extends Fragment {
                                                 .show();
                                     }
                                 },1000);//1 sec
-
-
-
-
                             }
                         } catch (Exception e) {
                             Toast.makeText(ctx,"Intente luego", Toast.LENGTH_SHORT).show();
@@ -444,6 +449,10 @@ public class AccountsFragment extends Fragment {
                     }
                 }
         );
+        postRequest.setRetryPolicy(new DefaultRetryPolicy(
+                50000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         queue.add(postRequest);
     }
 
@@ -507,6 +516,10 @@ public class AccountsFragment extends Fragment {
                     }
                 }
         );
+        postRequest.setRetryPolicy(new DefaultRetryPolicy(
+                50000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         queue.add(postRequest);
     }
 

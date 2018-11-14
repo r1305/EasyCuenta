@@ -23,9 +23,10 @@
                 android:orientation="horizontal">
                 <ImageButton
                     android:id="@+id/btn_show_contacts"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/ic_user"/>
+                    android:layout_width="50dp"
+                    android:layout_height="55dp"
+                    android:src="@drawable/ic_user"
+                    android:background="#FFF"/>
                 <com.rengwuxian.materialedittext.MaterialEditText
                     android:id="@+id/contact_et_name"
                     android:layout_width="match_parent"

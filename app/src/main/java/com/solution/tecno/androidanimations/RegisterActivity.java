@@ -128,11 +128,122 @@ public class RegisterActivity extends AppCompatActivity {
                 if(!name.isEmpty() && !username.isEmpty() && (!phone.isEmpty() && phone.length()>=9) && !psw.isEmpty()){
                     apd.setMessage("Registrando...");
                     apd.show();
-                    register(username,psw,name,phone);
+                    validatePhone(username,psw,name,phone);
                 }
             }
         });
+    }
 
+    public void validatePhone(final String user,final String psw,final String name,final String phone) {
+        RequestQueue queue = Volley.newRequestQueue(ctx);
+        String params="?phone="+Uri.encode(phone);
+        String url = base_url+"findPhoneNumber.php"+params;
+        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        JSONParser jp = new JSONParser();
+                        try {
+                            JSONArray ja=(JSONArray)jp.parse(response);
+                            JSONObject item=(JSONObject)ja.get(0);
+                            int encontrado=Integer.parseInt(item.get("encontrado").toString());
+                            if(encontrado==0){
+                                register(user,psw,name,phone);
+                            }else{
+                                apd.hide();
+                                aed.setMessage("# Celular ya registrado");
+                                aed.show();
+
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        aed.hide();
+                                        reg_phone.setError("Número ya registrado");
+                                        reg_phone.requestFocus();
+                                    }
+                                }, 3000);
+                            }
+                        } catch (Exception e) {
+                            apd.hide();
+                            aed.setMessage("Ocurrió un error al registrar\n"+e.getMessage());
+                            aed.show();
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    aed.hide();
+                                }
+                            }, 3000);
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // error
+                        Log.d("Error.Response", error.toString());
+                        Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+        queue.add(postRequest);
+    }
+
+    public void register(final String user,final String psw,String name,String phone) {
+        RequestQueue queue = Volley.newRequestQueue(ctx);
+        String params="?username="+user+"&psw="+psw+"&name="+ Uri.encode(name)+ "&phone="+Uri.encode(phone);
+        String url = base_url+"registerUser.php"+params;
+        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            if(response.equals("true")){
+                                apd.hide();
+                                asd.show();
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        asd.hide();
+                                        login(user,psw);
+                                    }
+                                }, 3000);
+
+                            }else{
+                                apd.hide();
+                                aed.setMessage("Ocurrió un error");
+                                aed.show();
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        aed.hide();
+                                    }
+                                }, 3000);
+                            }
+                        } catch (Exception e) {
+                            apd.hide();
+                            aed.setMessage(e.getMessage());
+                            aed.show();
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    aed.hide();
+                                }
+                            }, 3000);
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // error
+                        Log.d("Error.Response", error.toString());
+                        Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+        queue.add(postRequest);
     }
 
     public void login(String user,String psw) {
@@ -195,63 +306,6 @@ public class RegisterActivity extends AppCompatActivity {
                         }, 3000);
                         // error
                         Log.d("Error.Response", error.toString());
-                    }
-                }
-        );
-        queue.add(postRequest);
-    }
-
-    public void register(final String user,final String psw,String name,String phone) {
-        RequestQueue queue = Volley.newRequestQueue(ctx);
-        String params="?username="+user+"&psw="+psw+"&name="+ Uri.encode(name)+ "&phone="+Uri.encode(phone);
-        String url = base_url+"registerUser.php"+params;
-        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            if(response.equals("true")){
-                                apd.hide();
-                                asd.show();
-                                new Handler().postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        asd.hide();
-                                        login(user,psw);
-                                    }
-                                }, 3000);
-
-                            }else{
-                                apd.hide();
-                                aed.setMessage("Ocurrió un error");
-                                aed.show();
-                                new Handler().postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        aed.hide();
-                                    }
-                                }, 3000);
-                            }
-                        } catch (Exception e) {
-                            apd.hide();
-                            aed.setMessage(e.getMessage());
-                            aed.show();
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    aed.hide();
-                                }
-                            }, 3000);
-                            e.printStackTrace();
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // error
-                        Log.d("Error.Response", error.toString());
-                        Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
                     }
                 }
         );

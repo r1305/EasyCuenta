@@ -43,8 +43,8 @@ public class MyNotificationManager {
 
         NotificationCompat.Builder mBuilder;
         mBuilder = new NotificationCompat.Builder(mCtx);
-        mBuilder.setSmallIcon(R.drawable.ic_launcher_background);
-        mBuilder.setBadgeIconType(R.drawable.ic_launcher_background);
+        mBuilder.setSmallIcon(R.drawable.ic_bank_app);
+        mBuilder.setBadgeIconType(R.drawable.ic_bank_app);
         mBuilder.setContentTitle(title);
         mBuilder.setContentText(body);
         mBuilder.setContentIntent(pendingIntent);
