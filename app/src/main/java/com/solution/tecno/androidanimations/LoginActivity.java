@@ -1,25 +1,16 @@
 package com.solution.tecno.androidanimations;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
-import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Selection;
+import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.alirezaahmadi.progressbutton.ProgressButtonComponent;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -30,8 +21,6 @@ import com.android.volley.toolbox.Volley;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeErrorDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeProgressDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
-import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
-import com.github.javiersantos.materialstyleddialogs.enums.Style;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -42,6 +31,7 @@ public class LoginActivity extends AppCompatActivity {
     ProgressButtonComponent login_btn,register_btn;
     EditText et_user,et_psw;
     Context ctx;
+    Credentials cred;
     String base_url="https://www.jadconsultores.com.pe/php_connection/app/bancos_resumen/";
     AwesomeProgressDialog apd;
     AwesomeSuccessDialog asd;
@@ -51,6 +41,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         ctx=LoginActivity.this;
+        cred=new Credentials(ctx);
         //create progress dialog
         apd=new AwesomeProgressDialog(ctx)
                 .setTitle(R.string.app_name)
@@ -128,7 +119,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void login(final String user, String psw) {
-        RequestQueue queue = Volley.newRequestQueue(this);
+        RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?username="+user+"&psw="+psw;
         String url = base_url+"login.php"+params;
 
@@ -145,7 +136,7 @@ public class LoginActivity extends AppCompatActivity {
                             String user_name=item.get("username").toString();
                             String phone_number=item.get("phone_number").toString();
 
-                            save_credentials(id,full_name,user_name,phone_number);
+                            cred.save_credentials(id,full_name,user_name,phone_number);
                             apd.hide();
                             asd.show();
                             new Handler().postDelayed(new Runnable() {
@@ -192,16 +183,6 @@ public class LoginActivity extends AppCompatActivity {
                 }
         );
         queue.add(postRequest);
-    }
-
-    public void save_credentials(String user_id,String full_name,String username,String phone_number){
-        SharedPreferences sp=getSharedPreferences("Login", MODE_PRIVATE);
-        SharedPreferences.Editor Ed=sp.edit();
-        Ed.putString("user_id",user_id);
-        Ed.putString("full_name",full_name);
-        Ed.putString("username",username);
-        Ed.putString("phone_number",phone_number);
-        Ed.commit();
     }
 }
 

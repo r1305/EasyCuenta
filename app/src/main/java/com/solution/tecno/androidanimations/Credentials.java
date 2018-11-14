@@ -68,6 +68,15 @@ public class Credentials {
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pi = PendingIntent.getActivity(ctx, 0, i, 0);
         ctx.startActivity(i);
+    }
 
+    public void save_credentials(String user_id,String full_name,String username,String phone_number){
+        SharedPreferences sp=ctx.getSharedPreferences("Login", MODE_PRIVATE);
+        SharedPreferences.Editor Ed=sp.edit();
+        Ed.putString("user_id",user_id);
+        Ed.putString("full_name",full_name);
+        Ed.putString("username",username);
+        Ed.putString("phone_number",phone_number);
+        Ed.commit();
     }
 }

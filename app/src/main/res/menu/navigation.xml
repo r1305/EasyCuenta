@@ -7,9 +7,9 @@
         />
     <item
         android:id="@+id/menu_contacts"
-        android:title="Mis Contactos"
-        android:icon="@drawable/ic_contacts"
-        android:visible="false"
+        android:title="Notificar"
+        android:icon="@drawable/ic_notification"
+        android:visible="true"
         />
 
     <item

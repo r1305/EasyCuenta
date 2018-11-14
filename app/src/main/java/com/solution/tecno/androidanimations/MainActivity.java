@@ -129,6 +129,9 @@ public class MainActivity extends AppCompatActivity {
                         &&
                         ActivityCompat.checkSelfPermission(this,
                                 Manifest.permission.READ_CONTACTS)!= PackageManager.PERMISSION_GRANTED
+                        &&
+                        ActivityCompat.checkSelfPermission(this,
+                                Manifest.permission.SEND_SMS)!= PackageManager.PERMISSION_GRANTED
                 )
         {
             ActivityCompat.requestPermissions(this,
@@ -136,7 +139,8 @@ public class MainActivity extends AppCompatActivity {
                             Manifest.permission.ACCESS_FINE_LOCATION,
                             Manifest.permission.INTERNET,
                             Manifest.permission.CAMERA,
-                            Manifest.permission.READ_CONTACTS
+                            Manifest.permission.READ_CONTACTS,
+                            Manifest.permission.SEND_SMS
                     },
                     MY_PERMISSIONS_REQUEST_ACCESS);
         }else{
@@ -148,23 +152,14 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode,String permissions[], int[] grantResults)
     {
         switch (requestCode) {
-            case 1 : {
+            case 1 :
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     validateSession();
                 } else {
-                    aid.setMessage("Permisos necesarios.\nDebe aceptar para continuar");
-                    aid.show();
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            aid.hide();
-                            checkPermissions();
-                        }
-                    }, 1500);
+                    checkPermissions();
                 }
-                return;
-            }
+            break;
         }
     }
 

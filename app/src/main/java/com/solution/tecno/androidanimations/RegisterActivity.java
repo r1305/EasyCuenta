@@ -28,10 +28,13 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import static java.security.AccessController.getContext;
+
 public class RegisterActivity extends AppCompatActivity {
 
     EditText reg_username,reg_psw,reg_full_name,reg_phone;
     Context ctx;
+    Credentials cred;
     ProgressButtonComponent reg_button,cancel_button;
     String base_url="https://www.jadconsultores.com.pe/php_connection/app/bancos_resumen/";
     AwesomeProgressDialog apd;
@@ -43,6 +46,7 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         ctx = this;
+        cred = new Credentials(ctx);
 
         //create progress dialog
         apd=new AwesomeProgressDialog(ctx)
@@ -112,13 +116,16 @@ public class RegisterActivity extends AppCompatActivity {
                 if(phone.isEmpty()){
                     reg_phone.setError("Complete su celular");
                     reg_phone.requestFocus();
+                }else if(phone.length()<9){
+                    reg_phone.setError("Ingrese un número de celular válido");
+                    reg_phone.requestFocus();
                 }
                 if(psw.isEmpty()){
                     reg_psw.setError("Ingrese contraseña");
                     reg_psw.requestFocus();
                 }
 
-                if(!name.isEmpty() && !username.isEmpty() && !phone.isEmpty() && !psw.isEmpty()){
+                if(!name.isEmpty() && !username.isEmpty() && (!phone.isEmpty() && phone.length()>=9) && !psw.isEmpty()){
                     apd.setMessage("Registrando...");
                     apd.show();
                     register(username,psw,name,phone);
@@ -144,8 +151,10 @@ public class RegisterActivity extends AppCompatActivity {
                             JSONArray ja=(JSONArray)jp.parse(response);
                             JSONObject item=(JSONObject)ja.get(0);
                             String id=item.get("id").toString();
-
-                            save_credentials(id);
+                            String full_name=item.get("full_name").toString();
+                            String user_name=item.get("username").toString();
+                            String phone_number=item.get("phone_number").toString();
+                            cred.save_credentials(id,full_name,user_name,phone_number);
                             apd.hide();
                             asd.show();
 
@@ -192,16 +201,9 @@ public class RegisterActivity extends AppCompatActivity {
         queue.add(postRequest);
     }
 
-    public void save_credentials(String user_id){
-        SharedPreferences sp=getSharedPreferences("Login", MODE_PRIVATE);
-        SharedPreferences.Editor Ed=sp.edit();
-        Ed.putString("user_id",user_id);
-        Ed.commit();
-    }
-
     public void register(final String user,final String psw,String name,String phone) {
         RequestQueue queue = Volley.newRequestQueue(ctx);
-        String params="?username="+user+"&psw="+psw+"&name="+ Uri.encode(name)+ "&phone"+Uri.encode(phone);
+        String params="?username="+user+"&psw="+psw+"&name="+ Uri.encode(name)+ "&phone="+Uri.encode(phone);
         String url = base_url+"registerUser.php"+params;
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {

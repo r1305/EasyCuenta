@@ -106,7 +106,39 @@ public class ProfileFragment extends Fragment {
                         String username = prof_user_name.getText().toString();
                         String phone = prof_phone.getText().toString();
                         String psw = prof_psw.getText().toString();
-                        updateUser(user_id,username,phone,name,psw);
+                        if(name.isEmpty() && username.isEmpty() && psw.isEmpty() && phone.isEmpty()){
+                            prof_name.setError("Complete el nombre");
+                            prof_name.requestFocus();
+                            prof_user_name.setError("Complete el usuario");
+                            prof_user_name.requestFocus();
+                            prof_psw.setError("Ingrese contraseña");
+                            prof_psw.requestFocus();
+                            prof_phone.setError("Ingrese un número celular");
+                            prof_phone.requestFocus();
+                        }
+                        if(name.isEmpty()){
+                            prof_name.setError("Complete el nombre");
+                            prof_name.requestFocus();
+                        }
+                        if(username.isEmpty()){
+                            prof_user_name.setError("Complete el usuario");
+                            prof_user_name.requestFocus();
+                        }
+                        if(phone.isEmpty()){
+                            prof_phone.setError("Complete su celular");
+                            prof_phone.requestFocus();
+                        }else if(phone.length()<9){
+                            prof_phone.setError("Ingrese un número de celular válido");
+                            prof_phone.requestFocus();
+                        }
+                        if(psw.isEmpty()){
+                            prof_psw.setError("Ingrese contraseña");
+                            prof_psw.requestFocus();
+                        }
+
+                        if(!name.isEmpty() && !username.isEmpty() && !phone.isEmpty() && !psw.isEmpty()){
+                            updateUser(user_id,username,phone,name,psw);
+                        }
                     }
                 }, 1500);
             }
@@ -140,7 +172,7 @@ public class ProfileFragment extends Fragment {
                                     }
                                 }, 1500);
                                 proSwipeBtn.showResultIcon(true);
-                                save_credentials(id,username,phone_number);
+                                cred.save_credentials(id,full_name,username,phone_number);
                                 ((FirstActivity)getContext()).updateHeader(full_name,username);
                             }else{
                                 apd.hide();
@@ -254,14 +286,5 @@ public class ProfileFragment extends Fragment {
                 }
         );
         queue.add(postRequest);
-    }
-
-    public void save_credentials(String user_id,String user_name,String phone_number){
-        SharedPreferences sp=ctx.getSharedPreferences("Login", ctx.MODE_PRIVATE);
-        SharedPreferences.Editor Ed=sp.edit();
-        Ed.putString("user_id",user_id);
-        Ed.putString("user_name",user_name);
-        Ed.putString("phone_number",phone_number);
-        Ed.commit();
     }
 }

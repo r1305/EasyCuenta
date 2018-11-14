@@ -39,7 +39,7 @@ public class MyFirebaseInstanceIdService extends FirebaseInstanceIdService {
         //copy it as this method is called only when the new token is generated
         //and usually new token is only generated when the app is reinstalled or the data is cleared
         RequestQueue queue = Volley.newRequestQueue(ctx);
-        String params="?id=1&fcm="+token;
+        String params="?id="+user_id+"&fcm="+token;
         String url = base_url+"updateFCM.php"+params;
         System.out.println(url);
 
