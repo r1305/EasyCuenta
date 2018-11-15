@@ -2,6 +2,7 @@ package com.solution.tecno.androidanimations;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.inputmethodservice.Keyboard;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,7 +36,7 @@ import in.shadowfax.proswipebutton.ProSwipeButton;
 public class ProfileFragment extends Fragment {
     ProSwipeButton proSwipeBtn;
     Context ctx;
-    EditText prof_name,prof_user_name,prof_phone,prof_psw;
+    EditText prof_name,prof_user_name,prof_phone,prof_psw,prof_email;
     Credentials cred;
     String base_url="https://www.jadconsultores.com.pe/php_connection/app/bancos_resumen/";
     String user_id;
@@ -93,6 +94,8 @@ public class ProfileFragment extends Fragment {
         prof_user_name = v.findViewById(R.id.profile_et_user);
         prof_phone = v.findViewById(R.id.profile_et_phone);
         prof_psw = v.findViewById(R.id.profile_et_password);
+        prof_email = v.findViewById(R.id.profile_et_email);
+
         getUserProfile(user_id);
 
         proSwipeBtn.setOnSwipeListener(new ProSwipeButton.OnSwipeListener() {
@@ -108,7 +111,8 @@ public class ProfileFragment extends Fragment {
                         String username = prof_user_name.getText().toString();
                         String phone = prof_phone.getText().toString();
                         String psw = prof_psw.getText().toString();
-                        if(name.isEmpty() && username.isEmpty() && psw.isEmpty() && phone.isEmpty()){
+                        String email = prof_email.getText().toString();
+                        if(name.isEmpty() && username.isEmpty() && psw.isEmpty() && phone.isEmpty() && email.isEmpty()){
                             prof_name.setError("Complete el nombre");
                             prof_name.requestFocus();
                             prof_user_name.setError("Complete el usuario");
@@ -117,29 +121,68 @@ public class ProfileFragment extends Fragment {
                             prof_psw.requestFocus();
                             prof_phone.setError("Ingrese un número celular");
                             prof_phone.requestFocus();
+                            prof_email.setError("Ingrese un correo");
+                            prof_email.requestFocus();
+                            apd.hide();
+                            proSwipeBtn.showResultIcon(false);
+                            return;
                         }
                         if(name.isEmpty()){
                             prof_name.setError("Complete el nombre");
                             prof_name.requestFocus();
+                            apd.hide();
+                            proSwipeBtn.showResultIcon(false);
+                            return;
                         }
                         if(username.isEmpty()){
                             prof_user_name.setError("Complete el usuario");
                             prof_user_name.requestFocus();
+                            apd.hide();
+                            proSwipeBtn.showResultIcon(false);
+                            return;
+                        }
+                        if(email.isEmpty()){
+                            prof_email.setError("Complete el correo");
+                            prof_email.requestFocus();
+                            apd.hide();
+                            proSwipeBtn.showResultIcon(false);
+                            return;
+                        }else if(!isValidEmail(email)){
+                            prof_email.setError("Ingrese un correo válido");
+                            prof_email.requestFocus();
+                            apd.hide();
+                            proSwipeBtn.showResultIcon(false);
+                            return;
                         }
                         if(phone.isEmpty()){
                             prof_phone.setError("Complete su celular");
                             prof_phone.requestFocus();
+                            apd.hide();
+                            proSwipeBtn.showResultIcon(false);
+                            return;
                         }else if(phone.length()<9){
                             prof_phone.setError("Ingrese un número de celular válido");
                             prof_phone.requestFocus();
+                            apd.hide();
+                            proSwipeBtn.showResultIcon(false);
+                            return;
                         }
                         if(psw.isEmpty()){
                             prof_psw.setError("Ingrese contraseña");
                             prof_psw.requestFocus();
+                            apd.hide();
+                            proSwipeBtn.showResultIcon(false);
+                            return;
                         }
 
-                        if(!name.isEmpty() && !username.isEmpty() && !phone.isEmpty() && !psw.isEmpty()){
-                            updateUser(user_id,username,phone,name,psw);
+                        if(name!="" && username!="" &&
+                                phone!="" && psw!="" &&
+                                email!="" && isValidEmail(email)){
+                            updateUser(user_id,username,phone,name,psw,email);
+                        }else{
+                            apd.hide();
+                            proSwipeBtn.showResultIcon(false);
+                            return;
                         }
                     }
                 }, 1500);
@@ -148,17 +191,21 @@ public class ProfileFragment extends Fragment {
         return v;
     }
 
-    public void updateUser(final String id, final String username,final String phone_number,final String full_name,final String psw) {
+    public void updateUser(final String id, final String username,
+                           final String phone_number,final String full_name,
+                           final String psw,final String email) {
 
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?id="+id+
                 "&username="+Uri.encode(username)+
                 "&phone="+Uri.encode(phone_number)+
                 "&name="+Uri.encode(full_name)+
-                "&psw="+Uri.encode(psw)
+                "&psw="+Uri.encode(psw)+
+                "&email="+email
                 ;
 
         String url = base_url+"updateUser.php"+params;
+        System.out.println(url);
         StringRequest postRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -246,11 +293,13 @@ public class ProfileFragment extends Fragment {
                                 String user=item.get("username").toString();
                                 String psw=item.get("clave").toString();
                                 String phone=item.get("phone_number").toString();
+                                String email=item.get("email").toString();
 
                                 prof_name.setText(name);
                                 prof_user_name.setText(user);
                                 prof_psw.setText(psw);
                                 prof_phone.setText(phone);
+                                prof_email.setText(email);
                             }
                             apd.hide();
                             asd.show();
@@ -291,5 +340,12 @@ public class ProfileFragment extends Fragment {
                 }
         );
         queue.add(postRequest);
+    }
+
+    public final static boolean isValidEmail(CharSequence target) {
+        if (target == null)
+            return false;
+
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
     }
 }

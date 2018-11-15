@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.Gravity;
@@ -32,8 +34,11 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeErrorDialog;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeInfoDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeProgressDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeWarningDialog;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.github.javiersantos.materialstyleddialogs.enums.Style;
 import com.jackandphantom.circularprogressbar.CircleProgressbar;
@@ -47,6 +52,7 @@ public class AccountsFragment extends Fragment {
 
     TableLayout data_table;
     Context ctx;
+    Credentials cred;
     String user_id;
     EditText diag_et_bank,diag_et_number,diag_et_user_name;
 
@@ -59,6 +65,8 @@ public class AccountsFragment extends Fragment {
     AwesomeProgressDialog apd;
     AwesomeSuccessDialog asd;
     AwesomeErrorDialog aed;
+    AwesomeInfoDialog aid;
+    AwesomeWarningDialog awd;
     String base_url="https://www.jadconsultores.com.pe/php_connection/app/bancos_resumen/";
 
     public AccountsFragment() {
@@ -74,6 +82,7 @@ public class AccountsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ctx = this.getContext();
+        cred = new Credentials(ctx);
         //create progress dialog
         apd=new AwesomeProgressDialog(ctx)
                 .setTitle(R.string.app_name)
@@ -97,13 +106,58 @@ public class AccountsFragment extends Fragment {
                 .setColoredCircle(R.color.dialogErrorBackgroundColor)
                 .setDialogIconAndColor(R.drawable.ic_dialog_error,R.color.white)
                 .setCancelable(false);
+
+        //create info dialog
+        aid=new AwesomeInfoDialog(ctx)
+                .setTitle(R.string.app_name)
+                .setMessage("Actualiza tu número de celular para disfrutar de todas las funciones")
+                .setColoredCircle(R.color.dialogInfoBackgroundColor)
+                .setDialogIconAndColor(R.drawable.ic_dialog_warning,R.color.white)
+                .setPositiveButtonText("Ver mi perfil")
+                .setPositiveButtonClick(new Closure() {
+                    @Override
+                    public void exec() {
+                        FragmentManager fm = getActivity().getSupportFragmentManager();
+                        FragmentTransaction fragmentTransaction = fm.beginTransaction();
+                        Fragment fr=ProfileFragment.newInstance();
+                        fragmentTransaction.replace(R.id.container,fr);
+                        fragmentTransaction.commit();
+                    }
+                })
+                .setNegativeButtonText("Ahora no")
+                .setNegativeButtonClick(new Closure() {
+                    @Override
+                    public void exec() {
+                        aid.hide();
+                    }
+                })
+                .setCancelable(true);
+
+        //create info dialog
+        awd=new AwesomeWarningDialog(ctx)
+                .setTitle(R.string.app_name)
+                .setMessage("Actualiza tu número de celular para disfrutar de todas las funciones")
+                .setColoredCircle(R.color.dialogWarningBackgroundColor)
+                .setDialogIconAndColor(R.drawable.ic_dialog_warning,R.color.white)
+                .setButtonText("Ver mi perfil")
+                .setWarningButtonClick(new Closure() {
+                    @Override
+                    public void exec() {
+                        FragmentManager fm = getActivity().getSupportFragmentManager();
+                        FragmentTransaction fragmentTransaction = fm.beginTransaction();
+                        Fragment fr=ProfileFragment.newInstance();
+                        fragmentTransaction.replace(R.id.container,fr);
+                        fragmentTransaction.commit();
+                    }
+                })
+                .setCancelable(false);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         v = inflater.inflate(R.layout.fragment_accounts, container, false);
-        user_id=new Credentials(ctx).getUserId();
+        user_id=cred.getUserId();
         // Inflate the layout for this fragment
         swipe_refresh = v.findViewById(R.id.swipe_refresh_account);
         data_table = v.findViewById(R.id.data_table);
@@ -149,6 +203,7 @@ public class AccountsFragment extends Fragment {
                             handler.postDelayed(new Runnable() {
                                 public void run() {
                                     asd.hide();
+                                    verifiedPhoneNumber();
                                 }
                             }, 1500);   //3 seconds
                         } catch (Exception e) {
@@ -521,6 +576,18 @@ public class AccountsFragment extends Fragment {
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         queue.add(postRequest);
+    }
+
+    public void verifiedPhoneNumber(){
+        if(cred.getPhoneNumber().equals("0")){
+            awd.show();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    awd.hide();
+                }
+            },3500);
+        }
     }
 
 }

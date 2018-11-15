@@ -32,7 +32,7 @@ import static java.security.AccessController.getContext;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    EditText reg_username,reg_psw,reg_full_name,reg_phone;
+    EditText reg_username,reg_psw,reg_full_name,reg_phone,reg_email;
     Context ctx;
     Credentials cred;
     ProgressButtonComponent reg_button,cancel_button;
@@ -76,6 +76,7 @@ public class RegisterActivity extends AppCompatActivity {
         reg_username = findViewById(R.id.diag_et_user);
         reg_psw = findViewById(R.id.diag_et_password);
         reg_phone = findViewById(R.id.diag_et_phone);
+        reg_email = findViewById(R.id.diag_et_email);
 
         reg_button = findViewById(R.id.reg_btn_register);
         cancel_button = findViewById(R.id.reg_btn_cancel);
@@ -94,6 +95,7 @@ public class RegisterActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String name = reg_full_name.getText().toString();
                 String username = reg_username.getText().toString();
+                String email = reg_email.getText().toString();
                 String psw = reg_psw.getText().toString();
                 String phone = reg_phone.getText().toString();
 
@@ -113,6 +115,12 @@ public class RegisterActivity extends AppCompatActivity {
                     reg_username.setError("Complete el usuario");
                     reg_username.requestFocus();
                 }
+
+                if(email.isEmpty()){
+                    reg_username.setError("Complete el correo");
+                    reg_username.requestFocus();
+                }
+
                 if(phone.isEmpty()){
                     reg_phone.setError("Complete su celular");
                     reg_phone.requestFocus();
@@ -125,16 +133,18 @@ public class RegisterActivity extends AppCompatActivity {
                     reg_psw.requestFocus();
                 }
 
-                if(!name.isEmpty() && !username.isEmpty() && (!phone.isEmpty() && phone.length()>=9) && !psw.isEmpty()){
+                if(!name.isEmpty() && !username.isEmpty() &&
+                        (!phone.isEmpty() && phone.length()>=9) &&
+                        !psw.isEmpty() && !email.isEmpty()){
                     apd.setMessage("Registrando...");
                     apd.show();
-                    validatePhone(username,psw,name,phone);
+                    validatePhone(username,psw,name,phone,email);
                 }
             }
         });
     }
 
-    public void validatePhone(final String user,final String psw,final String name,final String phone) {
+    public void validatePhone(final String user,final String psw,final String name,final String phone,final String email) {
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?phone="+Uri.encode(phone);
         String url = base_url+"findPhoneNumber.php"+params;
@@ -148,7 +158,7 @@ public class RegisterActivity extends AppCompatActivity {
                             JSONObject item=(JSONObject)ja.get(0);
                             int encontrado=Integer.parseInt(item.get("encontrado").toString());
                             if(encontrado==0){
-                                register(user,psw,name,phone);
+                                register(user,psw,name,phone,email);
                             }else{
                                 apd.hide();
                                 aed.setMessage("# Celular ya registrado");
@@ -189,9 +199,10 @@ public class RegisterActivity extends AppCompatActivity {
         queue.add(postRequest);
     }
 
-    public void register(final String user,final String psw,String name,String phone) {
+    public void register(final String user,final String psw,String name,String phone,String email) {
         RequestQueue queue = Volley.newRequestQueue(ctx);
-        String params="?username="+user+"&psw="+psw+"&name="+ Uri.encode(name)+ "&phone="+Uri.encode(phone);
+        String params="?username="+user+"&psw="+psw+"&name="+ Uri.encode(name)+
+                "&phone="+Uri.encode(phone)+"&email="+email;
         String url = base_url+"registerUser.php"+params;
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {

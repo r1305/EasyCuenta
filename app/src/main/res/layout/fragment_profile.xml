@@ -37,6 +37,16 @@
         android:inputType="text"/>
 
     <com.rengwuxian.materialedittext.MaterialEditText
+        android:id="@+id/profile_et_email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Correo"
+        app:met_floatingLabel="highlight"
+        app:met_iconLeft="@drawable/ic_email"
+        app:met_iconPadding="0dp"
+        android:inputType="textEmailAddress"/>
+
+    <com.rengwuxian.materialedittext.MaterialEditText
         android:id="@+id/profile_et_phone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
