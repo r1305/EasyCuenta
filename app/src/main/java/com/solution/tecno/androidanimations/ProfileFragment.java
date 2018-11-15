@@ -6,6 +6,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -174,6 +176,11 @@ public class ProfileFragment extends Fragment {
                                 proSwipeBtn.showResultIcon(true);
                                 cred.save_credentials(id,full_name,username,phone_number);
                                 ((FirstActivity)getContext()).updateHeader(full_name,username);
+                                FragmentManager fm = getActivity().getSupportFragmentManager();
+                                FragmentTransaction fragmentTransaction = fm.beginTransaction();
+                                Fragment fr=AccountsFragment.newInstance();
+                                fragmentTransaction.replace(R.id.container,fr);
+                                fragmentTransaction.commit();
                             }else{
                                 apd.hide();
                                 aed.setMessage("Ocurrió un error");

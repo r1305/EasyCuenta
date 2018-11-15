@@ -32,7 +32,6 @@ public class MyNotificationManager {
     public void displayNotification(String body, String title) {
         Random random=new Random();
         int notificationId=random.nextInt();
-        Vibrator v = (Vibrator)mCtx.getSystemService(Context.VIBRATOR_SERVICE);
         // Start without a delay
         // Each element then alternates between vibrate, sleep, vibrate, sleep...
         long[] pattern = {0, 500, 250, 500, 250,500, 250};
@@ -50,6 +49,7 @@ public class MyNotificationManager {
         mBuilder.setContentIntent(pendingIntent);
         mBuilder.setOnlyAlertOnce(true);
         mBuilder.setChannelId(Constants.CHANNEL_ID);
+        mBuilder.setAutoCancel(true);
 
         NotificationManager nm=(NotificationManager)mCtx.getSystemService(Context.NOTIFICATION_SERVICE);
         mBuilder.setPriority(Notification.PRIORITY_HIGH);

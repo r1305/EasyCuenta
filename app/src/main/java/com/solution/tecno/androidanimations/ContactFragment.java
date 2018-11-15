@@ -13,9 +13,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.telephony.SmsManager;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeErrorDialog;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeInfoDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeProgressDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
 
@@ -60,6 +62,7 @@ public class ContactFragment extends Fragment {
     AwesomeProgressDialog apd;
     AwesomeSuccessDialog asd;
     AwesomeErrorDialog aed;
+    AwesomeInfoDialog aid;
 
     static final int REQUEST_CODE=1;
 
@@ -105,6 +108,14 @@ public class ContactFragment extends Fragment {
                 .setDialogIconAndColor(R.drawable.ic_dialog_error,R.color.white)
                 .setCancelable(false);
 
+        //create info dialog
+        aid=new AwesomeInfoDialog(ctx)
+                .setTitle(R.string.app_name)
+                .setMessage("Contacto no registrado")
+                .setColoredCircle(R.color.dialogInfoBackgroundColor)
+                .setDialogIconAndColor(R.drawable.ic_dialog_warning,R.color.white)
+                .setCancelable(false);
+
     }
 
     @Override
@@ -147,7 +158,8 @@ public class ContactFragment extends Fragment {
                         }
                     },2000);
                 }else{
-                    swipe_push.showResultIcon(true);
+                    apd.setMessage("Enviando...");
+                    apd.show();
                     sendPush(user_find_id,user_fcm,msg);
                 }
             }
@@ -351,6 +363,8 @@ public class ContactFragment extends Fragment {
                 contact_name.setText(name);
                 contact_phone.setText(number);
                 contact.setBackgroundColor(Color.WHITE);
+                apd.setMessage("Buscando usuario");
+                apd.show();
                 findByPhone(number);
             }
         }
@@ -373,20 +387,40 @@ public class ContactFragment extends Fragment {
                             if(encontrado>0){
                                 user_find_id=encontrado;
                                 user_fcm = fcm;
-                                swipe_sms.setVisibility(View.GONE);
-                                swipe_push.setVisibility(View.VISIBLE);
+                                apd.hide();
+                                asd.setMessage("Contacto encontrado");
+                                asd.show();
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        swipe_sms.setVisibility(View.GONE);
+                                        swipe_push.setVisibility(View.VISIBLE);
+                                        asd.hide();
+                                    }
+                                },2000);
+
                             }else{
-                                swipe_sms.setVisibility(View.VISIBLE);
-                                swipe_push.setVisibility(View.GONE);
+                                apd.hide();
+                                aid.setMessage("Contacto aún no registrado");
+                                aid.show();
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        swipe_sms.setVisibility(View.VISIBLE);
+                                        swipe_push.setVisibility(View.GONE);
+                                        aid.hide();
+                                    }
+                                },2000);
+
                             }
                         } catch (Exception e) {
                             apd.hide();
-                            aed.setMessage("Ocurrió un error al registrar\n"+e.getMessage());
-                            aed.show();
+                            aid.setMessage("Contacto aún no registrado");
+                            aid.show();
                             new Handler().postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
-                                    aed.hide();
+                                    aid.hide();
                                 }
                             }, 3000);
                             e.printStackTrace();
@@ -397,8 +431,15 @@ public class ContactFragment extends Fragment {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         // error
-                        Log.d("Error.Response", error.toString());
-                        Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
+                        apd.hide();
+                        aed.setMessage(error.toString());
+                        aed.show();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                aed.hide();
+                            }
+                        }, 3000);
                     }
                 }
         );
@@ -409,12 +450,39 @@ public class ContactFragment extends Fragment {
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?user="+user_id+"&fcm="+fcm+"&name="+Uri.encode(cred.getFullName())+"&msg="+msg;
         String url = base_url+"sendPushNotification.php"+params;
-        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+        StringRequest postRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        System.out.println("**** response"+response);
-                        swipe_push.showResultIcon(false);
+                        int success = Integer.parseInt(response);
+                        if(success>0){
+                            apd.hide();
+                            asd.setMessage("Notificación enviada");
+                            asd.show();
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    swipe_push.showResultIcon(true);
+                                    asd.hide();
+                                    FragmentManager fm = getActivity().getSupportFragmentManager();
+                                    FragmentTransaction fragmentTransaction = fm.beginTransaction();
+                                    Fragment fr=AccountsFragment.newInstance();
+                                    fragmentTransaction.replace(R.id.container,fr);
+                                    fragmentTransaction.commit();
+                                }
+                            },2000);
+                        }else{
+                            apd.hide();
+                            aed.setMessage("Notificación NO enviada");
+                            aed.show();
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    swipe_push.showResultIcon(false);
+                                    aed.hide();
+                                }
+                            },2000);
+                        }
                     }
                 },
                 new Response.ErrorListener() {
@@ -422,7 +490,16 @@ public class ContactFragment extends Fragment {
                     public void onErrorResponse(VolleyError error) {
                         // error
                         Log.d("Error.Response", error.toString());
-                        Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
+                        apd.hide();
+                        aed.setMessage(error.toString());
+                        aed.show();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                aed.hide();
+                                swipe_push.showResultIcon(false);
+                            }
+                        },2000);
                     }
                 }
         );

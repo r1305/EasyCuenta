@@ -18,14 +18,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
 
-        //if the message contains data payload
-        //It is a map of custom keyvalues
-        //we can read it easily
-        if (remoteMessage.getData().size() > 0) {
-            //handle the data message here
-            System.out.println(remoteMessage.getData());
-        }
-
         //getting the title and the body
         //String title = remoteMessage.getNotification().getTitle();
         String body = remoteMessage.getData().get("body");
