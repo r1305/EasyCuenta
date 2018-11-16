@@ -2,15 +2,18 @@ package com.solution.tecno.androidanimations;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
+import android.widget.TextView;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.alirezaahmadi.progressbutton.ProgressButtonComponent;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -22,6 +25,8 @@ import com.android.volley.toolbox.Volley;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeErrorDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeProgressDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
+import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
+import com.github.javiersantos.materialstyleddialogs.enums.Style;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -31,6 +36,7 @@ public class LoginActivity extends AppCompatActivity {
 
     ProgressButtonComponent login_btn,register_btn;
     EditText et_user,et_psw;
+    TextView forgot_password;
     Context ctx;
     Credentials cred;
     String base_url="https://www.jadconsultores.com.pe/php_connection/app/bancos_resumen/";
@@ -69,6 +75,15 @@ public class LoginActivity extends AppCompatActivity {
 
         et_user=findViewById(R.id.et_user);
         et_psw=findViewById(R.id.et_psw);
+        forgot_password = findViewById(R.id.forgot_password);
+        forgot_password.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(ctx,ForgotPasswordActivity.class);
+                startActivity(i);
+                LoginActivity.this.finish();
+            }
+        });
         login_btn = findViewById(R.id.btn_login);
         login_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -196,6 +211,12 @@ public class LoginActivity extends AppCompatActivity {
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         queue.add(postRequest);
+    }
+
+    public final static boolean isValidEmail(CharSequence target) {
+        if (target == null)
+            return false;
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
     }
 }
 
