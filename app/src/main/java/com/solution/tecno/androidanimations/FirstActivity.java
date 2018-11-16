@@ -33,6 +33,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeErrorDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeInfoDialog;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeProgressDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
@@ -49,6 +50,10 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
     Credentials cred;
     TextView header_name,header_username;
 
+    AwesomeProgressDialog apd;
+    AwesomeSuccessDialog asd;
+    AwesomeErrorDialog aed;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +65,30 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
         user_id=cred.getUserId();
         full_name=cred.getFullName();
         user_name=cred.getUserName();
+
+        //create progress dialog
+        apd=new AwesomeProgressDialog(ctx)
+                .setTitle(R.string.app_name)
+                .setMessage("Cargando")
+                .setColoredCircle(R.color.dialogInfoBackgroundColor)
+                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
+                .setCancelable(false);
+
+        //create success dialog
+        asd=new AwesomeSuccessDialog(ctx)
+                .setTitle(R.string.app_name)
+                .setMessage("Listo!")
+                .setColoredCircle(R.color.dialogSuccessBackgroundColor)
+                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
+                .setCancelable(false);
+
+        //create error dialog
+        aed=new AwesomeErrorDialog(ctx)
+                .setTitle(R.string.app_name)
+                .setMessage("Ocurrió un error")
+                .setColoredCircle(R.color.dialogErrorBackgroundColor)
+                .setDialogIconAndColor(R.drawable.ic_dialog_error,R.color.white)
+                .setCancelable(false);
 
         toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_menu_white);
@@ -149,10 +178,14 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
                             EditText diag_et_bank=layout.findViewById(R.id.diag_et_bank);
                             EditText diag_et_number=layout.findViewById(R.id.diag_et_account);
                             EditText diag_et_user_name=layout.findViewById(R.id.diag_et_titular);
+                            EditText diag_et_cci=layout.findViewById(R.id.diag_et_cci);
                             String bank = diag_et_bank.getText().toString();
                             String number = diag_et_number.getText().toString();
                             String user_name = diag_et_user_name.getText().toString();
-                            addAccount(user_id,bank,number,user_name);
+                            String cci = diag_et_cci.getText().toString();
+                            apd.setMessage("Guardando...");
+                            apd.show();
+                            addAccount(user_id,bank,number,user_name,cci);
                         }
                     })
                     .setNegativeText("Cancelar")
@@ -211,32 +244,40 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
         return true;
     }
 
-    public void addAccount(final String user_id, String bank, String number,String user_name) {
+    public void addAccount(final String user_id, String bank, String number,String user_name,String cci) {
 
         RequestQueue queue = Volley.newRequestQueue(ctx);
-        String params="?user_id="+Integer.parseInt(user_id)+"&bank="+Uri.encode(bank)+"&account="+number+"&name="+user_name;
+        String params="?user_id="+Integer.parseInt(user_id)+"" +
+                "&bank="+Uri.encode(bank)+
+                "&account="+number+
+                "&name="+user_name+
+                "&cci="+cci;
         String url = base_url+"addAccount.php"+params;
         StringRequest postRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         if(response.equals("true")){
-                            new AwesomeSuccessDialog(ctx)
-                                    .setTitle(R.string.app_name)
-                                    .setMessage("Registro existoso!\nDeslice hacia abajo para refrescar sus cuentas")
-                                    .setColoredCircle(R.color.dialogSuccessBackgroundColor)
-                                    .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
-                                    .setCancelable(true)
-                                    .show();
-                            Toast.makeText(ctx,"Registro correcto!\nDeslice hacia abajo para refrescar",Toast.LENGTH_LONG);
+                            apd.hide();
+                            asd.setMessage("Registro exitoso!\nDeslice hacia abajo para actualizar");
+                            asd.show();
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    asd.hide();
+                                }
+                            }, 1500);
+
                         }else{
-                            new AwesomeErrorDialog(ctx)
-                                    .setTitle(R.string.app_name)
-                                    .setMessage("Ocurrió un error al registrar su cuenta!\nIntentelo nuevamente")
-                                    .setColoredCircle(R.color.dialogErrorBackgroundColor)
-                                    .setDialogIconAndColor(R.drawable.ic_dialog_error, R.color.white)
-                                    .setCancelable(true).setButtonText(getString(R.string.dialog_ok_button))
-                                    .show();
+                            apd.hide();
+                            aed.setMessage("Ocurrió un error al registrar su cuenta!\nIntentelo nuevamente");
+                            aed.show();
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    aed.hide();
+                                }
+                            }, 1500);
                         }
                     }
                 },
@@ -244,8 +285,15 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         // error
-                        Log.d("Error.Response", error.toString());
-                        Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
+                        apd.hide();
+                        aed.setMessage("Ocurrió un error al registrar su cuenta!\n"+error.getMessage());
+                        aed.show();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                aed.hide();
+                            }
+                        }, 1500);
                     }
                 }
         );

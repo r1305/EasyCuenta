@@ -32,6 +32,16 @@
         android:inputType="number|text"/>
 
     <com.rengwuxian.materialedittext.MaterialEditText
+        android:id="@+id/diag_et_cci"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="CCI"
+        app:met_iconLeft="@drawable/ic_add_account"
+        app:met_floatingLabel="highlight"
+        app:met_iconPadding="0dp"
+        android:inputType="number|text"/>
+
+    <com.rengwuxian.materialedittext.MaterialEditText
         android:id="@+id/diag_et_titular"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

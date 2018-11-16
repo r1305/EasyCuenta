@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingRight="16dp"
+    android:paddingLeft="16dp"
+    android:paddingTop="16dp"
+    tools:context=".FirstActivity"
+    android:orientation="vertical"
+    android:gravity="center">
+
+    <com.rengwuxian.materialedittext.MaterialEditText
+        android:id="@+id/item_et_bank"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Banco"
+        app:met_floatingLabel="highlight"
+        app:met_iconLeft="@drawable/ic_bank"
+        app:met_iconPadding="0dp"
+        android:inputType="text|textCapWords"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <com.rengwuxian.materialedittext.MaterialEditText
+            android:id="@+id/item_et_account"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Número de cuenta"
+            app:met_iconLeft="@drawable/ic_add_account"
+            app:met_floatingLabel="highlight"
+            app:met_iconPadding="0dp"
+            android:inputType="number|text"
+            android:layout_weight="1"/>
+
+        <ImageButton
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_share"
+            android:layout_weight="3"
+            android:backgroundTint="#FFF"/>
+        <ImageButton
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_copy"
+            android:layout_weight="3"
+            android:backgroundTint="#FFF"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <com.rengwuxian.materialedittext.MaterialEditText
+            android:id="@+id/item_et_account_cci"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="CCI"
+            app:met_iconLeft="@drawable/ic_add_account"
+            app:met_floatingLabel="highlight"
+            app:met_iconPadding="0dp"
+            android:inputType="number|text"
+            android:layout_weight="1"/>
+
+        <ImageButton
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_share"
+            android:layout_weight="3"
+            android:backgroundTint="#FFF"/>
+        <ImageButton
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_copy"
+            android:layout_weight="3"
+            android:backgroundTint="#FFF"/>
+
+    </LinearLayout>
+
+    <com.rengwuxian.materialedittext.MaterialEditText
+        android:id="@+id/item_et_titular"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Titular"
+        app:met_iconLeft="@drawable/ic_user_name"
+        app:met_floatingLabel="highlight"
+        app:met_iconPadding="0dp"
+        android:inputType="textCapWords"/>
+
+</LinearLayout>
