@@ -37,12 +37,17 @@ public class MainActivity extends AppCompatActivity {
         ctx=MainActivity.this;
         cred = new Credentials(ctx);
 
+        version_name=findViewById(R.id.tv_version);
+        version_name.setText("V."+BuildConfig.VERSION_NAME);
+        version_name.setTextColor(Color.BLACK);
+        version_name.setTypeface(version_name.getTypeface(),Typeface.BOLD);
+
         //create progress dialog
         apd=new AwesomeProgressDialog(ctx)
                 .setTitle(R.string.app_name)
                 .setMessage("Cargando")
                 .setColoredCircle(R.color.dialogInfoBackgroundColor)
-                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
+                .setDialogIconAndColor(R.drawable.ic_bank_app_loader, R.color.white)
                 .setCancelable(false);
 
         //create success dialog
@@ -79,22 +84,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void redirect(Class activity_class){
+        apd.hide();
         Intent i=new Intent(ctx,activity_class);
         startActivity(i);
-        this.finish();
+        MainActivity.this.finish();
     }
 
     public void validateSession(){
-        CircleProgressbar circleProgressbar = findViewById(R.id.main_progress_bar);
-        circleProgressbar.setForegroundProgressColor(Color.RED);
-        circleProgressbar.setBackgroundProgressWidth(15);
-        circleProgressbar.setForegroundProgressWidth(20);
-        circleProgressbar.enabledTouch(false);
-        circleProgressbar.setRoundedCorner(true);
-        circleProgressbar.setClockwise(true);
-        circleProgressbar.setMaxProgress(100);
-        int animationDuration = 8000; // 2500ms = 2,5s
-        circleProgressbar.setProgressWithAnimation(-100, animationDuration); // Default duration = 1500ms
+        apd.setMessage("Validando sesión...");
+        apd.show();
 
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -102,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
                 String user_id=cred.getUserId();
                 String full_name=cred.getFullName();
                 if(full_name.equals("0")){
+                    apd.hide();
                     aid.setMessage("Inicie sesión nuevamente por favor");
                     new Handler().postDelayed(new Runnable() {
                         @Override

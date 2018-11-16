@@ -16,6 +16,15 @@ import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
 public class ForgotPasswordActivity extends AppCompatActivity {
 
     EditText forgot_email,forgot_number;
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent i = new Intent(ctx,LoginActivity.class);
+        startActivity(i);
+        ForgotPasswordActivity.this.finish();
+    }
+
     ProgressButtonComponent btn_forgot_reset,btn_forgot_cancel;
     Context ctx;
     Credentials cred;
