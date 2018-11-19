@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -55,14 +56,9 @@ import java.util.List;
 
 public class AccountsFragment extends Fragment {
 
-    TableLayout data_table;
     Context ctx;
     Credentials cred;
     String user_id;
-    EditText diag_et_bank,diag_et_number,diag_et_user_name;
-
-    String bank_edit,account_edit,titular_edit;
-
     SwipeRefreshLayout swipe_refresh;
     View v;
     AwesomeProgressDialog apd;
@@ -70,6 +66,7 @@ public class AccountsFragment extends Fragment {
     AwesomeErrorDialog aed;
     AwesomeInfoDialog aid;
     AwesomeWarningDialog awd;
+    FloatingActionButton add_new_account;
     String base_url="https://www.jadconsultores.com.pe/php_connection/app/bancos_resumen/";
 
     AccountAdapter adapter;
@@ -167,7 +164,45 @@ public class AccountsFragment extends Fragment {
         user_id=cred.getUserId();
         // Inflate the layout for this fragment
         swipe_refresh = v.findViewById(R.id.swipe_refresh_account);
-        data_table = v.findViewById(R.id.data_table);
+        add_new_account = v.findViewById(R.id.float_add_new_account);
+        add_new_account.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final View layout=LayoutInflater.from(ctx).inflate(R.layout.new_account_view,null);
+                new MaterialStyledDialog.Builder(ctx)
+                        .setStyle(Style.HEADER_WITH_TITLE)
+                        .setTitle("Nueva cuenta")
+                        .setDescription("Añade una nueva cuenta para compartirla rápidamente")
+                        .setPositiveText("Agregar")
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                dialog.dismiss();
+                                EditText diag_et_bank=layout.findViewById(R.id.diag_et_bank);
+                                EditText diag_et_number=layout.findViewById(R.id.diag_et_account);
+                                EditText diag_et_user_name=layout.findViewById(R.id.diag_et_titular);
+                                EditText diag_et_cci=layout.findViewById(R.id.diag_et_cci);
+                                String bank = diag_et_bank.getText().toString();
+                                String number = diag_et_number.getText().toString();
+                                String user_name = diag_et_user_name.getText().toString();
+                                String cci = diag_et_cci.getText().toString();
+                                apd.setMessage("Guardando...");
+                                apd.show();
+                                addAccount(user_id,bank,number,user_name,cci);
+                            }
+                        })
+                        .setNegativeText("Cancelar")
+                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .setCustomView(layout) // Old standard padding: .setCustomView(your_custom_view, 20, 20, 20, 0)
+                        //.setCustomView(your_custom_view, 10, 20, 10, 20) // int left, int top, int right, int bottom
+                        .show();
+            }
+        });
         activity=v.findViewById(R.id.recycler_view_accounts);
         activity.setLayoutManager(new LinearLayoutManager(ctx));
         adapter=new AccountAdapter(l);
@@ -187,7 +222,6 @@ public class AccountsFragment extends Fragment {
     public void getAccounts(String user_id) {
         apd.setMessage("Cargando...");
         apd.show();
-        cleanTable(data_table);
 
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?user_id="+Integer.parseInt(user_id);
@@ -206,13 +240,15 @@ public class AccountsFragment extends Fragment {
                             }
                             adapter.notifyDataSetChanged();
                             swipe_refresh.setRefreshing(false);
-                            apd.hide();
-                            asd.show();
+
+//                            asd.setMessage("Listo!");
+//                            asd.show();
                             //wait 3 seconds to hide success dialog
                             Handler handler = new Handler();
                             handler.postDelayed(new Runnable() {
                                 public void run() {
-                                    asd.hide();
+                                    apd.hide();
+//                                    asd.hide();
                                     verifiedPhoneNumber();
                                 }
                             }, 1500);   //3 seconds
@@ -259,324 +295,42 @@ public class AccountsFragment extends Fragment {
         queue.add(postRequest);
     }
 
-    public void updateAccount(int id,String bank, String number, String user_name) {
-        cleanTable(data_table);
+    public void addAccount(final String user_id, String bank, String number,String user_name,String cci) {
 
         RequestQueue queue = Volley.newRequestQueue(ctx);
-        String params="?id="+id+"&bank="+Uri.encode(bank)+"&account="+number+"&name="+Uri.parse(user_name);
-        String url = base_url+"updateAccount.php"+params;
-        System.out.println(url);
-        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            getAccounts(user_id);
-                        } catch (Exception e) {
-                            Toast.makeText(ctx,"Intente luego", Toast.LENGTH_SHORT).show();
-                            e.printStackTrace();
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // error
-                        Log.d("Error.Response", error.toString());
-                        Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
-                    }
-                }
-        );
-        postRequest.setRetryPolicy(new DefaultRetryPolicy(
-                50000,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        queue.add(postRequest);
-    }
-
-    public void getAccountDetail(final int id) {
-        RequestQueue queue = Volley.newRequestQueue(ctx);
-        String params="?account_id="+id;
-        String url = base_url+"getAccountDetail.php"+params;
-
-        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        Toast.makeText(ctx,response,Toast.LENGTH_LONG);
-                        JSONParser jp = new JSONParser();
-                        try {
-                            JSONArray ja=(JSONArray)jp.parse(response);
-                            for(int i=0;i<ja.size();i++){
-                                JSONObject item=(JSONObject)ja.get(i);
-                                System.out.println(item);
-                                bank_edit=item.get("bank").toString();
-                                account_edit=item.get("account_number").toString();
-                                titular_edit=item.get("user_name").toString();
-
-                                final View layout=LayoutInflater.from(ctx).inflate(R.layout.edit_account_view,null);
-                                diag_et_bank=layout.findViewById(R.id.diag_et_bank_edit);
-                                diag_et_number=layout.findViewById(R.id.diag_et_account_edit);
-                                diag_et_user_name=layout.findViewById(R.id.diag_et_titular_edit);
-
-                                diag_et_bank.setText(bank_edit);
-                                diag_et_number.setText(account_edit);
-                                diag_et_user_name.setText(titular_edit);
-
-                                apd.hide();
-                                asd.show();
-                                new Handler().postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        asd.hide();
-                                        new MaterialStyledDialog.Builder(ctx)
-                                                .setStyle(Style.HEADER_WITH_TITLE)
-                                                .setTitle("Editar cuenta")
-                                                .setDescription("Edita tu cuenta para compartirla rápidamente")
-                                                .setPositiveText("Guardar")
-                                                .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                                    @Override
-                                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                                        dialog.dismiss();
-                                                        String bank = diag_et_bank.getText().toString();
-                                                        String number = diag_et_number.getText().toString();
-                                                        String user_name =diag_et_user_name.getText().toString();
-                                                        updateAccount(id,bank,number,user_name);
-                                                    }
-                                                })
-                                                .setNegativeText("Cancelar")
-                                                .onNegative(new MaterialDialog.SingleButtonCallback() {
-                                                    @Override
-                                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                                        dialog.dismiss();
-                                                    }
-                                                })
-                                                .setCustomView(layout)
-                                                .show();
-                                    }
-                                },1000);//1 sec
-                            }
-                        } catch (Exception e) {
-                            Toast.makeText(ctx,"Intente luego", Toast.LENGTH_SHORT).show();
-                            e.printStackTrace();
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // error
-                        Log.d("Error.Response", error.toString());
-                        Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
-                    }
-                }
-        );
-        postRequest.setRetryPolicy(new DefaultRetryPolicy(
-                50000,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        queue.add(postRequest);
-    }
-
-    public void deleteAccount(int id) {
-        apd.setMessage("Eliminando...");
-        apd.show();
-        cleanTable(data_table);
-
-        RequestQueue queue = Volley.newRequestQueue(ctx);
-        String params="?id="+id;
-        String url = base_url+"deleteAccount.php"+params;
-
-        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            apd.hide();
-                            getAccounts(user_id);
-                        } catch (Exception e) {
-                            Toast.makeText(ctx,"Intente luego", Toast.LENGTH_SHORT).show();
-                            e.printStackTrace();
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // error
-                        Log.d("Error.Response", error.toString());
-                        Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
-                    }
-                }
-        );
-        postRequest.setRetryPolicy(new DefaultRetryPolicy(
-                50000,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        queue.add(postRequest);
-    }
-
-    private void cleanTable(TableLayout table) {
-        int childCount = table.getChildCount();
-        table.removeViews(0, childCount);
-    }
-
-    public void addNewTableRow(int id,String bank,String account){
-
-        Integer count= data_table.getChildCount();
-        // Create the table row
-        final TableRow tr = new TableRow(ctx);
-        if(count%2!=0) tr.setBackgroundColor(Color.GRAY);
-        tr.setId(id);
-        tr.setLayoutParams(new TableRow.LayoutParams(
-                TableRow.LayoutParams.FILL_PARENT,
-                TableRow.LayoutParams.WRAP_CONTENT));
-
-        //Create two columns to add as table data
-        //create column bank
-        TextView labelBank = new TextView(ctx);
-        labelBank.setText(bank.toUpperCase());
-        labelBank.setPadding(50, 0, 0, 0);
-        labelBank.setHeight(100);
-        labelBank.setGravity(Gravity.LEFT);
-        if(count%2!=0) labelBank.setTextColor(Color.WHITE); else labelBank.setTextColor(Color.BLACK);
-        tr.addView(labelBank);
-
-        //create column account
-        TextView labelAccount = new TextView(ctx);
-        labelAccount.setText(account);
-        labelAccount.setPadding(2, 0, 5, 0);
-        labelAccount.setHeight(100);
-        labelAccount.setGravity(Gravity.CENTER);
-        if(count%2!=0) labelAccount.setTextColor(Color.WHITE); else labelAccount.setTextColor(Color.BLACK);
-        tr.addView(labelAccount);
-
-        //create share bank+account icon
-        ImageButton share_icon = new ImageButton(ctx);
-        share_icon.setImageResource(R.drawable.ic_share);
-        share_icon.setPadding(0, 20, 35, 0);
-        share_icon.setClickable(true);
-        share_icon.setBackgroundColor(Color.parseColor("#00000000"));
-        share_icon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TextView tv_bank = (TextView)tr.getChildAt(0);
-                TextView tv_account = (TextView)tr.getChildAt(1);
-                String bank=tv_bank.getText().toString();
-                String account=tv_account.getText().toString();
-                Intent sendIntent = new Intent();
-                sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_TEXT, bank+": "+account);
-                sendIntent.setType("text/plain");
-                startActivity(sendIntent);
-            }
-        });
-        tr.addView(share_icon);
-
-        //create copy_account icon
-        ImageButton copy_icon = new ImageButton(ctx);
-        copy_icon.setImageResource(R.drawable.ic_copy);
-        copy_icon.setPadding(0, 20, 35, 0);
-        copy_icon.setClickable(true);
-        copy_icon.setBackgroundColor(Color.parseColor("#00000000"));
-        copy_icon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TextView tv_bank = (TextView)tr.getChildAt(0);
-                TextView tv_account = (TextView)tr.getChildAt(1);
-                String bank=tv_bank.getText().toString();
-                String account=tv_account.getText().toString();
-                ClipboardManager cm = (ClipboardManager)ctx.getSystemService(Context.CLIPBOARD_SERVICE);
-                cm.setText(account);
-                Toast.makeText(ctx, "Cuenta copiada", Toast.LENGTH_SHORT).show();
-            }
-        });
-        tr.addView(copy_icon);
-
-        //create edit_row icon
-        ImageButton edit_row = new ImageButton(ctx);
-        edit_row.setImageResource(R.drawable.ic_edit_row);
-        edit_row.setPadding(0, 20, 35, 0);
-        edit_row.setClickable(true);
-        edit_row.setBackgroundColor(Color.parseColor("#00000000"));
-        edit_row.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final int account_id=tr.getId();
-                apd.setMessage("Obteniendo datos...");
-                apd.show();
-
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        getAccountDetail(account_id);
-                    }
-                }, 3000);
-
-            }
-        });
-        tr.addView(edit_row);
-
-        //create edit_row icon
-        ImageButton delete_row = new ImageButton(ctx);
-        delete_row.setImageResource(R.drawable.ic_delete);
-        delete_row.setPadding(0, 20, 35, 0);
-        delete_row.setClickable(true);
-        delete_row.setBackgroundColor(Color.parseColor("#00000000"));
-        delete_row.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TextView tv_bank = (TextView)tr.getChildAt(0);
-                String bank=tv_bank.getText().toString();
-
-                new MaterialStyledDialog.Builder(ctx)
-                        .setStyle(Style.HEADER_WITH_TITLE)
-                        .setTitle("Eliminar cuenta")
-                        .setDescription("¿Está seguro de eliminar la cuenta: "+bank+"?")
-                        .setPositiveText("Eliminar")
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                dialog.dismiss();
-                                int id=tr.getId();
-                                deleteAccount(id);
-                            }
-                        })
-                        .setNegativeText("Cancelar")
-                        .onNegative(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                dialog.dismiss();
-                            }
-                        })
-                        .show();
-            }
-        });
-        tr.addView(delete_row);
-
-        // finally add this to the table row
-        data_table.addView(tr, new TableLayout.LayoutParams(
-                TableRow.LayoutParams.FILL_PARENT,
-                TableRow.LayoutParams.WRAP_CONTENT));
-    }
-
-    public void addAccount(final String user_id, String bank, String number,String user_name) {
-        cleanTable(data_table);
-
-        RequestQueue queue = Volley.newRequestQueue(ctx);
-        String params="?user_id="+Integer.parseInt(user_id)+"&bank="+Uri.encode(bank)+"&account="+number+"&name="+user_name;
+        String params="?user_id="+Integer.parseInt(user_id)+"" +
+                "&bank="+Uri.encode(bank)+
+                "&account="+number+
+                "&name="+user_name+
+                "&cci="+cci;
         String url = base_url+"addAccount.php"+params;
-
-        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+        StringRequest postRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Toast.makeText(ctx,response,Toast.LENGTH_LONG);
-                        try {
-                            getAccounts(user_id);
-                        } catch (Exception e) {
-                            Toast.makeText(ctx,"Intente luego", Toast.LENGTH_SHORT).show();
-                            e.printStackTrace();
+                        if(response.equals("true")){
+                            apd.hide();
+//                            asd.setMessage("Registro exitoso!\nDeslice hacia abajo para actualizar");
+                            asd.setMessage("Registro exitoso!");
+                            asd.show();
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    asd.hide();
+                                    getAccounts(user_id);
+                                }
+                            }, 1500);
+
+                        }else{
+                            apd.hide();
+                            aed.setMessage("Ocurrió un error al registrar su cuenta!\nIntentelo nuevamente");
+                            aed.show();
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    aed.hide();
+                                }
+                            }, 1500);
                         }
                     }
                 },
@@ -584,8 +338,15 @@ public class AccountsFragment extends Fragment {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         // error
-                        Log.d("Error.Response", error.toString());
-                        Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
+                        apd.hide();
+                        aed.setMessage("Ocurrió un error al registrar su cuenta!\n"+error.getMessage());
+                        aed.show();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                aed.hide();
+                            }
+                        }, 1500);
                     }
                 }
         );
@@ -595,6 +356,23 @@ public class AccountsFragment extends Fragment {
     public void verifiedPhoneNumber(){
         asd.hide();
         if(cred.getPhoneNumber().equals("0")){
+            awd.show();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    awd.hide();
+                }
+            },3500);
+        }else{
+            verifiedEamil();
+        }
+    }
+
+    public void verifiedEamil(){
+        asd.hide();
+        System.out.println("***"+cred.getEmail());
+        if(cred.getEmail().equals("0")){
+            awd.setMessage("Actualiza tu email para disfrutar de todas las funciones");
             awd.show();
             new Handler().postDelayed(new Runnable() {
                 @Override

@@ -12,6 +12,7 @@ public class Credentials {
     public String phone_number;
     public String full_name;
     public String username;
+    public String email;
     private Context ctx;
 
     public Credentials(Context ctx) {
@@ -54,6 +55,15 @@ public class Credentials {
         return this.username;
     }
 
+    public String getEmail(){
+
+        SharedPreferences sp1=ctx.getSharedPreferences("Login", MODE_PRIVATE);
+
+        String email=sp1.getString("email", "0");
+        this.email=email;
+        return this.email;
+    }
+
     public void logout(){
 
         SharedPreferences sp=ctx.getSharedPreferences("Login", MODE_PRIVATE);
@@ -62,6 +72,7 @@ public class Credentials {
         Ed.putString("phone_number","0");
         Ed.putString("full_name","0");
         Ed.putString("username","0");
+        Ed.putString("email","0");
         Ed.commit();
 
         Intent i=new Intent(ctx,LoginActivity.class);
@@ -70,13 +81,14 @@ public class Credentials {
         ctx.startActivity(i);
     }
 
-    public void save_credentials(String user_id,String full_name,String username,String phone_number){
+    public void save_credentials(String user_id,String full_name,String username,String phone_number,String email){
         SharedPreferences sp=ctx.getSharedPreferences("Login", MODE_PRIVATE);
         SharedPreferences.Editor Ed=sp.edit();
         Ed.putString("user_id",user_id);
         Ed.putString("full_name",full_name);
         Ed.putString("username",username);
         Ed.putString("phone_number",phone_number);
+        Ed.putString("eamil",email);
         Ed.commit();
     }
 }

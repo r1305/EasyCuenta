@@ -221,7 +221,7 @@ public class ProfileFragment extends Fragment {
                                     }
                                 }, 1500);
                                 proSwipeBtn.showResultIcon(true);
-                                cred.save_credentials(id,full_name,username,phone_number);
+                                cred.save_credentials(id,full_name,username,phone_number,email);
                                 ((FirstActivity)getContext()).updateHeader(full_name,username);
                                 FragmentManager fm = getActivity().getSupportFragmentManager();
                                 FragmentTransaction fragmentTransaction = fm.beginTransaction();

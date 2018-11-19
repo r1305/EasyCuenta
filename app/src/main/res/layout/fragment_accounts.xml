@@ -1,52 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_accounts"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AccountsFragment"
-    android:id="@+id/fragment_accounts">
+    tools:context=".AccountsFragment">
+
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh_account"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/recycler_view_accounts"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="3sp"
-                android:layout_marginRight="3sp">
-            </android.support.v7.widget.RecyclerView>
-        </ScrollView>
-
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-                <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:stretchColumns="0,1"
-                    android:id="@+id/data_table"
-                    android:layout_weight="1"
-                    android:layout_height="match_parent"
-                    android:layout_width="match_parent">
-                </TableLayout>
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/wsp_icon"
-                    android:src="@drawable/whats_app_icon"
-                    android:maxHeight="24px"
-                    android:maxWidth="24px"
-                    android:visibility="gone"
-                    android:layout_gravity="center_horizontal"/>
-            </LinearLayout>
+                android:layout_marginLeft="5sp"
+                android:layout_marginTop="5sp"
+                android:layout_marginRight="5sp" />
         </ScrollView>
     </android.support.v4.widget.SwipeRefreshLayout>
-</FrameLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/float_add_new_account"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/colorPrimary"
+        android:src="@drawable/ic_add_account_white"
+        app:layout_constraintBottom_toTopOf="@+id/swipe_refresh_account"
+        app:layout_constraintEnd_toStartOf="@+id/swipe_refresh_account"
+        app:layout_constraintHorizontal_bias="0.115"
+        app:layout_constraintStart_toEndOf="@+id/swipe_refresh_account"
+        app:layout_constraintTop_toBottomOf="@+id/swipe_refresh_account"
+        app:layout_constraintVertical_bias="0.549" />
+</android.support.constraint.ConstraintLayout>

@@ -161,8 +161,9 @@ public class LoginActivity extends AppCompatActivity {
                             String full_name=item.get("full_name").toString();
                             String user_name=item.get("username").toString();
                             String phone_number=item.get("phone_number").toString();
+                            String email=item.get("email").toString();
 
-                            cred.save_credentials(id,full_name,user_name,phone_number);
+                            cred.save_credentials(id,full_name,user_name,phone_number,email);
                             apd.hide();
                             asd.show();
                             new Handler().postDelayed(new Runnable() {

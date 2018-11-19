@@ -1,30 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingRight="12dp"
-    android:paddingLeft="12dp"
-    android:paddingTop="12dp"
-    android:paddingBottom="12dp"
+    android:layout_marginBottom="4dp"
+    android:paddingRight="16dp"
+    android:paddingLeft="16dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp"
+    android:layout_marginRight="55dp"
+    android:layout_marginLeft="6dp"
     tools:context=".FirstActivity"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="#000F">
+    android:background="#000F"
+    android:elevation="10dp"
+    app:cardCornerRadius="10dp"
+    app:cardBackgroundColor="#1F51B5"
+    android:id="@+id/item_card_view">
 
-    <android.support.v7.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:elevation="15dp"
-        android:paddingRight="10dp"
-        android:paddingTop="16dp"
-        android:paddingLeft="10dp"
-        android:background="#FFF0">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingRight="16dp"
+            android:paddingLeft="16dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -37,33 +40,36 @@
                     app:met_floatingLabel="highlight"
                     app:met_iconPadding="0dp"
                     android:gravity="left|center_vertical"
-                    android:layout_weight="4.8"/>
+                    android:layout_weight="4.8"
+                    android:textColor="#FFF"/>
                 <TextView
                     android:id="@+id/item_et_titular"
                     android:layout_width="match_parent"
-                    android:layout_height="25dp"
-                    android:hint="Titular"
+                    android:layout_height="28dp"
                     app:met_floatingLabel="highlight"
                     app:met_iconPadding="0dp"
                     android:gravity="left|center_vertical"
-                    android:textColor="#000"
-                    android:layout_weight="2"/>
+                    android:textColor="#FFF"
+                    android:layout_weight="2"
+                    />
 
-                <ImageButton
+                <ImageView
                     android:id="@+id/ic_edit_card"
                     android:layout_width="match_parent"
-                    android:layout_height="32dp"
+                    android:layout_height="match_parent"
                     android:src="@drawable/ic_edit"
                     android:layout_weight="5"
-                    android:background="#FFF"/>
+                    android:tint="#FFF"
+                    android:visibility="gone"/>
 
-                <ImageButton
+                <ImageView
                     android:id="@+id/ic_delete_card"
                     android:layout_width="match_parent"
-                    android:layout_height="32dp"
+                    android:layout_height="match_parent"
                     android:src="@drawable/ic_delete"
                     android:layout_weight="5"
-                    android:background="#FFF"/>
+                    android:tint="#FFF"
+                    />
             </LinearLayout>
 
             <TextView
@@ -74,20 +80,22 @@
                 app:met_iconPadding="0dp"
                 android:text="Banco"
                 android:gravity="left|center_horizontal"
-                android:textColor="#000"
+                android:textColor="#FFF"
                 android:textSize="18dp"/>
             <LinearLayout
+                android:layout_marginTop="5dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:hint="Cta: "
+                    android:text="Cta:"
                     app:met_floatingLabel="highlight"
                     app:met_iconPadding="0dp"
                     android:layout_weight="4.8"
-                    android:gravity="center_vertical"/>
+                    android:gravity="center_vertical"
+                    android:textColor="#FFF"/>
 
                 <TextView
                     android:id="@+id/item_et_account"
@@ -96,25 +104,27 @@
                     app:met_floatingLabel="highlight"
                     app:met_iconPadding="0dp"
                     android:layout_weight="2"
-                    android:gravity="left|center_vertical"/>
+                    android:gravity="left|center_vertical"
+                    android:textColor="#FFF"/>
 
-                <ImageButton
+                <ImageView
                     android:id="@+id/ic_share_cta"
                     android:layout_width="match_parent"
-                    android:layout_height="32dp"
+                    android:layout_height="match_parent"
                     android:src="@drawable/ic_share"
                     android:layout_weight="5"
-                    android:backgroundTint="#FFF"/>
-                <ImageButton
+                    android:tint="#FFF"/>
+                <ImageView
                     android:id="@+id/ic_copy_cta"
                     android:layout_width="match_parent"
-                    android:layout_height="32dp"
+                    android:layout_height="match_parent"
                     android:src="@drawable/ic_copy"
                     android:layout_weight="5"
-                    android:background="#FFF"/>
+                    android:tint="#FFF"/>
             </LinearLayout>
 
             <LinearLayout
+                android:layout_marginTop="5dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -122,10 +132,11 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:hint="CCI: "
                     app:met_floatingLabel="highlight"
                     app:met_iconPadding="0dp"
+                    android:text="CCI:"
                     android:layout_weight="4.8"
+                    android:textColor="#FFF"
                     android:gravity="center_vertical"/>
 
                 <TextView
@@ -135,26 +146,23 @@
                     app:met_floatingLabel="highlight"
                     app:met_iconPadding="0dp"
                     android:layout_weight="2"
+                    android:textColor="#FFF"
                     android:gravity="left|center_vertical"/>
 
-                <ImageButton
+                <ImageView
                     android:id="@+id/ic_share_cci"
                     android:layout_width="match_parent"
-                    android:layout_height="32dp"
+                    android:layout_height="match_parent"
                     android:src="@drawable/ic_share"
                     android:layout_weight="5"
-                    android:background="#FFF"/>
-                <ImageButton
+                    android:tint="#FFF"/>
+                <ImageView
                     android:id="@+id/ic_copy_cci"
                     android:layout_width="match_parent"
-                    android:layout_height="32dp"
+                    android:layout_height="match_parent"
                     android:src="@drawable/ic_copy"
                     android:layout_weight="5"
-                    android:background="#FFF"/>
+                    android:tint="#FFF"/>
             </LinearLayout>
         </LinearLayout>
-
-    </android.support.v7.widget.CardView>
-
-
-</LinearLayout>
+</android.support.v7.widget.CardView>

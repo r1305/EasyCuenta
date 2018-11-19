@@ -3,12 +3,14 @@ package com.solution.tecno.androidanimations;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +44,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import java.util.List;
+import java.util.Random;
 
 public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHolder>{
 
@@ -117,11 +121,14 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         JSONObject obj=l.get(position);
-        final String titular = obj.get("user_name").toString();
-        final String bco = obj.get("bank").toString();
-        final String cta = obj.get("account_number").toString();
-        final String cci = obj.get("cci").toString();
+        final String titular = obj.get("user_name").toString().trim();
+        final String bco = obj.get("bank").toString().trim();
+        final String cta = obj.get("account_number").toString().trim();
+        final String cci = obj.get("cci").toString().trim().trim();
         final String id = obj.get("id").toString();
+        Random rnd = new Random();
+        int currentColor = Color.argb(255, rnd.nextInt(200), rnd.nextInt(200), rnd.nextInt(200));
+        holder.cardView.setCardBackgroundColor(currentColor);
         holder.titular.setText(titular);
         holder.banco.setText(bco);
         holder.cta.setText(cta);
@@ -171,16 +178,60 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
         holder.ic_edit_card.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final int account_id=Integer.parseInt(id);
                 apd.setMessage("Obteniendo datos...");
                 apd.show();
 
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        getAccountDetail(account_id);
+//                        getAccountDetail(account_id);
+                        final View layout=LayoutInflater.from(ctx).inflate(R.layout.edit_account_view,null);
+                        diag_et_bank=layout.findViewById(R.id.diag_et_bank_edit);
+                        diag_et_number=layout.findViewById(R.id.diag_et_account_edit);
+                        diag_et_user_name=layout.findViewById(R.id.diag_et_titular_edit);
+                        diag_et_cci=layout.findViewById(R.id.diag_et_cci_edit);
+
+                        diag_et_bank.setText(bco);
+                        diag_et_number.setText(cta);
+                        diag_et_user_name.setText(titular);
+                        diag_et_cci.setText(cci);
+
+                        apd.hide();
+                        asd.show();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                asd.hide();
+                                new MaterialStyledDialog.Builder(ctx)
+                                        .setStyle(Style.HEADER_WITH_TITLE)
+                                        .setTitle("Editar cuenta")
+                                        .setDescription("Edita tu cuenta para compartirla rápidamente")
+                                        .setPositiveText("Guardar")
+                                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                                            @Override
+                                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                                dialog.dismiss();
+                                                apd.setMessage("Guardando...");
+                                                String bank = diag_et_bank.getText().toString();
+                                                String number = diag_et_number.getText().toString();
+                                                String user_name =diag_et_user_name.getText().toString();
+                                                String cci = diag_et_cci.getText().toString();
+                                                updateAccount(id,bank,number,user_name,cci);
+                                            }
+                                        })
+                                        .setNegativeText("Cancelar")
+                                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                                            @Override
+                                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                                dialog.dismiss();
+                                            }
+                                        })
+                                        .setCustomView(layout)
+                                        .show();
+                            }
+                        },1000);//1 sec
                     }
-                }, 3000);
+                }, 2500);
             }
         });
 
@@ -188,6 +239,66 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
             @Override
             public void onClick(View view) {
                 deleteAccount(id);
+            }
+        });
+
+        holder.cardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                apd.setMessage("Obteniendo datos...");
+                apd.show();
+
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+//                        getAccountDetail(account_id);
+                        final View layout=LayoutInflater.from(ctx).inflate(R.layout.edit_account_view,null);
+                        diag_et_bank=layout.findViewById(R.id.diag_et_bank_edit);
+                        diag_et_number=layout.findViewById(R.id.diag_et_account_edit);
+                        diag_et_user_name=layout.findViewById(R.id.diag_et_titular_edit);
+                        diag_et_cci=layout.findViewById(R.id.diag_et_cci_edit);
+
+                        diag_et_bank.setText(bco);
+                        diag_et_number.setText(cta);
+                        diag_et_user_name.setText(titular);
+                        diag_et_cci.setText(cci);
+
+                        apd.hide();
+                        asd.show();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                asd.hide();
+                                new MaterialStyledDialog.Builder(ctx)
+                                        .setStyle(Style.HEADER_WITH_TITLE)
+                                        .setTitle("Editar cuenta")
+                                        .setDescription("Edita tu cuenta para compartirla rápidamente")
+                                        .setPositiveText("Guardar")
+                                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                                            @Override
+                                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                                dialog.dismiss();
+                                                apd.setMessage("Guardando...");
+                                                String bank = diag_et_bank.getText().toString();
+                                                String number = diag_et_number.getText().toString();
+                                                String user_name =diag_et_user_name.getText().toString();
+                                                String cci = diag_et_cci.getText().toString();
+                                                updateAccount(id,bank,number,user_name,cci);
+                                            }
+                                        })
+                                        .setNegativeText("Cancelar")
+                                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                                            @Override
+                                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                                dialog.dismiss();
+                                            }
+                                        })
+                                        .setCustomView(layout)
+                                        .show();
+                            }
+                        },1000);//1 sec
+                    }
+                }, 2500);
             }
         });
     }
@@ -204,10 +315,12 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
     class ViewHolder extends RecyclerView.ViewHolder{
 
         TextView titular,cta,banco,cci;
-        ImageButton ic_share_cta,ic_share_cci,ic_copy_cta,ic_copy_cci,ic_edit_card,ic_delete_card;
+        ImageView ic_share_cta,ic_share_cci,ic_copy_cta,ic_copy_cci,ic_edit_card,ic_delete_card;
+        CardView cardView;
 
         private ViewHolder(View itemView) {
             super(itemView);
+            cardView=itemView.findViewById(R.id.item_card_view);
             banco=itemView.findViewById(R.id.item_et_bank);
             cta=itemView.findViewById(R.id.item_et_account);
             cci=itemView.findViewById(R.id.item_et_account_cci);
@@ -221,7 +334,7 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
         }
     }
 
-    public void getAccounts(String user_id) {
+    private void getAccounts(String user_id) {
         apd.setMessage("Cargando...");
         apd.show();
         RequestQueue queue = Volley.newRequestQueue(ctx);
@@ -291,14 +404,14 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
         queue.add(postRequest);
     }
 
-    public void updateAccount(int id,String bank, String number, String user_name,String cci) {
+    private void updateAccount(String id,String bank, String number, String user_name,String cci) {
 
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?id="+id+
                 "&bank="+Uri.encode(bank)+
                 "&account="+number+
                 "&name="+Uri.parse(user_name)+
-                "&cci="+cci;
+                "&cci="+cci.trim();
         String url = base_url+"updateAccount.php"+params;
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
@@ -308,8 +421,15 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
                             apd.hide();
                             getAccounts(user_id);
                         } catch (Exception e) {
-                            Toast.makeText(ctx,"Intente luego", Toast.LENGTH_SHORT).show();
-                            e.printStackTrace();
+                            apd.hide();
+                            aed.setMessage(e.getMessage());
+                            aed.show();
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    aed.hide();
+                                }
+                            }, 2500);
                         }
                     }
                 },
@@ -317,8 +437,15 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         // error
-                        Log.d("Error.Response", error.toString());
-                        Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
+                        apd.hide();
+                        aed.setMessage(error.getMessage());
+                        aed.show();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                aed.hide();
+                            }
+                        }, 2500);
                     }
                 }
         );
@@ -329,7 +456,7 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
         queue.add(postRequest);
     }
 
-    public void getAccountDetail(final int id) {
+    private void getAccountDetail(final String id) {
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?account_id="+id;
         String url = base_url+"getAccountDetail.php"+params;
@@ -344,7 +471,6 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
                             JSONArray ja=(JSONArray)jp.parse(response);
                             for(int i=0;i<ja.size();i++){
                                 JSONObject item=(JSONObject)ja.get(i);
-                                System.out.println(item);
                                 bank_edit=item.get("bank").toString();
                                 account_edit=item.get("account_number").toString();
                                 titular_edit=item.get("user_name").toString();
@@ -483,7 +609,7 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
         queue.add(postRequest);
     }
 
-    public void verifiedPhoneNumber(){
+    private void verifiedPhoneNumber(){
         asd.hide();
         if(cred.getPhoneNumber().equals("0")){
             awd.show();

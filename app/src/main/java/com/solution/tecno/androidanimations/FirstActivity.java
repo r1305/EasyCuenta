@@ -164,42 +164,6 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
             new Credentials(ctx).logout();
         }
 
-        if(id == R.id.action_add_new_account){
-            final View layout=LayoutInflater.from(ctx).inflate(R.layout.new_account_view,null);
-            new MaterialStyledDialog.Builder(this)
-                    .setStyle(Style.HEADER_WITH_TITLE)
-                    .setTitle("Nueva cuenta")
-                    .setDescription("Añade una nueva cuenta para compartirla rápidamente")
-                    .setPositiveText("Agregar")
-                    .onPositive(new MaterialDialog.SingleButtonCallback() {
-                        @Override
-                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            dialog.dismiss();
-                            EditText diag_et_bank=layout.findViewById(R.id.diag_et_bank);
-                            EditText diag_et_number=layout.findViewById(R.id.diag_et_account);
-                            EditText diag_et_user_name=layout.findViewById(R.id.diag_et_titular);
-                            EditText diag_et_cci=layout.findViewById(R.id.diag_et_cci);
-                            String bank = diag_et_bank.getText().toString();
-                            String number = diag_et_number.getText().toString();
-                            String user_name = diag_et_user_name.getText().toString();
-                            String cci = diag_et_cci.getText().toString();
-                            apd.setMessage("Guardando...");
-                            apd.show();
-                            addAccount(user_id,bank,number,user_name,cci);
-                        }
-                    })
-                    .setNegativeText("Cancelar")
-                    .onNegative(new MaterialDialog.SingleButtonCallback() {
-                        @Override
-                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            dialog.dismiss();
-                        }
-                    })
-                    .setCustomView(layout) // Old standard padding: .setCustomView(your_custom_view, 20, 20, 20, 0)
-                    //.setCustomView(your_custom_view, 10, 20, 10, 20) // int left, int top, int right, int bottom
-                    .show();
-        }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -242,62 +206,6 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
         drawer.closeDrawer(Gravity.START);
         fragmentTransaction.commit();
         return true;
-    }
-
-    public void addAccount(final String user_id, String bank, String number,String user_name,String cci) {
-
-        RequestQueue queue = Volley.newRequestQueue(ctx);
-        String params="?user_id="+Integer.parseInt(user_id)+"" +
-                "&bank="+Uri.encode(bank)+
-                "&account="+number+
-                "&name="+user_name+
-                "&cci="+cci;
-        String url = base_url+"addAccount.php"+params;
-        StringRequest postRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        if(response.equals("true")){
-                            apd.hide();
-                            asd.setMessage("Registro exitoso!\nDeslice hacia abajo para actualizar");
-                            asd.show();
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    asd.hide();
-                                }
-                            }, 1500);
-
-                        }else{
-                            apd.hide();
-                            aed.setMessage("Ocurrió un error al registrar su cuenta!\nIntentelo nuevamente");
-                            aed.show();
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    aed.hide();
-                                }
-                            }, 1500);
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // error
-                        apd.hide();
-                        aed.setMessage("Ocurrió un error al registrar su cuenta!\n"+error.getMessage());
-                        aed.show();
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                aed.hide();
-                            }
-                        }, 1500);
-                    }
-                }
-        );
-        queue.add(postRequest);
     }
 
     public void updateHeader(String name,String username) {

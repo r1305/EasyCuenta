@@ -117,8 +117,11 @@ public class RegisterActivity extends AppCompatActivity {
                 }
 
                 if(email.isEmpty()){
-                    reg_username.setError("Complete el correo");
-                    reg_username.requestFocus();
+                    reg_email.setError("Complete el correo");
+                    reg_email.requestFocus();
+                }else if(!isValidEmail(email)){
+                    reg_email.setError("Ingrese un correo válido");
+                    reg_email.requestFocus();
                 }
 
                 if(phone.isEmpty()){
@@ -135,7 +138,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                 if(!name.isEmpty() && !username.isEmpty() &&
                         (!phone.isEmpty() && phone.length()>=9) &&
-                        !psw.isEmpty() && !email.isEmpty()){
+                        !psw.isEmpty() && !email.isEmpty() && isValidEmail(email)){
                     apd.setMessage("Registrando...");
                     apd.show();
                     validatePhone(username,psw,name,phone,email);
@@ -276,7 +279,8 @@ public class RegisterActivity extends AppCompatActivity {
                             String full_name=item.get("full_name").toString();
                             String user_name=item.get("username").toString();
                             String phone_number=item.get("phone_number").toString();
-                            cred.save_credentials(id,full_name,user_name,phone_number);
+                            String email=item.get("email").toString();
+                            cred.save_credentials(id,full_name,user_name,phone_number,email);
                             apd.hide();
                             asd.show();
 
@@ -321,5 +325,12 @@ public class RegisterActivity extends AppCompatActivity {
                 }
         );
         queue.add(postRequest);
+    }
+
+    public final static boolean isValidEmail(CharSequence target) {
+        if (target == null)
+            return false;
+
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
     }
 }
