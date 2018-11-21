@@ -370,7 +370,6 @@ public class AccountsFragment extends Fragment {
 
     public void verifiedEamil(){
         asd.hide();
-        System.out.println("***"+cred.getEmail());
         if(cred.getEmail().equals("0")){
             awd.setMessage("Actualiza tu email para disfrutar de todas las funciones");
             awd.show();

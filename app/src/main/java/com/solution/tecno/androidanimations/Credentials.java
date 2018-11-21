@@ -88,7 +88,7 @@ public class Credentials {
         Ed.putString("full_name",full_name);
         Ed.putString("username",username);
         Ed.putString("phone_number",phone_number);
-        Ed.putString("eamil",email);
+        Ed.putString("email",email);
         Ed.commit();
     }
 }
