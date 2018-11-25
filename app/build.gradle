@@ -6,8 +6,8 @@ android {
         applicationId "com.solution.tecno.androidanimations"
         minSdkVersion 15
         targetSdkVersion 27
-        versionCode 24
-        versionName "2.8.1"
+        versionCode 25
+        versionName "2.8.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -49,6 +49,8 @@ dependencies {
     implementation 'com.android.support:cardview-v7:27.1.1'
     //SWIPE button
     implementation 'in.shadowfax:proswipebutton:1.1'
+    //FAVORITE BUTTON
+    implementation 'com.github.ivbaranov:materialfavoritebutton:0.1.5'
 }
 
 apply plugin: 'com.google.gms.google-services'

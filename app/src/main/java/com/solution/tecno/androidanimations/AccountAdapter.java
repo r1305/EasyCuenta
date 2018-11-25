@@ -36,6 +36,7 @@ import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeProgressDialog
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeWarningDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
+import com.github.ivbaranov.mfb.MaterialFavoriteButton;
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.github.javiersantos.materialstyleddialogs.enums.Style;
 
@@ -124,8 +125,9 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
         final String titular = obj.get("user_name").toString().trim();
         final String bco = obj.get("bank").toString().trim();
         final String cta = obj.get("account_number").toString().trim();
-        final String cci = obj.get("cci").toString().trim().trim();
+        final String cci = obj.get("cci").toString().trim();
         final String id = obj.get("id").toString();
+        final String fav = obj.get("fav").toString();
         Random rnd = new Random();
         int currentColor = Color.argb(255, rnd.nextInt(200), rnd.nextInt(200), rnd.nextInt(200));
         holder.cardView.setCardBackgroundColor(currentColor);
@@ -133,9 +135,31 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
         holder.banco.setText(bco);
         holder.cta.setText(cta);
         holder.cci.setText(cci);
-        if(cci.equals("")){
+        if(fav.equals("0")){
+            holder.fav.setFavorite(false);
+        }else{
+            holder.fav.setFavorite(true);
+        }
+
+        holder.fav.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                apd.setMessage("Actualizando...");
+                apd.show();
+                if(fav.equals("0")){
+                    updateFavorite(id,1);
+                }else{
+                    updateFavorite(id,0);
+                }
+            }
+        });
+
+        if(cci.isEmpty()){
             holder.ic_copy_cci.setVisibility(View.GONE);
             holder.ic_share_cci.setVisibility(View.GONE);
+        }else{
+            holder.ic_copy_cci.setVisibility(View.VISIBLE);
+            holder.ic_share_cci.setVisibility(View.VISIBLE);
         }
         holder.ic_copy_cta.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -173,65 +197,6 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
                 sendIntent.putExtra(Intent.EXTRA_TEXT, bco+": "+cci);
                 sendIntent.setType("text/plain");
                 ctx.startActivity(sendIntent);
-            }
-        });
-        holder.ic_edit_card.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                apd.setMessage("Obteniendo datos...");
-                apd.show();
-
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-//                        getAccountDetail(account_id);
-                        final View layout=LayoutInflater.from(ctx).inflate(R.layout.edit_account_view,null);
-                        diag_et_bank=layout.findViewById(R.id.diag_et_bank_edit);
-                        diag_et_number=layout.findViewById(R.id.diag_et_account_edit);
-                        diag_et_user_name=layout.findViewById(R.id.diag_et_titular_edit);
-                        diag_et_cci=layout.findViewById(R.id.diag_et_cci_edit);
-
-                        diag_et_bank.setText(bco);
-                        diag_et_number.setText(cta);
-                        diag_et_user_name.setText(titular);
-                        diag_et_cci.setText(cci);
-
-                        apd.hide();
-                        asd.show();
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                asd.hide();
-                                new MaterialStyledDialog.Builder(ctx)
-                                        .setStyle(Style.HEADER_WITH_TITLE)
-                                        .setTitle("Editar cuenta")
-                                        .setDescription("Edita tu cuenta para compartirla rápidamente")
-                                        .setPositiveText("Guardar")
-                                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                            @Override
-                                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                                dialog.dismiss();
-                                                apd.setMessage("Guardando...");
-                                                String bank = diag_et_bank.getText().toString();
-                                                String number = diag_et_number.getText().toString();
-                                                String user_name =diag_et_user_name.getText().toString();
-                                                String cci = diag_et_cci.getText().toString();
-                                                updateAccount(id,bank,number,user_name,cci);
-                                            }
-                                        })
-                                        .setNegativeText("Cancelar")
-                                        .onNegative(new MaterialDialog.SingleButtonCallback() {
-                                            @Override
-                                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                                dialog.dismiss();
-                                            }
-                                        })
-                                        .setCustomView(layout)
-                                        .show();
-                            }
-                        },1000);//1 sec
-                    }
-                }, 2500);
             }
         });
 
@@ -317,6 +282,7 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
         TextView titular,cta,banco,cci;
         ImageView ic_share_cta,ic_share_cci,ic_copy_cta,ic_copy_cci,ic_edit_card,ic_delete_card;
         CardView cardView;
+        MaterialFavoriteButton fav;
 
         private ViewHolder(View itemView) {
             super(itemView);
@@ -329,8 +295,9 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
             ic_share_cci=itemView.findViewById(R.id.ic_share_cci);
             ic_copy_cta=itemView.findViewById(R.id.ic_copy_cta);
             ic_copy_cci=itemView.findViewById(R.id.ic_copy_cci);
-            ic_edit_card=itemView.findViewById(R.id.ic_edit_card);
+//            ic_edit_card=itemView.findViewById(R.id.ic_edit_card);
             ic_delete_card=itemView.findViewById(R.id.ic_delete_card);
+            fav = itemView.findViewById(R.id.item_fav);
         }
     }
 
@@ -456,72 +423,19 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
         queue.add(postRequest);
     }
 
-    private void getAccountDetail(final String id) {
-        RequestQueue queue = Volley.newRequestQueue(ctx);
-        String params="?account_id="+id;
-        String url = base_url+"getAccountDetail.php"+params;
+    private void updateFavorite(String id,int fav) {
 
+        RequestQueue queue = Volley.newRequestQueue(ctx);
+        String params="?id="+id+
+                "&fav="+fav;
+        String url = base_url+"updateFavorite.php"+params;
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Toast.makeText(ctx,response,Toast.LENGTH_LONG);
-                        JSONParser jp = new JSONParser();
                         try {
-                            JSONArray ja=(JSONArray)jp.parse(response);
-                            for(int i=0;i<ja.size();i++){
-                                JSONObject item=(JSONObject)ja.get(i);
-                                bank_edit=item.get("bank").toString();
-                                account_edit=item.get("account_number").toString();
-                                titular_edit=item.get("user_name").toString();
-                                cci_edit=item.get("cci").toString();
-
-                                final View layout=LayoutInflater.from(ctx).inflate(R.layout.edit_account_view,null);
-                                diag_et_bank=layout.findViewById(R.id.diag_et_bank_edit);
-                                diag_et_number=layout.findViewById(R.id.diag_et_account_edit);
-                                diag_et_user_name=layout.findViewById(R.id.diag_et_titular_edit);
-                                diag_et_cci=layout.findViewById(R.id.diag_et_cci_edit);
-
-                                diag_et_bank.setText(bank_edit);
-                                diag_et_number.setText(account_edit);
-                                diag_et_user_name.setText(titular_edit);
-                                diag_et_cci.setText(cci_edit);
-
-                                apd.hide();
-                                asd.show();
-                                new Handler().postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        asd.hide();
-                                        new MaterialStyledDialog.Builder(ctx)
-                                                .setStyle(Style.HEADER_WITH_TITLE)
-                                                .setTitle("Editar cuenta")
-                                                .setDescription("Edita tu cuenta para compartirla rápidamente")
-                                                .setPositiveText("Guardar")
-                                                .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                                    @Override
-                                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                                        dialog.dismiss();
-                                                        apd.setMessage("Guardando...");
-                                                        String bank = diag_et_bank.getText().toString();
-                                                        String number = diag_et_number.getText().toString();
-                                                        String user_name =diag_et_user_name.getText().toString();
-                                                        String cci = diag_et_cci.getText().toString();
-                                                        updateAccount(id,bank,number,user_name,cci);
-                                                    }
-                                                })
-                                                .setNegativeText("Cancelar")
-                                                .onNegative(new MaterialDialog.SingleButtonCallback() {
-                                                    @Override
-                                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                                        dialog.dismiss();
-                                                    }
-                                                })
-                                                .setCustomView(layout)
-                                                .show();
-                                    }
-                                },1000);//1 sec
-                            }
+                            apd.hide();
+                            getAccounts(user_id);
                         } catch (Exception e) {
                             apd.hide();
                             aed.setMessage(e.getMessage());
@@ -531,7 +445,7 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
                                 public void run() {
                                     aed.hide();
                                 }
-                            }, 25000);
+                            }, 2500);
                         }
                     }
                 },
@@ -540,14 +454,14 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
                     public void onErrorResponse(VolleyError error) {
                         // error
                         apd.hide();
-                        aed.setMessage(error.toString());
+                        aed.setMessage(error.getMessage());
                         aed.show();
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
                                 aed.hide();
                             }
-                        }, 25000);
+                        }, 2500);
                     }
                 }
         );

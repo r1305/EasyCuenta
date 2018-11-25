@@ -20,7 +20,7 @@
     app:cardBackgroundColor="#1F51B5"
     android:id="@+id/item_card_view">
 
-        <LinearLayout
+    <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
@@ -29,101 +29,109 @@
             android:paddingTop="16dp"
             android:paddingBottom="16dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="25dp"
-                    android:text="Titular: "
-                    app:met_floatingLabel="highlight"
-                    app:met_iconPadding="0dp"
-                    android:gravity="left|center_vertical"
-                    android:layout_weight="4.8"
-                    android:textColor="#FFF"/>
-                <TextView
-                    android:id="@+id/item_et_titular"
-                    android:layout_width="match_parent"
-                    android:layout_height="28dp"
-                    app:met_floatingLabel="highlight"
-                    app:met_iconPadding="0dp"
-                    android:gravity="left|center_vertical"
-                    android:textColor="#FFF"
-                    android:layout_weight="2"
-                    />
+        <com.github.ivbaranov.mfb.MaterialFavoriteButton
+            android:id="@+id/item_fav"
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:layout_gravity="center"
+            android:tint="#FFF" />
 
-                <ImageView
-                    android:id="@+id/ic_edit_card"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/ic_edit"
-                    android:layout_weight="5"
-                    android:tint="#FFF"
-                    android:visibility="gone"/>
-
-                <ImageView
-                    android:id="@+id/ic_delete_card"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/ic_delete"
-                    android:layout_weight="5"
-                    android:tint="#FFF"
-                    />
-            </LinearLayout>
-
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
             <TextView
-                android:id="@+id/item_et_bank"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="25dp"
+                android:text="Titular: "
                 app:met_floatingLabel="highlight"
                 app:met_iconPadding="0dp"
-                android:text="Banco"
-                android:gravity="left|center_horizontal"
-                android:textColor="#FFF"
-                android:textSize="18dp"/>
-            <LinearLayout
-                android:layout_marginTop="5dp"
+                android:gravity="left|center_vertical"
+                android:layout_weight="4.8"
+                android:textColor="#FFF"/>
+            <TextView
+                android:id="@+id/item_et_titular"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="Cta:"
-                    app:met_floatingLabel="highlight"
-                    app:met_iconPadding="0dp"
-                    android:layout_weight="4.8"
-                    android:gravity="center_vertical"
-                    android:textColor="#FFF"/>
+                android:layout_height="28dp"
+                app:met_floatingLabel="highlight"
+                app:met_iconPadding="0dp"
+                android:gravity="left|center_vertical"
+                android:textColor="#FFF"
+                android:layout_weight="2"
+                />
 
-                <TextView
-                    android:id="@+id/item_et_account"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    app:met_floatingLabel="highlight"
-                    app:met_iconPadding="0dp"
-                    android:layout_weight="2"
-                    android:gravity="left|center_vertical"
-                    android:textColor="#FFF"/>
+            <ImageView
+                android:id="@+id/ic_edit_card"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_edit"
+                android:layout_weight="5"
+                android:tint="#FFF"
+                android:visibility="gone"/>
 
-                <ImageView
-                    android:id="@+id/ic_share_cta"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/ic_share"
-                    android:layout_weight="5"
-                    android:tint="#FFF"/>
-                <ImageView
-                    android:id="@+id/ic_copy_cta"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/ic_copy"
-                    android:layout_weight="5"
-                    android:tint="#FFF"/>
-            </LinearLayout>
+            <ImageView
+                android:id="@+id/ic_delete_card"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_delete"
+                android:layout_weight="5"
+                android:tint="#FFF"
+                />
+        </LinearLayout>
 
-            <LinearLayout
+        <TextView
+            android:id="@+id/item_et_bank"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:met_floatingLabel="highlight"
+            app:met_iconPadding="0dp"
+            android:text="Banco"
+            android:gravity="left|center_horizontal"
+            android:textColor="#FFF"
+            android:textSize="18dp"/>
+
+        <LinearLayout
+            android:layout_marginTop="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Cta:"
+                app:met_floatingLabel="highlight"
+                app:met_iconPadding="0dp"
+                android:layout_weight="4.8"
+                android:gravity="center_vertical"
+                android:textColor="#FFF"/>
+
+            <TextView
+                android:id="@+id/item_et_account"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:met_floatingLabel="highlight"
+                app:met_iconPadding="0dp"
+                android:layout_weight="2"
+                android:gravity="left|center_vertical"
+                android:textColor="#FFF"/>
+
+            <ImageView
+                android:id="@+id/ic_share_cta"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_share"
+                android:layout_weight="5"
+                android:tint="#FFF"/>
+            <ImageView
+                android:id="@+id/ic_copy_cta"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_copy"
+                android:layout_weight="5"
+                android:tint="#FFF"/>
+        </LinearLayout>
+
+        <LinearLayout
                 android:layout_marginTop="5dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -147,7 +155,7 @@
                     app:met_iconPadding="0dp"
                     android:layout_weight="2"
                     android:textColor="#FFF"
-                    android:gravity="left|center_vertical"/>
+                    android:gravity="start|center_vertical"/>
 
                 <ImageView
                     android:id="@+id/ic_share_cci"
@@ -164,5 +172,5 @@
                     android:layout_weight="5"
                     android:tint="#FFF"/>
             </LinearLayout>
-        </LinearLayout>
+    </LinearLayout>
 </android.support.v7.widget.CardView>
