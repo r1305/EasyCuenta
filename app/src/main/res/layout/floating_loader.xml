@@ -16,15 +16,6 @@
             android:layout_alignParentRight="true"
             android:src="@drawable/ic_bank_app_loader" />
 
-        <com.jackandphantom.circularprogressbar.CircleProgressbar
-            android:id="@+id/first_progress_bar"
-            android:layout_width="250dp"
-            android:layout_height="250dp"
-            android:layout_centerInParent="true"
-            app:cpb_foregroundProgressColor="#1864c2"
-            app:cpb_foregroundProgressWidth="15"
-            app:cpb_progress="100"
-            app:cpb_roundedCorner="true" />
     </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>

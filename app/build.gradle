@@ -6,8 +6,8 @@ android {
         applicationId "com.solution.tecno.androidanimations"
         minSdkVersion 15
         targetSdkVersion 27
-        versionCode 25
-        versionName "2.8.2"
+        versionCode 26
+        versionName "2.8.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -35,8 +35,6 @@ dependencies {
     implementation 'com.rengwuxian.materialedittext:library:2.1.4'
     //progress button
     implementation 'com.alirezaahmadi:progress-button:1.1.2'
-    //progress bar
-    implementation 'com.jackandphantom.android:circularprogressbar:1.2.0'
     //input dialog
     implementation 'com.github.javiersantos:MaterialStyledDialogs:2.1'
     //Firebase Notification
