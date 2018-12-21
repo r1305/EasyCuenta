@@ -16,12 +16,13 @@
         android:orientation="vertical"
         android:gravity="center">
 
-        <ImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/profile_photo"
             android:layout_width="200dp"
             android:layout_height="200dp"
             android:src="@drawable/ic_bank_app"
-            android:foregroundTint="@color/colorPrimary"/>
+            android:foregroundTint="@color/colorPrimary"
+            android:scaleType="centerCrop"/>
 
         <com.rengwuxian.materialedittext.MaterialEditText
             android:id="@+id/profile_et_name"

@@ -2,12 +2,8 @@ package com.solution.tecno.androidanimations;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
-import android.inputmethodservice.Keyboard;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,8 +16,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -32,7 +26,6 @@ import com.android.volley.toolbox.Volley;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeErrorDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeProgressDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
-import com.cloudinary.Cloudinary;
 import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
@@ -42,10 +35,9 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import in.shadowfax.proswipebutton.ProSwipeButton;
 
 
@@ -61,8 +53,10 @@ public class ProfileFragment extends Fragment {
     AwesomeSuccessDialog asd;
     AwesomeErrorDialog aed;
     String user_photo="";
-    ImageView prof_photo;
+    String photo_id="";
+    CircleImageView prof_photo;
     String photo_path;
+    boolean new_photo=false;
     public ProfileFragment() {
         // Required empty public constructor
     }
@@ -73,15 +67,10 @@ public class ProfileFragment extends Fragment {
         return fragment;
     }
 
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ctx=this.getContext();
-
-        //Init Cloudinary
-        MediaManager.init(ctx);
         //create progress dialog
         apd=new AwesomeProgressDialog(ctx)
                 .setTitle(R.string.app_name)
@@ -120,6 +109,7 @@ public class ProfileFragment extends Fragment {
                 // example code starts here
                 Double progress = (double) bytes/totalBytes;
                 System.out.println("*** CARGANDO: "+progress);
+                apd.setMessage("Cargando foto..."+(Integer.parseInt(String.valueOf(progress))*100)+"%");
                 // post progress to app UI (e.g. progress bar, notification)
                 // example code ends here
             }
@@ -127,23 +117,50 @@ public class ProfileFragment extends Fragment {
             public void onSuccess(String requestId, Map resultData) {
                 // your code here
                 System.out.println("*** LISTO: "+resultData.get("secure_url").toString());
+                System.out.println(resultData);
                 user_photo=resultData.get("secure_url").toString();
+//                photo_id=resultData.get("").toString();
+                apd.setMessage("Actualizando datos...");
                 Picasso.get()
                         .load(user_photo)
                         .resize(200, 200)
                         .centerCrop()
                         .into(prof_photo);
 
+                String name = prof_name.getText().toString();
+                String username = prof_user_name.getText().toString();
+                String phone = prof_phone.getText().toString();
+                String psw = prof_psw.getText().toString();
+                String email = prof_email.getText().toString();
+                updateUser(user_id,username,phone,name,psw,email);
+
             }
             @Override
             public void onError(String requestId, ErrorInfo error) {
                 // your code here
                 System.out.println("*** ERROR: "+error.getDescription());
+                apd.hide();
+                aed.setMessage(error.getDescription());
+                aed.show();
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    public void run() {
+                        aed.hide();
+                    }
+                }, 3000);
             }
             @Override
             public void onReschedule(String requestId, ErrorInfo error) {
                 // your code here
                 System.out.println("*** ERROR Reschedule: "+error.getDescription());
+                aed.setMessage(error.getDescription());
+                aed.show();
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    public void run() {
+                        aed.hide();
+                    }
+                }, 3000);
             }})
                 .dispatch();
     }
@@ -166,10 +183,9 @@ public class ProfileFragment extends Fragment {
         prof_photo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
+                Intent i = new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                i.setType("image/*");
+                startActivityForResult(i, PICK_IMAGE);
             }
         });
 
@@ -255,7 +271,11 @@ public class ProfileFragment extends Fragment {
                         if(name!="" && username!="" &&
                                 phone!="" && psw!="" &&
                                 email!="" && isValidEmail(email)){
-                            updateUser(user_id,username,phone,name,psw,email);
+                            if(new_photo){
+                                uploadImage();
+                            }else{
+                                updateUser(user_id,username,phone,name,psw,email);
+                            }
                         }else{
                             apd.hide();
                             proSwipeBtn.showResultIcon(false);
@@ -266,33 +286,6 @@ public class ProfileFragment extends Fragment {
             }
         });
         return v;
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-//        if (requestCode == PICK_IMAGE) {
-
-        Uri selectedImage = data.getData();
-
-        String[] filePathColumn = { MediaStore.Images.Media.DATA };
-
-        Cursor cursor = getActivity().getContentResolver().query(selectedImage,
-                filePathColumn, null, null, null);
-        cursor.moveToFirst();
-
-        int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-        String picturePath = cursor.getString(columnIndex);
-        cursor.close();
-
-//            prof_photo.setImageBitmap(BitmapFactory.decodeFile(picturePath));
-        Picasso.get()
-                .load(picturePath)
-                .resize(200, 200)
-                .centerCrop()
-                .into(prof_photo);
-
-//        }
     }
 
     public void updateUser(final String id, final String username,
@@ -306,7 +299,7 @@ public class ProfileFragment extends Fragment {
                 "&name="+Uri.encode(full_name)+
                 "&psw="+Uri.encode(psw)+
                 "&email="+email+
-                "photo="+user_photo
+                "&photo="+Uri.encode(user_photo)
                 ;
 
         String url = base_url+"updateUser.php"+params;
@@ -330,7 +323,7 @@ public class ProfileFragment extends Fragment {
                                 ((FirstActivity)getContext()).updateHeader(full_name,username);
                                 FragmentManager fm = getActivity().getSupportFragmentManager();
                                 FragmentTransaction fragmentTransaction = fm.beginTransaction();
-                                Fragment fr=AccountsFragment.newInstance();
+                                Fragment fr=ProfileFragment.newInstance();
                                 fragmentTransaction.replace(R.id.container,fr);
                                 fragmentTransaction.commit();
                             }else{
@@ -459,5 +452,29 @@ public class ProfileFragment extends Fragment {
         if (target == null)
             return false;
         return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+
+        if (requestCode == PICK_IMAGE && data!=null) {
+
+            Uri selectedImage = data.getData();
+            String[] filePathColumn = { MediaStore.Images.Media.DATA };
+
+            Cursor cursor = getActivity().getContentResolver().query(selectedImage,
+                    filePathColumn, null, null, null);
+            cursor.moveToFirst();
+
+            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+            String picturePath = cursor.getString(columnIndex);
+            photo_path=picturePath;
+            cursor.close();
+
+            prof_photo.setImageBitmap(BitmapFactory.decodeFile(picturePath));
+            new_photo=true;
+
+        }
     }
 }

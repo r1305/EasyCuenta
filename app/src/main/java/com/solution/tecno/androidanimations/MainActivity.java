@@ -16,6 +16,7 @@ import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeErrorDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeInfoDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeProgressDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
+import com.cloudinary.android.MediaManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -78,6 +79,9 @@ public class MainActivity extends AppCompatActivity {
         version_name.setTextColor(Color.BLACK);
         version_name.setTypeface(version_name.getTypeface(),Typeface.BOLD);
 
+        //Init Cloudinary
+        MediaManager.init(ctx);
+
         checkPermissions();
     }
 
@@ -129,6 +133,9 @@ public class MainActivity extends AppCompatActivity {
                         &&
                         ActivityCompat.checkSelfPermission(this,
                                 Manifest.permission.SEND_SMS)!= PackageManager.PERMISSION_GRANTED
+                        &&
+                        ActivityCompat.checkSelfPermission(this,
+                                Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED
                 )
         {
             ActivityCompat.requestPermissions(this,
@@ -137,7 +144,8 @@ public class MainActivity extends AppCompatActivity {
                             Manifest.permission.INTERNET,
                             Manifest.permission.CAMERA,
                             Manifest.permission.READ_CONTACTS,
-                            Manifest.permission.SEND_SMS
+                            Manifest.permission.SEND_SMS,
+                            Manifest.permission.READ_EXTERNAL_STORAGE
                     },
                     MY_PERMISSIONS_REQUEST_ACCESS);
         }else{

@@ -6,8 +6,8 @@ android {
         applicationId "com.solution.tecno.androidanimations"
         minSdkVersion 15
         targetSdkVersion 27
-        versionCode 26
-        versionName "2.8.3"
+        versionCode 27
+        versionName "2.8.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -40,7 +40,7 @@ dependencies {
     //Firebase Notification
     implementation 'com.google.firebase:firebase-messaging:15.0.2'
     //Circle Image
-    implementation 'com.jackandphantom.android:circularimageview:1.2.0'
+    implementation 'de.hdodenhof:circleimageview:2.1.0'
     //SWEET Dialog
     implementation 'com.github.blennerSilva:AwesomeDialog:2.0.5'
     //Card vie
