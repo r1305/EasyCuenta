@@ -86,6 +86,7 @@
                 android:layout_margin="8dp"
                 app:bg_color="@android:color/holo_blue_dark"
                 app:btn_text="Actualizar" />
+
         </LinearLayout>
 
     </LinearLayout>

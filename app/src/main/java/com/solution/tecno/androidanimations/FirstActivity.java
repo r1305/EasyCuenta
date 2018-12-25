@@ -39,16 +39,20 @@ import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
 import com.github.javiersantos.materialstyleddialogs.enums.Style;
 import com.solution.tecno.androidanimations.Firebase.MyFirebaseInstanceIdService;
+import com.squareup.picasso.Picasso;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class FirstActivity extends AppCompatActivity  implements NavigationView.OnNavigationItemSelectedListener{
 
     Context ctx;
     Toolbar toolbar;
     DrawerLayout drawer;
-    String user_id,full_name,user_name;
+    String user_id,full_name,user_name,user_photo;
     String base_url="https://www.jadconsultores.com.pe/php_connection/app/bancos_resumen/";
     Credentials cred;
     TextView header_name,header_username;
+    CircleImageView header_photo;
 
     AwesomeProgressDialog apd;
     AwesomeSuccessDialog asd;
@@ -65,6 +69,7 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
         user_id=cred.getUserId();
         full_name=cred.getFullName();
         user_name=cred.getUserName();
+        user_photo=cred.getUserPhoto();
 
         //create progress dialog
         apd=new AwesomeProgressDialog(ctx)
@@ -134,8 +139,14 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
         View headerView = navigationView.getHeaderView(0);
         header_name = headerView.findViewById(R.id.nav_header_name);
         header_username = headerView.findViewById(R.id.nav_header_username);
+        header_photo = headerView.findViewById(R.id.nav_header_photo);
         header_name.setText(full_name);
         header_username.setText(user_name);
+        Picasso.get()
+                .load(user_photo)
+                .resize(200, 200)
+                .centerCrop()
+                .into(header_photo);
         navigationView.setNavigationItemSelectedListener(this);
 
         FragmentManager fm = getSupportFragmentManager();
@@ -208,9 +219,14 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
         return true;
     }
 
-    public void updateHeader(String name,String username) {
+    public void updateHeader(String name,String username,String photo) {
         header_name.setText(name); //str OR whatvever you need to set.
         header_username.setText(username); //str OR whatvever you need to set.
+        Picasso.get()
+                .load(photo)
+                .resize(200, 200)
+                .centerCrop()
+                .into(header_photo);
     }
 
     @Override

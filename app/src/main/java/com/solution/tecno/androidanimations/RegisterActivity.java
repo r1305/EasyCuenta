@@ -280,7 +280,8 @@ public class RegisterActivity extends AppCompatActivity {
                             String user_name=item.get("username").toString();
                             String phone_number=item.get("phone_number").toString();
                             String email=item.get("email").toString();
-                            cred.save_credentials(id,full_name,user_name,phone_number,email);
+                            String photo=item.get("profile_photo").toString();
+                            cred.save_credentials(id,full_name,user_name,phone_number,email,photo);
                             apd.hide();
                             asd.show();
 

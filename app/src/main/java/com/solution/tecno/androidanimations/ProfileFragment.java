@@ -3,14 +3,17 @@ package com.solution.tecno.androidanimations;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,15 +29,18 @@ import com.android.volley.toolbox.Volley;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeErrorDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeProgressDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
+import com.cloudinary.Cloudinary;
 import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
+import com.cloudinary.utils.ObjectUtils;
 import com.squareup.picasso.Picasso;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -57,6 +63,7 @@ public class ProfileFragment extends Fragment {
     CircleImageView prof_photo;
     String photo_path;
     boolean new_photo=false;
+    String CLOUDINARY_URL = "cloudinary://285423822327279:0K7-UMpvn21oyqDdKO-xJ_P9_t8@dsdrbqoex";
     public ProfileFragment() {
         // Required empty public constructor
     }
@@ -100,26 +107,32 @@ public class ProfileFragment extends Fragment {
         MediaManager.get().upload(photo_path).callback(new UploadCallback() {
             @Override
             public void onStart(String requestId) {
+                //delete image
+                try{
+                    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                    StrictMode.setThreadPolicy(policy);
+                    Cloudinary cloudinary=new Cloudinary(CLOUDINARY_URL);
+                    Map deleteParams = ObjectUtils.asMap("invalidate", true );
+                    cloudinary.uploader().destroy(photo_id,deleteParams );
+                }catch (Exception e){
+                    Log.d("***",e.toString());
+                }
                 // your code here
-                System.out.println("*** INICIANDO");
                 apd.setMessage("Cargando foto...");
             }
             @Override
             public void onProgress(String requestId, long bytes, long totalBytes) {
                 // example code starts here
                 Double progress = (double) bytes/totalBytes;
-                System.out.println("*** CARGANDO: "+progress);
-                apd.setMessage("Cargando foto..."+(Integer.parseInt(String.valueOf(progress))*100)+"%");
+                apd.setMessage("Cargando foto..."+Math.round(progress*100)+"%");
                 // post progress to app UI (e.g. progress bar, notification)
                 // example code ends here
             }
             @Override
             public void onSuccess(String requestId, Map resultData) {
                 // your code here
-                System.out.println("*** LISTO: "+resultData.get("secure_url").toString());
-                System.out.println(resultData);
                 user_photo=resultData.get("secure_url").toString();
-//                photo_id=resultData.get("").toString();
+                photo_id=resultData.get("public_id").toString();
                 apd.setMessage("Actualizando datos...");
                 Picasso.get()
                         .load(user_photo)
@@ -138,7 +151,6 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onError(String requestId, ErrorInfo error) {
                 // your code here
-                System.out.println("*** ERROR: "+error.getDescription());
                 apd.hide();
                 aed.setMessage(error.getDescription());
                 aed.show();
@@ -152,7 +164,6 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onReschedule(String requestId, ErrorInfo error) {
                 // your code here
-                System.out.println("*** ERROR Reschedule: "+error.getDescription());
                 aed.setMessage(error.getDescription());
                 aed.show();
                 Handler handler = new Handler();
@@ -299,17 +310,23 @@ public class ProfileFragment extends Fragment {
                 "&name="+Uri.encode(full_name)+
                 "&psw="+Uri.encode(psw)+
                 "&email="+email+
-                "&photo="+Uri.encode(user_photo)
+                "&photo="+Uri.encode(user_photo)+
+                "&photo_id="+photo_id
                 ;
 
         String url = base_url+"updateUser.php"+params;
-        System.out.println(url);
         StringRequest postRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         try {
                             if(response.equals("true")){
+                                FragmentManager fm = getActivity().getSupportFragmentManager();
+                                FragmentTransaction fragmentTransaction = fm.beginTransaction();
+                                Fragment fr=ProfileFragment.newInstance();
+                                fragmentTransaction.replace(R.id.container,fr);
+                                fragmentTransaction.commit();
+
                                 apd.hide();
                                 asd.show();
                                 Handler handler = new Handler();
@@ -318,14 +335,8 @@ public class ProfileFragment extends Fragment {
                                         asd.hide();
                                     }
                                 }, 1500);
-                                proSwipeBtn.showResultIcon(true);
-                                cred.save_credentials(id,full_name,username,phone_number,email);
-                                ((FirstActivity)getContext()).updateHeader(full_name,username);
-                                FragmentManager fm = getActivity().getSupportFragmentManager();
-                                FragmentTransaction fragmentTransaction = fm.beginTransaction();
-                                Fragment fr=ProfileFragment.newInstance();
-                                fragmentTransaction.replace(R.id.container,fr);
-                                fragmentTransaction.commit();
+                                cred.save_credentials(id,full_name,username,phone_number,email,user_photo);
+                                ((FirstActivity)getContext()).updateHeader(full_name,username,user_photo);
                             }else{
                                 apd.hide();
                                 aed.setMessage("Ocurrió un error");
@@ -393,6 +404,7 @@ public class ProfileFragment extends Fragment {
                                 String phone=item.get("phone_number").toString();
                                 String email=item.get("email").toString();
                                 String url = item.get("profile_photo").toString();
+                                photo_id = item.get("photo_id").toString();
                                 if(url!="" && !url.isEmpty()){
                                     Picasso.get()
                                             .load(url)
@@ -406,6 +418,8 @@ public class ProfileFragment extends Fragment {
                                 prof_psw.setText(psw);
                                 prof_phone.setText(phone);
                                 prof_email.setText(email);
+
+                                ((FirstActivity)getContext()).updateHeader(name,user,url);
                             }
                             apd.hide();
                             asd.show();
@@ -460,6 +474,7 @@ public class ProfileFragment extends Fragment {
 
         if (requestCode == PICK_IMAGE && data!=null) {
 
+
             Uri selectedImage = data.getData();
             String[] filePathColumn = { MediaStore.Images.Media.DATA };
 
@@ -473,6 +488,7 @@ public class ProfileFragment extends Fragment {
             cursor.close();
 
             prof_photo.setImageBitmap(BitmapFactory.decodeFile(picturePath));
+
             new_photo=true;
 
         }

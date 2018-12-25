@@ -4,16 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.alirezaahmadi.progressbutton.ProgressButtonComponent;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -25,8 +21,6 @@ import com.android.volley.toolbox.Volley;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeErrorDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeProgressDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
-import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog;
-import com.github.javiersantos.materialstyleddialogs.enums.Style;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -162,8 +156,9 @@ public class LoginActivity extends AppCompatActivity {
                             String user_name=item.get("username").toString();
                             String phone_number=item.get("phone_number").toString();
                             String email=item.get("email").toString();
+                            String user_photo=item.get("profile_photo").toString();
 
-                            cred.save_credentials(id,full_name,user_name,phone_number,email);
+                            cred.save_credentials(id,full_name,user_name,phone_number,email,user_photo);
                             apd.hide();
                             asd.show();
                             new Handler().postDelayed(new Runnable() {

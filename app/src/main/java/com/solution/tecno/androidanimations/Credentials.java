@@ -13,6 +13,7 @@ public class Credentials {
     public String full_name;
     public String username;
     public String email;
+    public String user_photo;
     private Context ctx;
 
     public Credentials(Context ctx) {
@@ -64,6 +65,14 @@ public class Credentials {
         return this.email;
     }
 
+    public String getUserPhoto(){
+        SharedPreferences apl=ctx.getSharedPreferences("Login",MODE_PRIVATE);
+
+        String user_photo=apl.getString("user_photo","0");
+        this.user_photo=user_photo;
+        return this.user_photo;
+    }
+
     public void logout(){
 
         SharedPreferences sp=ctx.getSharedPreferences("Login", MODE_PRIVATE);
@@ -81,7 +90,7 @@ public class Credentials {
         ctx.startActivity(i);
     }
 
-    public void save_credentials(String user_id,String full_name,String username,String phone_number,String email){
+    public void save_credentials(String user_id,String full_name,String username,String phone_number,String email,String photo){
         SharedPreferences sp=ctx.getSharedPreferences("Login", MODE_PRIVATE);
         SharedPreferences.Editor Ed=sp.edit();
         Ed.putString("user_id",user_id);
@@ -89,6 +98,7 @@ public class Credentials {
         Ed.putString("username",username);
         Ed.putString("phone_number",phone_number);
         Ed.putString("email",email);
+        Ed.putString("user_photo",photo);
         Ed.commit();
     }
 }
