@@ -1,7 +1,9 @@
 package com.solution.tecno.androidanimations;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -45,6 +48,8 @@ import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import in.shadowfax.proswipebutton.ProSwipeButton;
+
+import static com.solution.tecno.androidanimations.MainActivity.MY_PERMISSIONS_REQUEST_ACCESS;
 
 
 public class ProfileFragment extends Fragment {
@@ -194,9 +199,7 @@ public class ProfileFragment extends Fragment {
         prof_photo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                i.setType("image/*");
-                startActivityForResult(i, PICK_IMAGE);
+                checkPermissions();
             }
         });
 
@@ -491,6 +494,38 @@ public class ProfileFragment extends Fragment {
 
             new_photo=true;
 
+        }
+    }
+
+    private void checkPermissions(){
+        if (ActivityCompat.checkSelfPermission(ctx,Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{
+                            Manifest.permission.READ_EXTERNAL_STORAGE
+                    },
+                    MY_PERMISSIONS_REQUEST_ACCESS);
+        }else{
+            Intent i = new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            i.setType("image/*");
+            startActivityForResult(i, PICK_IMAGE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,String permissions[], int[] grantResults)
+    {
+        switch (requestCode) {
+            case 1 :
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Intent i = new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    i.setType("image/*");
+                    startActivityForResult(i, PICK_IMAGE);
+                } else {
+                    checkPermissions();
+                }
+                break;
         }
     }
 }
