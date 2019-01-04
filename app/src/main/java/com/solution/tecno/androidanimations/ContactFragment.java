@@ -17,9 +17,11 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.telephony.SmsManager;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -52,7 +54,8 @@ public class ContactFragment extends Fragment {
     Credentials cred;
     ImageButton contact;
     EditText contact_name,contact_phone,contact_msg;
-    ProSwipeButton swipe_sms,swipe_push;
+    ProSwipeButton swipe_push;
+    Button invite_button;
     int user_find_id=0;
     String user_fcm="";
     View v;
@@ -127,8 +130,50 @@ public class ContactFragment extends Fragment {
         contact_name = v.findViewById(R.id.contact_et_name);
         contact_phone = v.findViewById(R.id.contact_et_phone);
         contact_msg = v.findViewById(R.id.contact_et_message);
-        swipe_sms = v.findViewById(R.id.contact_send_sms);
+        contact_msg.setVisibility(View.GONE);
         swipe_push = v.findViewById(R.id.contact_send_push);
+        swipe_push.setVisibility(View.GONE);
+        invite_button = v.findViewById(R.id.btn_invite_contact);
+
+        invite_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String phone = contact_phone.getText().toString();
+                if(phone.equals("")){
+                    aed.setMessage("Debe elegir un contacto primero");
+                    aed.show();
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            aed.hide();
+                            contact.setBackgroundColor(Color.RED);
+                            contact_name.setError("Seleccione un contacto");
+                        }
+                    },2000);
+                }
+
+                if(!phone.isEmpty()){
+                    contact.setBackgroundColor(Color.WHITE);
+                    String msg2 ="Descarga Easy Cuenta y comparte tus cuentas de forma rapida y sencilla.\n"+
+                            "Entra aqui: https://goo.gl/6pCzFf y empieza a compartir";
+                    Intent sendIntent = new Intent();
+                    sendIntent.setAction(Intent.ACTION_SEND);
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, msg2);
+                    sendIntent.setType("text/plain");
+                    ctx.startActivity(sendIntent);
+                }
+            }
+        });
+
+        contact_name.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Uri uri = Uri.parse("content://contacts");
+                Intent intent = new Intent(Intent.ACTION_PICK, uri);
+                intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
+                startActivityForResult(intent, REQUEST_CODE);
+            }
+        });
 
         contact.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -165,177 +210,7 @@ public class ContactFragment extends Fragment {
             }
         });
 
-        swipe_sms.setOnSwipeListener(new ProSwipeButton.OnSwipeListener() {
-            @Override
-            public void onSwipeConfirm() {
-                String phone = contact_phone.getText().toString();
-                String msg = contact_msg.getText().toString();
-                msg = msg.trim();
-                if(phone.equals("")){
-                    aed.setMessage("Debe elegir un contacto primero");
-                    aed.show();
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            aed.hide();
-                            contact.setBackgroundColor(Color.RED);
-                            contact_name.setError("Seleccione un contacto");
-                            swipe_sms.showResultIcon(false);
-                        }
-                    },2000);
-                }else if(msg.isEmpty()){
-                    aed.setMessage("Debe ingresar un mensaje al destinatario");
-                    aed.show();
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            aed.hide();
-                            swipe_sms.showResultIcon(false);
-                            contact_msg.setError("Ingrese un mensaje");
-                            contact_msg.requestFocus();
-                        }
-                    },2000);
-                }
-
-                if(!msg.isEmpty() && !phone.isEmpty()){
-                    contact.setBackgroundColor(Color.WHITE);
-                    swipe_sms.showResultIcon(true);
-                    String msg2 ="Descarga Easy Cuenta y comparte tus cuentas de forma rapida y sencilla.\n"+
-                            "Entra aqui: https://goo.gl/6pCzFf y empieza a compartir";
-                    apd.setMessage("Enviando...");
-                    sendSMS2(phone,msg);
-                    sendSMS(phone,msg2);
-                }
-
-            }
-        });
-
         return v;
-    }
-
-    private void sendSMS(String phoneNumber, String message) {
-        SmsManager sms = SmsManager.getDefault();
-        sms.sendTextMessage(phoneNumber, null, message, null, null);
-    }
-
-    public void sendSMS2(String phoneNumber,String message) {
-        SmsManager smsManager = SmsManager.getDefault();
-
-
-        String SENT = "SMS_SENT";
-        String DELIVERED = "SMS_DELIVERED";
-
-        SmsManager sms = SmsManager.getDefault();
-        ArrayList<String> parts = sms.divideMessage(message);
-        int messageCount = parts.size();
-
-        Log.i("Message Count", "Message Count: " + messageCount);
-
-        ArrayList<PendingIntent> deliveryIntents = new ArrayList<PendingIntent>();
-        ArrayList<PendingIntent> sentIntents = new ArrayList<PendingIntent>();
-
-        PendingIntent sentPI = PendingIntent.getBroadcast(ctx, 0, new Intent(SENT), 0);
-        PendingIntent deliveredPI = PendingIntent.getBroadcast(ctx, 0, new Intent(DELIVERED), 0);
-
-        for (int j = 0; j < messageCount; j++) {
-            sentIntents.add(sentPI);
-            deliveryIntents.add(deliveredPI);
-        }
-
-        // ---when the SMS has been sent---
-        ctx.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context arg0, Intent arg1) {
-                switch (getResultCode()) {
-                    case Activity.RESULT_OK:
-                        swipe_sms.showResultIcon(true);
-                        apd.hide();
-                        asd.setMessage("Enviado");
-                        asd.show();
-                        new Handler().postDelayed(new Runnable() {
-                            public void run() {
-                                asd.hide();
-                            }
-                        }, 1500);
-                    break;
-                    case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
-                        swipe_sms.showResultIcon(false);
-                        apd.hide();
-                        aed.setMessage("No Enviado");
-                        aed.show();
-                        new Handler().postDelayed(new Runnable() {
-                            public void run() {
-                                aed.hide();
-                            }
-                        }, 1500);
-                    break;
-                    case SmsManager.RESULT_ERROR_NO_SERVICE:
-                        swipe_sms.showResultIcon(false);
-                        apd.hide();
-                        aed.setMessage("Sin Servicio");
-                        aed.show();
-                        new Handler().postDelayed(new Runnable() {
-                            public void run() {
-                                aed.hide();
-                            }
-                        }, 1500);
-                    break;
-                    case SmsManager.RESULT_ERROR_NULL_PDU:
-                        swipe_sms.showResultIcon(false);
-                        apd.hide();
-                        aed.setMessage("Sin Servicio");
-                        aed.show();
-                        new Handler().postDelayed(new Runnable() {
-                            public void run() {
-                                aed.hide();
-                            }
-                        }, 1500);
-                    break;
-                    case SmsManager.RESULT_ERROR_RADIO_OFF:
-                        swipe_sms.showResultIcon(false);
-                        apd.hide();
-                        aed.setMessage("Sin Servicio");
-                        aed.show();
-                        new Handler().postDelayed(new Runnable() {
-                            public void run() {
-                                aed.hide();
-                            }
-                        }, 1500);
-                    break;
-                }
-            }
-        }, new IntentFilter(SENT));
-
-        // ---when the SMS has been delivered---
-        ctx.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context arg0, Intent arg1) {
-                switch (getResultCode()) {
-
-                    case Activity.RESULT_OK:
-                        aed.setMessage("SMS Entregado");
-                        asd.show();
-                        new Handler().postDelayed(new Runnable() {
-                            public void run() {
-                                asd.hide();
-                            }
-                        }, 1500);
-                    break;
-                    case Activity.RESULT_CANCELED:
-                        swipe_sms.showResultIcon(false);
-                        aed.setMessage("No Entregado");
-                        aed.show();
-                        new Handler().postDelayed(new Runnable() {
-                            public void run() {
-                                aed.hide();
-                            }
-                        }, 1500);
-                    break;
-                }
-            }
-        }, new IntentFilter(DELIVERED));
-        smsManager.sendTextMessage(phoneNumber, null, message, sentPI, deliveredPI);
-        /* sms.sendMultipartTextMessage(phoneNumber, null, parts, sentIntents, deliveryIntents); */
     }
 
     @Override
@@ -393,7 +268,8 @@ public class ContactFragment extends Fragment {
                                 new Handler().postDelayed(new Runnable() {
                                     @Override
                                     public void run() {
-                                        swipe_sms.setVisibility(View.GONE);
+                                        contact_msg.setVisibility(View.VISIBLE);
+                                        invite_button.setVisibility(View.GONE);
                                         swipe_push.setVisibility(View.VISIBLE);
                                         asd.hide();
                                     }
@@ -403,11 +279,13 @@ public class ContactFragment extends Fragment {
                                 apd.hide();
                                 aid.setMessage("Contacto aún no registrado");
                                 aid.show();
+
                                 new Handler().postDelayed(new Runnable() {
                                     @Override
                                     public void run() {
-                                        swipe_sms.setVisibility(View.VISIBLE);
+                                        contact_msg.setVisibility(View.GONE);
                                         swipe_push.setVisibility(View.GONE);
+                                        invite_button.setVisibility(View.VISIBLE);
                                         aid.hide();
                                     }
                                 },2000);
@@ -420,9 +298,12 @@ public class ContactFragment extends Fragment {
                             new Handler().postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
+                                    contact_msg.setVisibility(View.GONE);
+                                    swipe_push.setVisibility(View.GONE);
+                                    invite_button.setVisibility(View.VISIBLE);
                                     aid.hide();
                                 }
-                            }, 3000);
+                            }, 2000);
                             e.printStackTrace();
                         }
                     }

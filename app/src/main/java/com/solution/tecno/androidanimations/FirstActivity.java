@@ -70,6 +70,7 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
         full_name=cred.getFullName();
         user_name=cred.getUserName();
         user_photo=cred.getUserPhoto();
+        System.out.println("***"+user_photo);
 
         //create progress dialog
         apd=new AwesomeProgressDialog(ctx)

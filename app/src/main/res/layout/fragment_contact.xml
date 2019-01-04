@@ -64,15 +64,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <in.shadowfax.proswipebutton.ProSwipeButton
-                    android:id="@+id/contact_send_sms"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    app:bg_color="@android:color/holo_blue_dark"
-                    app:btn_text="Enviar SMS" />
+                android:orientation="vertical">
 
                 <in.shadowfax.proswipebutton.ProSwipeButton
                     android:id="@+id/contact_send_push"
@@ -80,8 +72,22 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
                     app:bg_color="@android:color/holo_blue_dark"
-                    app:btn_text="Notificar"
-                    android:visibility="gone"/>
+                    app:btn_text="Notificar" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+                    <Button
+                        android:id="@+id/btn_invite_contact"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:text="Invitar"
+                        android:backgroundTint="@android:color/holo_blue_dark"
+                        android:textColor="#fff"
+                        />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
