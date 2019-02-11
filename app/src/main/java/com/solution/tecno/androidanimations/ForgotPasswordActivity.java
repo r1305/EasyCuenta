@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 
 import com.alirezaahmadi.progressbutton.ProgressButtonComponent;
@@ -36,7 +37,8 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         ForgotPasswordActivity.this.finish();
     }
 
-    ProgressButtonComponent btn_forgot_reset,btn_forgot_cancel;
+//    ProgressButtonComponent btn_forgot_reset,btn_forgot_cancel;
+    Button btn_forgot_reset,btn_forgot_cancel;
     Context ctx;
     Credentials cred;
     String base_url="https://www.jadconsultores.com.pe/php_connection/app/bancos_resumen/";

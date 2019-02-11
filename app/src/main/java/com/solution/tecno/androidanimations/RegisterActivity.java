@@ -35,7 +35,8 @@ public class RegisterActivity extends AppCompatActivity {
     EditText reg_username,reg_psw,reg_full_name,reg_phone,reg_email;
     Context ctx;
     Credentials cred;
-    ProgressButtonComponent reg_button,cancel_button;
+//    ProgressButtonComponent reg_button,cancel_button;
+    Button reg_button,cancel_button;
     String base_url="https://www.jadconsultores.com.pe/php_connection/app/bancos_resumen/";
     AwesomeProgressDialog apd;
     AwesomeSuccessDialog asd;

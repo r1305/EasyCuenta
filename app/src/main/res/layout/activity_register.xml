@@ -78,7 +78,7 @@
             android:orientation="horizontal">
 
             <com.alirezaahmadi.progressbutton.ProgressButtonComponent
-                android:id="@+id/reg_btn_register"
+
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:buttonText="Registrar"
@@ -89,10 +89,11 @@
                 android:background="#3333ff"
                 android:padding="16dp"
                 android:layout_weight="1"
-                android:gravity="center"/>
+                android:gravity="center"
+                android:visibility="gone"/>
 
             <com.alirezaahmadi.progressbutton.ProgressButtonComponent
-                android:id="@+id/reg_btn_cancel"
+
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:buttonText="Cancelar"
@@ -102,6 +103,26 @@
                 app:progressWidth="4dp"
                 android:background="#FFFFFF"
                 android:padding="16dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:visibility="gone"/>
+
+            <Button
+                android:id="@+id/reg_btn_register"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Registrar"
+                android:background="@drawable/blue_round_button"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textColor="#FFF"/>
+
+            <Button
+                android:id="@+id/reg_btn_cancel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Cancelar"
+                android:background="@drawable/white_round_button"
                 android:layout_weight="1"
                 android:gravity="center"/>
         </LinearLayout>

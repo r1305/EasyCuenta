@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -28,7 +29,8 @@ import org.json.simple.parser.JSONParser;
 
 public class LoginActivity extends AppCompatActivity {
 
-    ProgressButtonComponent login_btn,register_btn;
+//    ProgressButtonComponent login_btn,register_btn;
+    Button login_btn,register_btn;
     EditText et_user,et_psw;
     TextView forgot_password;
     Context ctx;
@@ -115,11 +117,9 @@ public class LoginActivity extends AppCompatActivity {
 
                 if(!username.isEmpty() && !psw.isEmpty()){
                     apd.show();
-                    login_btn.setInProgress(true);
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            login_btn.setInProgress(false);
                             login(username,psw);
                         }
                     }, 3000);
