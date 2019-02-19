@@ -157,8 +157,9 @@ public class LoginActivity extends AppCompatActivity {
                             String phone_number=item.get("phone_number").toString();
                             String email=item.get("email").toString();
                             String user_photo=item.get("profile_photo").toString();
+                            String login_status=item.get("login_status").toString();
 
-                            cred.save_credentials(id,full_name,user_name,phone_number,email,user_photo);
+                            cred.save_credentials(id,full_name,user_name,phone_number,email,user_photo,login_status);
                             apd.hide();
                             asd.show();
                             new Handler().postDelayed(new Runnable() {

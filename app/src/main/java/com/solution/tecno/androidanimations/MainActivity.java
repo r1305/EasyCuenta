@@ -101,7 +101,8 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 String user_id=cred.getUserId();
                 String full_name=cred.getFullName();
-                if(full_name.equals("0")){
+                String login_status=cred.getLoginStatus();
+                if(login_status.equals("0")){
                     apd.hide();
                     aid.setMessage("Inicie sesión nuevamente por favor");
                     new Handler().postDelayed(new Runnable() {

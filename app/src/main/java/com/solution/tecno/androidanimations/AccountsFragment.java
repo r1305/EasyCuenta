@@ -153,6 +153,7 @@ public class AccountsFragment extends Fragment {
                              Bundle savedInstanceState) {
         v = inflater.inflate(R.layout.fragment_accounts, container, false);
         user_id=cred.getUserId();
+        cred.getUserLoginStatus();
         // Inflate the layout for this fragment
         swipe_refresh = v.findViewById(R.id.swipe_refresh_account);
         add_new_account = v.findViewById(R.id.float_add_new_account);
@@ -217,6 +218,7 @@ public class AccountsFragment extends Fragment {
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?user_id="+Integer.parseInt(user_id);
         String url = base_url+"getUserAccounts.php"+params;
+        System.out.println("*** url_accounts: "+url);
         StringRequest postRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -372,7 +374,4 @@ public class AccountsFragment extends Fragment {
             },3500);
         }
     }
-
-
-
 }

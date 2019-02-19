@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,7 +15,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,7 +41,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import java.io.ByteArrayOutputStream;
 import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -63,8 +60,7 @@ public class ProfileFragment extends Fragment {
     AwesomeProgressDialog apd;
     AwesomeSuccessDialog asd;
     AwesomeErrorDialog aed;
-    String user_photo="";
-    String photo_id="";
+    String user_photo="",photo_id="",login_status="";
     CircleImageView prof_photo;
     String photo_path;
     boolean new_photo=false;
@@ -188,6 +184,7 @@ public class ProfileFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_profile, container, false);;
         cred = new Credentials(ctx);
         user_id = cred.getUserId();
+        login_status = cred.getLoginStatus();
         proSwipeBtn = v.findViewById(R.id.profile_btn_save);
         prof_name = v.findViewById(R.id.profile_et_name);
         prof_user_name = v.findViewById(R.id.profile_et_user);
@@ -338,7 +335,7 @@ public class ProfileFragment extends Fragment {
                                         asd.hide();
                                     }
                                 }, 1500);
-                                cred.save_credentials(id,full_name,username,phone_number,email,user_photo);
+                                cred.save_credentials(id,full_name,username,phone_number,email,user_photo,login_status);
                                 ((FirstActivity)getContext()).updateHeader(full_name,username,user_photo);
                             }else{
                                 apd.hide();

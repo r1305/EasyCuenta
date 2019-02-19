@@ -282,7 +282,7 @@ public class RegisterActivity extends AppCompatActivity {
                             String phone_number=item.get("phone_number").toString();
                             String email=item.get("email").toString();
                             String photo=item.get("profile_photo").toString();
-                            cred.save_credentials(id,full_name,user_name,phone_number,email,photo);
+                            cred.save_credentials(id,full_name,user_name,phone_number,email,photo,"1");
                             apd.hide();
                             asd.show();
 

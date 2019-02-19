@@ -4,6 +4,26 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Handler;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
+
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeInfoDialog;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
+import com.solution.tecno.androidanimations.Firebase.Constants;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -14,7 +34,9 @@ public class Credentials {
     public String username;
     public String email;
     public String user_photo;
+    public String login_status;
     private Context ctx;
+    AwesomeInfoDialog aid;
 
     public Credentials(Context ctx) {
         this.ctx = ctx;
@@ -73,6 +95,14 @@ public class Credentials {
         return this.user_photo;
     }
 
+    public String getLoginStatus(){
+        SharedPreferences apl=ctx.getSharedPreferences("Login",MODE_PRIVATE);
+
+        String login_status=apl.getString("login_status","0");
+        this.login_status=login_status;
+        return this.login_status;
+    }
+
     public void logout(){
 
         SharedPreferences sp=ctx.getSharedPreferences("Login", MODE_PRIVATE);
@@ -82,6 +112,7 @@ public class Credentials {
         Ed.putString("full_name","0");
         Ed.putString("username","0");
         Ed.putString("email","0");
+        Ed.putString("login_status","0");
         Ed.commit();
 
         Intent i=new Intent(ctx,LoginActivity.class);
@@ -90,7 +121,7 @@ public class Credentials {
         ctx.startActivity(i);
     }
 
-    public void save_credentials(String user_id,String full_name,String username,String phone_number,String email,String photo){
+    public void save_credentials(String user_id,String full_name,String username,String phone_number,String email,String photo,String login_status){
         SharedPreferences sp=ctx.getSharedPreferences("Login", MODE_PRIVATE);
         SharedPreferences.Editor Ed=sp.edit();
         Ed.putString("user_id",user_id);
@@ -99,6 +130,75 @@ public class Credentials {
         Ed.putString("phone_number",phone_number);
         Ed.putString("email",email);
         Ed.putString("user_photo",photo);
+        Ed.putString("login_status",login_status);
         Ed.commit();
+    }
+
+    public void validateSession(){
+        //create info dialog
+        aid=new AwesomeInfoDialog(ctx)
+                .setTitle(R.string.app_name)
+                .setMessage("Su sesión ha caducado")
+                .setColoredCircle(R.color.dialogInfoBackgroundColor)
+                .setDialogIconAndColor(R.drawable.ic_dialog_warning,R.color.white)
+                .setCancelable(true);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                getUserLoginStatus();
+                System.out.println("*** login_status:"+login_status);
+                if(login_status.equals("0")){
+                    aid.show();
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            aid.hide();
+                            logout();
+                        }
+                    }, 1500);
+
+                }
+            }
+        }, 3000);
+    }
+
+    public void getUserLoginStatus() {
+        RequestQueue queue = Volley.newRequestQueue(ctx);
+        String params="?user_id="+getUserId();
+        String url =  Constants.BASE_URL+"getLoginStatus.php"+params;
+        System.out.println("*** login_status_url: "+url);
+        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        JSONParser jp = new JSONParser();
+                        try {
+                            JSONArray ja=(JSONArray)jp.parse(response);
+                            JSONObject item=(JSONObject)ja.get(0);
+                            login_status=item.get("login_status").toString();
+                            System.out.println("getLoginStatus: "+login_status);
+                            SharedPreferences sp=ctx.getSharedPreferences("Login", MODE_PRIVATE);
+                            SharedPreferences.Editor Ed=sp.edit();
+                            Ed.putString("login_status",login_status);
+                            Ed.commit();
+                            validateSession();
+                            System.out.println("credential_login_status: "+getLoginStatus());
+                        } catch (Exception e) {
+                            System.out.println(e);
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("Error.Response", error.toString());
+                    }
+                }
+        );
+        postRequest.setRetryPolicy(new DefaultRetryPolicy(
+                50000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        queue.add(postRequest);
     }
 }

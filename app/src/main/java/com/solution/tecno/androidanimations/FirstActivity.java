@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -12,17 +13,30 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeErrorDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeProgressDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
+import com.solution.tecno.androidanimations.Firebase.Constants;
 import com.solution.tecno.androidanimations.Firebase.MyFirebaseInstanceIdService;
 import com.squareup.picasso.Picasso;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -32,7 +46,7 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
     Toolbar toolbar;
     DrawerLayout drawer;
     String user_id,full_name,user_name,user_photo;
-    String base_url="https://www.jadconsultores.com.pe/php_connection/app/bancos_resumen/";
+    String base_url= Constants.BASE_URL;
     Credentials cred;
     TextView header_name,header_username;
     CircleImageView header_photo;
@@ -152,11 +166,11 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+        // as you specify a parent activity in AndroidManifpest.xml.
         int id = item.getItemId();
 
         if(id == R.id.action_log_out){
-            new Credentials(ctx).logout();
+            logout(user_id,"0");
         }
 
         return super.onOptionsItemSelected(item);
@@ -220,6 +234,87 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
         a.addCategory(Intent.CATEGORY_HOME);
         a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(a);
+    }
+
+    public void logout(final String user_id, String status) {
+        RequestQueue queue = Volley.newRequestQueue(ctx);
+        String params="?user_id="+user_id+"&status="+status;
+        String url = base_url+"login.php"+params;
+        System.out.println("***"+url);
+
+        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        JSONParser jp = new JSONParser();
+                        try {
+                            JSONArray ja=(JSONArray)jp.parse(response);
+                            JSONObject item=(JSONObject)ja.get(0);
+                            String id=item.get("id").toString();
+                            String full_name=item.get("full_name").toString();
+                            String user_name=item.get("username").toString();
+                            String phone_number=item.get("phone_number").toString();
+                            String email=item.get("email").toString();
+                            String user_photo=item.get("profile_photo").toString();
+                            String login_status=item.get("login_status").toString();
+
+                            cred.save_credentials(id,full_name,user_name,phone_number,email,user_photo,login_status);
+                            apd.hide();
+                            asd.show();
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    asd.hide();
+                                    cred.logout();
+                                }
+                            }, 1500);
+
+
+                        } catch (Exception e) {
+                            apd.hide();
+                            aed.setMessage(e.getMessage());
+                            aed.show();
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    aed.hide();
+                                }
+                            }, 2000);
+                            System.out.println(e);
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        apd.hide();
+                        aed.setMessage(error.toString());
+                        aed.show();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                aed.hide();
+                            }
+                        }, 2000);
+                        // error
+                        Log.d("Error.Response", error.toString());
+                        apd.hide();
+                        aed.setMessage(error.toString());
+                        aed.show();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                aed.hide();
+                            }
+                        }, 2000);
+                    }
+                }
+        );
+        postRequest.setRetryPolicy(new DefaultRetryPolicy(
+                50000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        queue.add(postRequest);
     }
 
 }
