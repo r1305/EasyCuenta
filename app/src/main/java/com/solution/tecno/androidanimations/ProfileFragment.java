@@ -35,6 +35,7 @@ import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
 import com.cloudinary.utils.ObjectUtils;
+import com.solution.tecno.androidanimations.Firebase.Constants;
 import com.squareup.picasso.Picasso;
 
 import org.json.simple.JSONArray;
@@ -55,7 +56,7 @@ public class ProfileFragment extends Fragment {
     Context ctx;
     EditText prof_name,prof_user_name,prof_phone,prof_psw,prof_email;
     Credentials cred;
-    String base_url="https://www.jadconsultores.com.pe/php_connection/app/bancos_resumen/";
+    String base_url=Constants.BASE_URL;
     String user_id;
     AwesomeProgressDialog apd;
     AwesomeSuccessDialog asd;
@@ -304,6 +305,9 @@ public class ProfileFragment extends Fragment {
                            final String psw,final String email) {
 
         RequestQueue queue = Volley.newRequestQueue(ctx);
+        if(user_photo==""){
+            user_photo= Constants.BASE_PHOTO;
+        }
         String params="?id="+id+
                 "&username="+Uri.encode(username)+
                 "&phone="+Uri.encode(phone_number)+

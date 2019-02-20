@@ -47,6 +47,7 @@ public class LoginActivity extends AppCompatActivity {
         a.addCategory(Intent.CATEGORY_HOME);
         a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(a);
+        this.finish();
     }
 
     @Override

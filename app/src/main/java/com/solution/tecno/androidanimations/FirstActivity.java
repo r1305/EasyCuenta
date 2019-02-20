@@ -67,6 +67,9 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
         full_name=cred.getFullName();
         user_name=cred.getUserName();
         user_photo=cred.getUserPhoto();
+        if(user_photo==""){
+            user_photo=Constants.BASE_PHOTO;
+        }
         System.out.println("***"+user_photo);
 
         //create progress dialog
@@ -170,6 +173,8 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
         int id = item.getItemId();
 
         if(id == R.id.action_log_out){
+            apd.setMessage("Cerrando Sesión");
+            apd.show();
             logout(user_id,"0");
         }
 
@@ -240,25 +245,13 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?user_id="+user_id+"&status="+status;
         String url = base_url+"login.php"+params;
-        System.out.println("***"+url);
+        System.out.println("*** logout: "+url);
 
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        JSONParser jp = new JSONParser();
                         try {
-                            JSONArray ja=(JSONArray)jp.parse(response);
-                            JSONObject item=(JSONObject)ja.get(0);
-                            String id=item.get("id").toString();
-                            String full_name=item.get("full_name").toString();
-                            String user_name=item.get("username").toString();
-                            String phone_number=item.get("phone_number").toString();
-                            String email=item.get("email").toString();
-                            String user_photo=item.get("profile_photo").toString();
-                            String login_status=item.get("login_status").toString();
-
-                            cred.save_credentials(id,full_name,user_name,phone_number,email,user_photo,login_status);
                             apd.hide();
                             asd.show();
                             new Handler().postDelayed(new Runnable() {
