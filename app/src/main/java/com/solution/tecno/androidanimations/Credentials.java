@@ -35,6 +35,7 @@ public class Credentials {
     public String email;
     public String user_photo;
     public String login_status;
+    public String json_response;
     private Context ctx;
     AwesomeInfoDialog aid;
 
@@ -97,10 +98,24 @@ public class Credentials {
 
     public String getLoginStatus(){
         SharedPreferences apl=ctx.getSharedPreferences("Login",MODE_PRIVATE);
-
         String login_status=apl.getString("login_status","0");
         this.login_status=login_status;
         return this.login_status;
+    }
+
+    public void setJsonResponse(String response){
+        SharedPreferences sp=ctx.getSharedPreferences("Login", MODE_PRIVATE);
+        SharedPreferences.Editor Ed=sp.edit();
+        Ed.putString("json_response",response);
+        Ed.commit();
+        this.json_response=response;
+    }
+
+    public String getJsonResponse(){
+        SharedPreferences apl=ctx.getSharedPreferences("Login",MODE_PRIVATE);
+        String json_response=apl.getString("json_response","0");
+        this.json_response=json_response;
+        return this.json_response;
     }
 
     public void logout(){

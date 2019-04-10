@@ -223,6 +223,7 @@ public class AccountsFragment extends Fragment {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        cred.setJsonResponse(response);
                         JSONParser jp = new JSONParser();
                         try {
                             JSONArray ja=(JSONArray)jp.parse(response);
@@ -245,6 +246,7 @@ public class AccountsFragment extends Fragment {
                                     verifiedPhoneNumber();
                                 }
                             }, 1500);   //3 seconds
+                            System.out.println(cred.getJsonResponse());
                         } catch (Exception e) {
                             Log.d("***",e.toString());
                             swipe_refresh.setRefreshing(false);
@@ -357,11 +359,11 @@ public class AccountsFragment extends Fragment {
                 }
             },3500);
         }else{
-            verifiedEamil();
+            verifiedEmail();
         }
     }
 
-    public void verifiedEamil(){
+    public void verifiedEmail(){
         asd.hide();
         if(cred.getEmail().equals("0")){
             awd.setMessage("Actualiza tu email para disfrutar de todas las funciones");
