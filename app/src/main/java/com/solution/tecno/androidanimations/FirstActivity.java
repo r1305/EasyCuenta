@@ -70,7 +70,6 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
         if(user_photo==""){
             user_photo=Constants.BASE_PHOTO;
         }
-        System.out.println("***"+user_photo);
 
         //create progress dialog
         apd=new AwesomeProgressDialog(ctx)
@@ -209,8 +208,20 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
                 fragmentTransaction.replace(R.id.container,fr);
             break;
             case R.id.menu_profile:
-                fr=ProfileFragment.newInstance();
-                fragmentTransaction.replace(R.id.container,fr);
+                if(cred.getNetworkStatus().equals("1")){
+                    fr=ProfileFragment.newInstance();
+                    fragmentTransaction.replace(R.id.container,fr);
+                }else{
+                    aed.setMessage("Red no disponible");
+                    aed.show();
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        public void run() {
+                            aed.hide();
+                        }
+                    }, 1500);
+                }
+
             break;
             default:
                 fr=AccountsFragment.newInstance();

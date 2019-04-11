@@ -97,17 +97,6 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
                 .setMessage("Actualiza tu número de celular para disfrutar de todas las funciones")
                 .setColoredCircle(R.color.dialogWarningBackgroundColor)
                 .setDialogIconAndColor(R.drawable.ic_dialog_warning,R.color.white)
-                .setButtonText("Ver mi perfil")
-                .setWarningButtonClick(new Closure() {
-                    @Override
-                    public void exec() {
-                        FragmentManager fm = af.getActivity().getSupportFragmentManager();
-                        FragmentTransaction fragmentTransaction = fm.beginTransaction();
-                        Fragment fr=ProfileFragment.newInstance();
-                        fragmentTransaction.replace(R.id.container,fr);
-                        fragmentTransaction.commit();
-                    }
-                })
                 .setCancelable(false);
 
         user_id = cred.getUserId();
@@ -144,12 +133,23 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
         holder.fav.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                apd.setMessage("Actualizando...");
-                apd.show();
-                if(fav.equals("0")){
-                    updateFavorite(id,1);
+                if(cred.getNetworkStatus().equals("1")){
+                    apd.setMessage("Actualizando...");
+                    apd.show();
+                    if(fav.equals("0")){
+                        updateFavorite(id,1);
+                    }else{
+                        updateFavorite(id,0);
+                    }
                 }else{
-                    updateFavorite(id,0);
+                    aed.setMessage("Red no disponible");
+                    aed.show();
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        public void run() {
+                            aed.hide();
+                        }
+                    }, 1500);
                 }
             }
         });
@@ -203,67 +203,98 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
         holder.ic_delete_card.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                deleteAccount(id);
+                if(cred.getNetworkStatus().equals("1")){
+                    awd.setButtonText("Eliminar");
+                    awd.setCancelable(true);
+                    awd.setMessage("¿Estás seguro de eliminar esta cuenta?");
+                    awd.setWarningButtonClick(new Closure() {
+                        @Override
+                        public void exec() {
+                            deleteAccount(id);
+                        }
+                    });
+                    awd.show();
+                }else{
+                    aed.setMessage("Red no disponible");
+                    aed.show();
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        public void run() {
+                            aed.hide();
+                        }
+                    }, 1500);
+                }
             }
         });
 
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                apd.setMessage("Obteniendo datos...");
-                apd.show();
+                if(cred.getNetworkStatus().equals("0")){
+                    aed.setMessage("Red no disponible");
+                    aed.show();
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        public void run() {
+                            aed.hide();
+                        }
+                    }, 1500);
+                }else{
+                    apd.setMessage("Obteniendo datos...");
+                    apd.show();
 
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-//                        getAccountDetail(account_id);
-                        final View layout=LayoutInflater.from(ctx).inflate(R.layout.edit_account_view,null);
-                        diag_et_bank=layout.findViewById(R.id.diag_et_bank_edit);
-                        diag_et_number=layout.findViewById(R.id.diag_et_account_edit);
-                        diag_et_user_name=layout.findViewById(R.id.diag_et_titular_edit);
-                        diag_et_cci=layout.findViewById(R.id.diag_et_cci_edit);
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            //                        getAccountDetail(account_id);
+                            final View layout=LayoutInflater.from(ctx).inflate(R.layout.edit_account_view,null);
+                            diag_et_bank=layout.findViewById(R.id.diag_et_bank_edit);
+                            diag_et_number=layout.findViewById(R.id.diag_et_account_edit);
+                            diag_et_user_name=layout.findViewById(R.id.diag_et_titular_edit);
+                            diag_et_cci=layout.findViewById(R.id.diag_et_cci_edit);
 
-                        diag_et_bank.setText(bco);
-                        diag_et_number.setText(cta);
-                        diag_et_user_name.setText(titular);
-                        diag_et_cci.setText(cci);
+                            diag_et_bank.setText(bco);
+                            diag_et_number.setText(cta);
+                            diag_et_user_name.setText(titular);
+                            diag_et_cci.setText(cci);
 
-                        apd.hide();
-                        asd.show();
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                asd.hide();
-                                new MaterialStyledDialog.Builder(ctx)
-                                        .setStyle(Style.HEADER_WITH_TITLE)
-                                        .setTitle("Editar cuenta")
-                                        .setDescription("Edita tu cuenta para compartirla rápidamente")
-                                        .setPositiveText("Guardar")
-                                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                            @Override
-                                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                                dialog.dismiss();
-                                                apd.setMessage("Guardando...");
-                                                String bank = diag_et_bank.getText().toString();
-                                                String number = diag_et_number.getText().toString();
-                                                String user_name =diag_et_user_name.getText().toString();
-                                                String cci = diag_et_cci.getText().toString();
-                                                updateAccount(id,bank,number,user_name,cci);
-                                            }
-                                        })
-                                        .setNegativeText("Cancelar")
-                                        .onNegative(new MaterialDialog.SingleButtonCallback() {
-                                            @Override
-                                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                                dialog.dismiss();
-                                            }
-                                        })
-                                        .setCustomView(layout)
-                                        .show();
-                            }
-                        },1000);//1 sec
-                    }
-                }, 2500);
+                            apd.hide();
+                            asd.show();
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    asd.hide();
+                                    new MaterialStyledDialog.Builder(ctx)
+                                            .setStyle(Style.HEADER_WITH_TITLE)
+                                            .setTitle("Editar cuenta")
+                                            .setDescription("Edita tu cuenta para compartirla rápidamente")
+                                            .setPositiveText("Guardar")
+                                            .onPositive(new MaterialDialog.SingleButtonCallback() {
+                                                @Override
+                                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                                    dialog.dismiss();
+                                                    apd.setMessage("Guardando...");
+                                                    String bank = diag_et_bank.getText().toString();
+                                                    String number = diag_et_number.getText().toString();
+                                                    String user_name =diag_et_user_name.getText().toString();
+                                                    String cci = diag_et_cci.getText().toString();
+                                                    updateAccount(id,bank,number,user_name,cci);
+                                                }
+                                            })
+                                            .setNegativeText("Cancelar")
+                                            .onNegative(new MaterialDialog.SingleButtonCallback() {
+                                                @Override
+                                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                                    dialog.dismiss();
+                                                }
+                                            })
+                                            .setCustomView(layout)
+                                            .show();
+                                }
+                            },1000);//1 sec
+                        }
+                    }, 2500);
+                }
             }
         });
     }
@@ -301,7 +332,7 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
         }
     }
 
-    private void getAccounts(String user_id) {
+    private void getAccounts(final String user_id) {
         apd.setMessage("Cargando...");
         apd.show();
         RequestQueue queue = Volley.newRequestQueue(ctx);
@@ -331,9 +362,10 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
                                 }
                             }, 1500);   //3 seconds
                         } catch (Exception e) {
+                            cred.registerError(e.toString(),user_id);
                             Log.d("***",e.toString());
                             apd.hide();
-                            aed.setMessage(e.getMessage());
+                            aed.setMessage("No se pudo obtener la información");
                             aed.show();
                             //wait 3 seconds to hide success dialog
                             Handler handler = new Handler();
@@ -348,9 +380,10 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        cred.registerError(error.toString(),user_id);
                         Log.d("***",error.toString());
                         apd.hide();
-                        aed.setMessage(error.toString());
+                        aed.setMessage("No se pudo obtener la información");
                         aed.show();
                         //wait 3 seconds to hide success dialog
                         Handler handler = new Handler();

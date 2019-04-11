@@ -1,6 +1,8 @@
 package com.solution.tecno.androidanimations;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -160,39 +162,50 @@ public class AccountsFragment extends Fragment {
         add_new_account.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final View layout=LayoutInflater.from(ctx).inflate(R.layout.new_account_view,null);
-                new MaterialStyledDialog.Builder(ctx)
-                        .setStyle(Style.HEADER_WITH_TITLE)
-                        .setTitle("Nueva cuenta")
-                        .setDescription("Añade una nueva cuenta para compartirla rápidamente")
-                        .setPositiveText("Agregar")
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                dialog.dismiss();
-                                EditText diag_et_bank=layout.findViewById(R.id.diag_et_bank);
-                                EditText diag_et_number=layout.findViewById(R.id.diag_et_account);
-                                EditText diag_et_user_name=layout.findViewById(R.id.diag_et_titular);
-                                EditText diag_et_cci=layout.findViewById(R.id.diag_et_cci);
-                                String bank = diag_et_bank.getText().toString();
-                                String number = diag_et_number.getText().toString();
-                                String user_name = diag_et_user_name.getText().toString();
-                                String cci = diag_et_cci.getText().toString();
-                                apd.setMessage("Guardando...");
-                                apd.show();
-                                addAccount(user_id,bank,number,user_name,cci);
-                            }
-                        })
-                        .setNegativeText("Cancelar")
-                        .onNegative(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                dialog.dismiss();
-                            }
-                        })
-                        .setCustomView(layout) // Old standard padding: .setCustomView(your_custom_view, 20, 20, 20, 0)
-                        //.setCustomView(your_custom_view, 10, 20, 10, 20) // int left, int top, int right, int bottom
-                        .show();
+                if(cred.getNetworkStatus().equals("0")){
+                    aed.setMessage("Red no disponible");
+                    aed.show();
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        public void run() {
+                            aed.hide();
+                        }
+                    }, 1500);
+                }else{
+                    final View layout=LayoutInflater.from(ctx).inflate(R.layout.new_account_view,null);
+                    new MaterialStyledDialog.Builder(ctx)
+                            .setStyle(Style.HEADER_WITH_TITLE)
+                            .setTitle("Nueva cuenta")
+                            .setDescription("Añade una nueva cuenta para compartirla rápidamente")
+                            .setPositiveText("Agregar")
+                            .onPositive(new MaterialDialog.SingleButtonCallback() {
+                                @Override
+                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                    dialog.dismiss();
+                                    EditText diag_et_bank=layout.findViewById(R.id.diag_et_bank);
+                                    EditText diag_et_number=layout.findViewById(R.id.diag_et_account);
+                                    EditText diag_et_user_name=layout.findViewById(R.id.diag_et_titular);
+                                    EditText diag_et_cci=layout.findViewById(R.id.diag_et_cci);
+                                    String bank = diag_et_bank.getText().toString();
+                                    String number = diag_et_number.getText().toString();
+                                    String user_name = diag_et_user_name.getText().toString();
+                                    String cci = diag_et_cci.getText().toString();
+                                    apd.setMessage("Guardando...");
+                                    apd.show();
+                                    addAccount(user_id,bank,number,user_name,cci);
+                                }
+                            })
+                            .setNegativeText("Cancelar")
+                            .onNegative(new MaterialDialog.SingleButtonCallback() {
+                                @Override
+                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                    dialog.dismiss();
+                                }
+                            })
+                            .setCustomView(layout) // Old standard padding: .setCustomView(your_custom_view, 20, 20, 20, 0)
+                            //.setCustomView(your_custom_view, 10, 20, 10, 20) // int left, int top, int right, int bottom
+                            .show();
+                }
             }
         });
         activity=v.findViewById(R.id.recycler_view_accounts);
@@ -202,11 +215,18 @@ public class AccountsFragment extends Fragment {
         swipe_refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                getAccounts(user_id);
+                if(cred.getNetworkStatus().equals("1")){
+                    getAccounts(user_id);
+                }else{
+                    getAccountsOffline();
+                }
             }
         });
-
-        getAccounts(user_id);
+        if(cred.getNetworkStatus().equals("1")){
+            getAccounts(user_id);
+        }else{
+            getAccountsOffline();
+        }
         activity.setAdapter(adapter);
         return v;
     }
@@ -218,7 +238,6 @@ public class AccountsFragment extends Fragment {
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?user_id="+Integer.parseInt(user_id);
         String url = base_url+"getUserAccounts.php"+params;
-        System.out.println("*** url_accounts: "+url);
         StringRequest postRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -246,7 +265,6 @@ public class AccountsFragment extends Fragment {
                                     verifiedPhoneNumber();
                                 }
                             }, 1500);   //3 seconds
-                            System.out.println(cred.getJsonResponse());
                         } catch (Exception e) {
                             Log.d("***",e.toString());
                             swipe_refresh.setRefreshing(false);
@@ -288,6 +306,46 @@ public class AccountsFragment extends Fragment {
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         queue.add(postRequest);
+    }
+
+    public void getAccountsOffline() {
+        System.out.println("offline");
+        apd.setMessage("Cargando...");
+        apd.show();
+
+        JSONParser jp = new JSONParser();
+        try {
+            JSONArray ja=(JSONArray)jp.parse(cred.getJsonResponse());
+            l.clear();
+            for(int i=0;i<ja.size();i++){
+                JSONObject item=(JSONObject)ja.get(i);
+                l.add(item);
+            }
+            adapter.notifyDataSetChanged();
+            swipe_refresh.setRefreshing(false);
+
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                public void run() {
+                    apd.hide();
+                    verifiedPhoneNumber();
+                }
+            }, 1500);
+        } catch (Exception e) {
+            Log.d("***",e.toString());
+            cred.registerError(e.getMessage(),user_id);
+            swipe_refresh.setRefreshing(false);
+            apd.hide();
+            aed.setMessage("No se pudo cargar la información");
+            aed.show();
+            //wait 3 seconds to hide success dialog
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                public void run() {
+                    aed.hide();
+                }
+            }, 3000);
+        }
     }
 
     public void addAccount(final String user_id, String bank, String number,String user_name,String cci) {

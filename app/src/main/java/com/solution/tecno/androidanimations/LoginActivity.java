@@ -95,35 +95,46 @@ public class LoginActivity extends AppCompatActivity {
         login_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final String username=et_user.getText().toString();
-                final String psw=et_psw.getText().toString();
+                if(cred.getNetworkStatus().equals("1")){
+                    final String username=et_user.getText().toString();
+                    final String psw=et_psw.getText().toString();
 
-                if(username.isEmpty() && psw.isEmpty()){
-                    et_user.setError("Complete el usuario");
-                    et_user.requestFocus();
-                    et_psw.setError("Ingrese contraseña");
-                    et_psw.requestFocus();
-                    return;
-                }
-                if(username.isEmpty()){
-                    et_user.setError("Complete el usuario");
-                    et_user.requestFocus();
-                    return;
-                }
-                if(psw.isEmpty()){
-                    et_psw.setError("Ingrese contraseña");
-                    et_psw.requestFocus();
-                    return;
-                }
+                    if(username.isEmpty() && psw.isEmpty()){
+                        et_user.setError("Complete el usuario");
+                        et_user.requestFocus();
+                        et_psw.setError("Ingrese contraseña");
+                        et_psw.requestFocus();
+                        return;
+                    }
+                    if(username.isEmpty()){
+                        et_user.setError("Complete el usuario");
+                        et_user.requestFocus();
+                        return;
+                    }
+                    if(psw.isEmpty()){
+                        et_psw.setError("Ingrese contraseña");
+                        et_psw.requestFocus();
+                        return;
+                    }
 
-                if(!username.isEmpty() && !psw.isEmpty()){
-                    apd.show();
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
+                    if(!username.isEmpty() && !psw.isEmpty()){
+                        apd.show();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                login(username,psw);
+                            }
+                        }, 3000);
+                    }
+                }else{
+                    aed.setMessage("Red no disponible");
+                    aed.show();
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
                         public void run() {
-                            login(username,psw);
+                            aed.hide();
                         }
-                    }, 3000);
+                    }, 1500);
                 }
             }
         });
@@ -175,8 +186,9 @@ public class LoginActivity extends AppCompatActivity {
 
 
                         } catch (Exception e) {
+                            cred.registerError(e.getMessage(),user);
                             apd.hide();
-                            aed.setMessage(e.getMessage());
+                            aed.setMessage("Credenciales incorrectas");
                             aed.show();
                             new Handler().postDelayed(new Runnable() {
                                 @Override
@@ -191,8 +203,9 @@ public class LoginActivity extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        cred.registerError(error.getMessage(),user);
                         apd.hide();
-                        aed.setMessage(error.toString());
+                        aed.setMessage("Credenciales incorrectas");
                         aed.show();
                         new Handler().postDelayed(new Runnable() {
                             @Override

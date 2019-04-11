@@ -4,6 +4,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -36,6 +39,7 @@ public class Credentials {
     public String user_photo;
     public String login_status;
     public String json_response;
+    public String network_status;
     private Context ctx;
     AwesomeInfoDialog aid;
 
@@ -103,6 +107,14 @@ public class Credentials {
         return this.login_status;
     }
 
+    public String getNetworkStatus(){
+        isNetworkAvailable();
+        SharedPreferences apl=ctx.getSharedPreferences("Login",MODE_PRIVATE);
+        String network_status=apl.getString("network_status","0");
+        this.network_status=network_status;
+        return this.network_status;
+    }
+
     public void setJsonResponse(String response){
         SharedPreferences sp=ctx.getSharedPreferences("Login", MODE_PRIVATE);
         SharedPreferences.Editor Ed=sp.edit();
@@ -157,31 +169,49 @@ public class Credentials {
                 .setColoredCircle(R.color.dialogInfoBackgroundColor)
                 .setDialogIconAndColor(R.drawable.ic_dialog_warning,R.color.white)
                 .setCancelable(true);
+        isNetworkAvailable();
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                getUserLoginStatus();
-                System.out.println("*** login_status:"+login_status);
-                if(login_status.equals("0")){
-                    aid.show();
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            aid.hide();
-                            logout();
-                        }
-                    }, 1500);
+                if(network_status.equals("1")){
+                    getUserLoginStatus();
+                    if(login_status.equals("0")){
+                        aid.show();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                aid.hide();
+                                logout();
+                            }
+                        }, 1500);
 
+                    }
                 }
             }
         }, 3000);
+    }
+
+    private void isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager)ctx.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        SharedPreferences sp=ctx.getSharedPreferences("Login", MODE_PRIVATE);
+        SharedPreferences.Editor Ed=sp.edit();
+
+        if(activeNetworkInfo==null || !activeNetworkInfo.isConnected()){
+            Ed.putString("network_status","0");
+            this.network_status="0";
+        }else{
+            Ed.putString("network_status","1");
+            this.network_status="1";
+        }
+        Ed.commit();
     }
 
     public void getUserLoginStatus() {
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?user_id="+getUserId();
         String url =  Constants.BASE_URL+"getLoginStatus.php"+params;
-        System.out.println("*** login_status_url: "+url);
         StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>() {
                     @Override
@@ -191,13 +221,11 @@ public class Credentials {
                             JSONArray ja=(JSONArray)jp.parse(response);
                             JSONObject item=(JSONObject)ja.get(0);
                             login_status=item.get("login_status").toString();
-                            System.out.println("getLoginStatus: "+login_status);
                             SharedPreferences sp=ctx.getSharedPreferences("Login", MODE_PRIVATE);
                             SharedPreferences.Editor Ed=sp.edit();
                             Ed.putString("login_status",login_status);
                             Ed.commit();
                             validateSession();
-                            System.out.println("credential_login_status: "+getLoginStatus());
                         } catch (Exception e) {
                             System.out.println(e);
                         }
@@ -214,6 +242,29 @@ public class Credentials {
                 50000,
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        queue.add(postRequest);
+    }
+
+    public void registerError(final String error,final String user_id) {
+        String base_url="https://www.jadconsultores.com.pe/php_connection/app/bancos_resumen/";
+        RequestQueue queue = Volley.newRequestQueue(ctx);
+        String params="?user_id="+user_id+
+                "&error="+ Uri.encode(error);
+        String url = base_url+"registerError.php"+params;
+        StringRequest postRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        registerError(error.toString(),user_id);
+                    }
+                }
+        );
         queue.add(postRequest);
     }
 }
