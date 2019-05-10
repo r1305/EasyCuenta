@@ -213,17 +213,6 @@ public class LoginActivity extends AppCompatActivity {
                                 aed.hide();
                             }
                         }, 2000);
-                        // error
-                        Log.d("Error.Response", error.toString());
-                        apd.hide();
-                        aed.setMessage(error.toString());
-                        aed.show();
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                aed.hide();
-                            }
-                        }, 2000);
                     }
                 }
         );

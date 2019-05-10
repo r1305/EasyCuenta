@@ -312,8 +312,9 @@ public class ContactFragment extends Fragment {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         // error
+                        cred.registerError(error.getMessage(),user_id);
                         apd.hide();
-                        aed.setMessage(error.toString());
+                        aed.setMessage("Ocurrió un error al buscar la información");
                         aed.show();
                         new Handler().postDelayed(new Runnable() {
                             @Override

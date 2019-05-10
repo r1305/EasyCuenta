@@ -363,7 +363,6 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
                             }, 1500);   //3 seconds
                         } catch (Exception e) {
                             cred.registerError(e.toString(),user_id);
-                            Log.d("***",e.toString());
                             apd.hide();
                             aed.setMessage("No se pudo obtener la información");
                             aed.show();
@@ -381,7 +380,6 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         cred.registerError(error.toString(),user_id);
-                        Log.d("***",error.toString());
                         apd.hide();
                         aed.setMessage("No se pudo obtener la información");
                         aed.show();
@@ -421,8 +419,9 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
                             apd.hide();
                             getAccounts(user_id);
                         } catch (Exception e) {
+                            cred.registerError(e.getMessage(),user_id);
                             apd.hide();
-                            aed.setMessage(e.getMessage());
+                            aed.setMessage("Error al actualizar");
                             aed.show();
                             new Handler().postDelayed(new Runnable() {
                                 @Override
@@ -437,8 +436,9 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         // error
+                        cred.registerError(error.getMessage(),user_id);
                         apd.hide();
-                        aed.setMessage(error.getMessage());
+                        aed.setMessage("Error al actualizar");
                         aed.show();
                         new Handler().postDelayed(new Runnable() {
                             @Override
@@ -470,8 +470,9 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
                             apd.hide();
                             getAccounts(user_id);
                         } catch (Exception e) {
+                            cred.registerError(e.getMessage(),user_id);
                             apd.hide();
-                            aed.setMessage(e.getMessage());
+                            aed.setMessage("Error al actualizar");
                             aed.show();
                             new Handler().postDelayed(new Runnable() {
                                 @Override
@@ -486,8 +487,9 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         // error
+                        cred.registerError(error.getMessage(),user_id);
                         apd.hide();
-                        aed.setMessage(error.getMessage());
+                        aed.setMessage("Error al actualizar");
                         aed.show();
                         new Handler().postDelayed(new Runnable() {
                             @Override
@@ -521,8 +523,9 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
                             apd.hide();
                             getAccounts(user_id);
                         } catch (Exception e) {
+                            cred.registerError(e.getMessage(),user_id);
                             apd.hide();
-                            aed.setMessage(e.getMessage());
+                            aed.setMessage("Ocurrió un error al eliminar");
                             aed.show();
                             new Handler().postDelayed(new Runnable() {
                                 @Override
@@ -537,8 +540,9 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         // error
+                        cred.registerError(error.getMessage(),user_id);
                         apd.hide();
-                        aed.setMessage(error.getMessage());
+                        aed.setMessage("Ocurrió un error al eliminar");
                         aed.show();
                         new Handler().postDelayed(new Runnable() {
                             @Override

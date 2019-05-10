@@ -231,7 +231,7 @@ public class AccountsFragment extends Fragment {
         return v;
     }
 
-    public void getAccounts(String user_id) {
+    public void getAccounts(final String user_id) {
         apd.setMessage("Cargando...");
         apd.show();
 
@@ -266,10 +266,10 @@ public class AccountsFragment extends Fragment {
                                 }
                             }, 1500);   //3 seconds
                         } catch (Exception e) {
-                            Log.d("***",e.toString());
+                            cred.registerError(e.getMessage(),user_id);
                             swipe_refresh.setRefreshing(false);
                             apd.hide();
-                            aed.setMessage(e.getMessage());
+                            aed.setMessage("No se pudo cargar la información");
                             aed.show();
                             //wait 3 seconds to hide success dialog
                             Handler handler = new Handler();
@@ -284,10 +284,10 @@ public class AccountsFragment extends Fragment {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.d("***",error.toString());
+                        cred.registerError(error.getMessage(),user_id);
                         swipe_refresh.setRefreshing(false);
                         apd.hide();
-                        aed.setMessage(error.toString());
+                        aed.setMessage("No se pudo cargar la información");
                         aed.show();
                         //wait 3 seconds to hide success dialog
                         Handler handler = new Handler();
@@ -332,7 +332,6 @@ public class AccountsFragment extends Fragment {
                 }
             }, 1500);
         } catch (Exception e) {
-            Log.d("***",e.toString());
             cred.registerError(e.getMessage(),user_id);
             swipe_refresh.setRefreshing(false);
             apd.hide();
@@ -391,8 +390,9 @@ public class AccountsFragment extends Fragment {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         // error
+                        cred.registerError(error.getMessage(),user_id);
                         apd.hide();
-                        aed.setMessage("Ocurrió un error al registrar su cuenta!\n"+error.getMessage());
+                        aed.setMessage("Ocurrió un error al registrar su cuenta!");
                         aed.show();
                         new Handler().postDelayed(new Runnable() {
                             @Override
