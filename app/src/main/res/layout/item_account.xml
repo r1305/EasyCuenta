@@ -1,40 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_gravity="center"
     android:layout_marginBottom="4dp"
-    android:paddingRight="16dp"
-    android:paddingLeft="16dp"
-    android:paddingTop="16dp"
-    android:paddingBottom="16dp"
-    android:layout_marginRight="55dp"
-    android:layout_marginLeft="6dp"
-    tools:context=".FirstActivity"
+    android:padding="16dp"
+    tools:context=".activities.FirstActivity"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="#000F"
-    android:elevation="10dp"
+    android:background="@drawable/border_blue"
     app:cardCornerRadius="10dp"
-    app:cardBackgroundColor="#1F51B5"
     android:id="@+id/item_card_view">
 
     <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:paddingRight="16dp"
-            android:paddingLeft="16dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="16dp">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingEnd="16dp"
+        android:paddingStart="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:background="@drawable/border_blue">
 
         <com.github.ivbaranov.mfb.MaterialFavoriteButton
             android:id="@+id/item_fav"
             android:layout_width="match_parent"
             android:layout_height="36dp"
             android:layout_gravity="center"
-            android:tint="#FFF" />
+            android:tint="@color/colorPrimaryDark" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -44,19 +39,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="25dp"
                 android:text="Titular: "
-                app:met_floatingLabel="highlight"
-                app:met_iconPadding="0dp"
-                android:gravity="left|center_vertical"
+                android:gravity="start|center_vertical"
                 android:layout_weight="4.8"
-                android:textColor="#FFF"/>
+                android:textColor="@color/colorPrimaryDark"/>
             <TextView
                 android:id="@+id/item_et_titular"
                 android:layout_width="match_parent"
                 android:layout_height="28dp"
-                app:met_floatingLabel="highlight"
-                app:met_iconPadding="0dp"
-                android:gravity="left|center_vertical"
-                android:textColor="#FFF"
+                
+                
+                android:gravity="start|center_vertical"
+                android:textColor="@color/colorPrimaryDark"
                 android:layout_weight="2"
                 />
 
@@ -66,7 +59,7 @@
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_edit"
                 android:layout_weight="5"
-                android:tint="#FFF"
+                android:tint="@color/colorPrimaryDark"
                 android:visibility="gone"/>
 
             <ImageView
@@ -75,7 +68,7 @@
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_delete"
                 android:layout_weight="5"
-                android:tint="#FFF"
+                android:tint="@color/colorPrimaryDark"
                 />
         </LinearLayout>
 
@@ -83,11 +76,9 @@
             android:id="@+id/item_et_bank"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:met_floatingLabel="highlight"
-            app:met_iconPadding="0dp"
             android:text="Banco"
-            android:gravity="left|center_horizontal"
-            android:textColor="#FFF"
+            android:gravity="start|center_horizontal"
+            android:textColor="@color/colorPrimaryDark"
             android:textSize="18dp"/>
 
         <LinearLayout
@@ -99,21 +90,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="Cta:"
-                app:met_floatingLabel="highlight"
-                app:met_iconPadding="0dp"
                 android:layout_weight="4.8"
                 android:gravity="center_vertical"
-                android:textColor="#FFF"/>
+                android:textColor="@color/colorPrimaryDark"/>
 
             <TextView
                 android:id="@+id/item_et_account"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:met_floatingLabel="highlight"
-                app:met_iconPadding="0dp"
                 android:layout_weight="2"
-                android:gravity="left|center_vertical"
-                android:textColor="#FFF"/>
+                android:gravity="start|center_vertical"
+                android:textColor="@color/colorPrimaryDark"/>
 
             <ImageView
                 android:id="@+id/ic_share_cta"
@@ -121,14 +108,14 @@
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_share"
                 android:layout_weight="5"
-                android:tint="#FFF"/>
+                android:tint="@color/colorPrimaryDark"/>
             <ImageView
                 android:id="@+id/ic_copy_cta"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_copy"
                 android:layout_weight="5"
-                android:tint="#FFF"/>
+                android:tint="@color/colorPrimaryDark"/>
         </LinearLayout>
 
         <LinearLayout
@@ -140,21 +127,17 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    app:met_floatingLabel="highlight"
-                    app:met_iconPadding="0dp"
                     android:text="CCI:"
                     android:layout_weight="4.8"
-                    android:textColor="#FFF"
+                    android:textColor="@color/colorPrimaryDark"
                     android:gravity="center_vertical"/>
 
                 <TextView
                     android:id="@+id/item_et_account_cci"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    app:met_floatingLabel="highlight"
-                    app:met_iconPadding="0dp"
                     android:layout_weight="2"
-                    android:textColor="#FFF"
+                    android:textColor="@color/colorPrimaryDark"
                     android:gravity="start|center_vertical"/>
 
                 <ImageView
@@ -163,14 +146,14 @@
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_share"
                     android:layout_weight="5"
-                    android:tint="#FFF"/>
+                    android:tint="@color/colorPrimaryDark"/>
                 <ImageView
                     android:id="@+id/ic_copy_cci"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_copy"
                     android:layout_weight="5"
-                    android:tint="#FFF"/>
+                    android:tint="@color/colorPrimaryDark"/>
             </LinearLayout>
     </LinearLayout>
-</android.support.v7.widget.CardView>
+</androidx.cardview.widget.CardView>

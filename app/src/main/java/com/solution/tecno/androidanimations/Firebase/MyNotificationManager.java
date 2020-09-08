@@ -5,9 +5,9 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.app.NotificationCompat;
+import androidx.core.app.NotificationCompat;
 
-import com.solution.tecno.androidanimations.FirstActivity;
+import com.solution.tecno.androidanimations.activities.FirstActivity;
 import com.solution.tecno.androidanimations.R;
 
 import java.util.Random;
@@ -42,7 +42,6 @@ public class MyNotificationManager {
         NotificationCompat.Builder mBuilder;
         mBuilder = new NotificationCompat.Builder(mCtx);
         mBuilder.setSmallIcon(R.drawable.ic_bank_app);
-        mBuilder.setBadgeIconType(R.drawable.ic_bank_app);
         mBuilder.setContentTitle(title);
         mBuilder.setContentText(body);
         mBuilder.setContentIntent(pendingIntent);

@@ -4,7 +4,6 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_INTERNAL_STORAGE" />
 
@@ -16,11 +15,8 @@
         android:roundIcon="@drawable/ic_bank_app"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <meta-data
-            android:name="CLOUDINARY_URL"
-            android:value="cloudinary://285423822327279:0K7-UMpvn21oyqDdKO-xJ_P9_t8@dsdrbqoex"/>
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -28,22 +24,17 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".Firebase.MyFirebaseInstanceIdService">
-            <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
-            </intent-filter>
-        </service>
         <service android:name=".Firebase.MyFirebaseMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
 
-        <activity android:name=".LoginActivity" />
-        <activity android:name=".FirstActivity" />
-        <activity android:name=".SecondActivity" />
-        <activity android:name=".RegisterActivity" />
-        <activity android:name=".ForgotPasswordActivity"></activity>
+        <activity android:name=".activities.LoginActivity" />
+        <activity android:name=".activities.FirstActivity" />
+        <activity android:name=".activities.SecondActivity" />
+        <activity android:name=".activities.RegisterActivity" />
+        <activity android:name=".activities.ForgotPasswordActivity"/>
     </application>
 
 </manifest>

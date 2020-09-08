@@ -1,17 +1,16 @@
-package com.solution.tecno.androidanimations;
+package com.solution.tecno.androidanimations.activities;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.alirezaahmadi.progressbutton.ProgressButtonComponent;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -19,9 +18,10 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeErrorDialog;
-import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeProgressDialog;
-import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
+import com.solution.tecno.androidanimations.R;
+import com.solution.tecno.androidanimations.utils.Credentials;
+import com.solution.tecno.androidanimations.utils.Utils;
+import com.solution.tecno.androidanimations.utils.ViewDialog;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -34,11 +34,9 @@ public class LoginActivity extends AppCompatActivity {
     EditText et_user,et_psw;
     TextView forgot_password;
     Context ctx;
+    ViewDialog viewDialog;
     Credentials cred;
-    String base_url="https://www.jadconsultores.com.pe/php_connection/app/bancos_resumen/";
-    AwesomeProgressDialog apd;
-    AwesomeSuccessDialog asd;
-    AwesomeErrorDialog aed;
+    String base_url;
 
     @Override
     public void onBackPressed() {
@@ -56,29 +54,8 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         ctx=LoginActivity.this;
         cred=new Credentials(ctx);
-        //create progress dialog
-        apd=new AwesomeProgressDialog(ctx)
-                .setTitle(R.string.app_name)
-                .setMessage("Cargando")
-                .setColoredCircle(R.color.dialogInfoBackgroundColor)
-                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
-                .setCancelable(false);
-
-        //create success dialog
-        asd=new AwesomeSuccessDialog(ctx)
-                .setTitle(R.string.app_name)
-                .setMessage("Listo!")
-                .setColoredCircle(R.color.dialogSuccessBackgroundColor)
-                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
-                .setCancelable(false);
-
-        //create error dialog
-        aed=new AwesomeErrorDialog(ctx)
-                .setTitle(R.string.app_name)
-                .setMessage("Ocurrió un error")
-                .setColoredCircle(R.color.dialogErrorBackgroundColor)
-                .setDialogIconAndColor(R.drawable.ic_dialog_error,R.color.white)
-                .setCancelable(false);
+        viewDialog = new ViewDialog(this);
+        base_url = ctx.getResources().getString(R.string.base_url);
 
         et_user=findViewById(R.id.et_user);
         et_psw=findViewById(R.id.et_psw);
@@ -86,7 +63,7 @@ public class LoginActivity extends AppCompatActivity {
         forgot_password.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(ctx,ForgotPasswordActivity.class);
+                Intent i = new Intent(ctx, ForgotPasswordActivity.class);
                 startActivity(i);
                 LoginActivity.this.finish();
             }
@@ -118,7 +95,6 @@ public class LoginActivity extends AppCompatActivity {
                     }
 
                     if(!username.isEmpty() && !psw.isEmpty()){
-                        apd.show();
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
@@ -127,14 +103,7 @@ public class LoginActivity extends AppCompatActivity {
                         }, 3000);
                     }
                 }else{
-                    aed.setMessage("Red no disponible");
-                    aed.show();
-                    Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        public void run() {
-                            aed.hide();
-                        }
-                    }, 1500);
+                    new Utils().createAlert(ctx,"Red no disponible",1);
                 }
             }
         });
@@ -151,6 +120,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void login(final String user, String psw) {
+        viewDialog.showDialog();
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?username="+user+"&psw="+psw;
         String url = base_url+"login.php"+params;
@@ -172,12 +142,10 @@ public class LoginActivity extends AppCompatActivity {
                             String login_status=item.get("login_status").toString();
 
                             cred.save_credentials(id,full_name,user_name,phone_number,email,user_photo,login_status);
-                            apd.hide();
-                            asd.show();
+                            viewDialog.hideDialog(1.5);
                             new Handler().postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
-                                    asd.hide();
                                     Intent i=new Intent(ctx,FirstActivity.class);
                                     startActivity(i);
                                     LoginActivity.this.finish();
@@ -187,16 +155,8 @@ public class LoginActivity extends AppCompatActivity {
 
                         } catch (Exception e) {
                             cred.registerError(e.getMessage(),user);
-                            apd.hide();
-                            aed.setMessage("Credenciales incorrectas");
-                            aed.show();
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    aed.hide();
-                                }
-                            }, 2000);
-                            System.out.println(e);
+                            viewDialog.hideDialog(0);
+                            new Utils().createAlert(ctx,e.getMessage(),1);
                         }
                     }
                 },
@@ -204,15 +164,8 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         cred.registerError(error.getMessage(),user);
-                        apd.hide();
-                        aed.setMessage("Credenciales incorrectas");
-                        aed.show();
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                aed.hide();
-                            }
-                        }, 2000);
+                        viewDialog.hideDialog(0);
+                        new Utils().createAlert(ctx,error.getMessage(),1);
                     }
                 }
         );

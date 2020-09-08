@@ -1,4 +1,4 @@
-package com.solution.tecno.androidanimations;
+package com.solution.tecno.androidanimations.activities;
 
 import android.Manifest;
 import android.content.Context;
@@ -8,26 +8,22 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.appcompat.app.AppCompatActivity;
 import android.widget.TextView;
-
-import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeErrorDialog;
-import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeInfoDialog;
-import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeProgressDialog;
-import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
-import com.cloudinary.android.MediaManager;
+import com.solution.tecno.androidanimations.BuildConfig;
+import com.solution.tecno.androidanimations.R;
+import com.solution.tecno.androidanimations.utils.Credentials;
+import com.solution.tecno.androidanimations.utils.Utils;
+import com.solution.tecno.androidanimations.utils.ViewDialog;
 
 public class MainActivity extends AppCompatActivity {
 
     Context ctx;
+    ViewDialog viewDialog;
     Class activity;
     TextView version_name;
     public static int MY_PERMISSIONS_REQUEST_ACCESS= 1;
-    AwesomeProgressDialog apd;
-    AwesomeSuccessDialog asd;
-    AwesomeErrorDialog aed;
-    AwesomeInfoDialog aid;
     Credentials cred;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,66 +31,30 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ctx=MainActivity.this;
         cred = new Credentials(ctx);
+        viewDialog = new ViewDialog(this);
 
         version_name=findViewById(R.id.tv_version);
-        version_name.setText("V."+BuildConfig.VERSION_NAME);
+        version_name.setText("V."+ BuildConfig.VERSION_NAME);
         version_name.setTextColor(Color.BLACK);
         version_name.setTypeface(version_name.getTypeface(),Typeface.BOLD);
-
-        //create progress dialog
-        apd=new AwesomeProgressDialog(ctx)
-                .setTitle(R.string.app_name)
-                .setMessage("Cargando")
-                .setColoredCircle(R.color.dialogInfoBackgroundColor)
-                .setDialogIconAndColor(R.drawable.ic_bank_app_loader, R.color.white)
-                .setCancelable(false);
-
-        //create success dialog
-        asd=new AwesomeSuccessDialog(ctx)
-                .setTitle(R.string.app_name)
-                .setMessage("Listo!")
-                .setColoredCircle(R.color.dialogSuccessBackgroundColor)
-                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
-                .setCancelable(false);
-
-        //create error dialog
-        aed=new AwesomeErrorDialog(ctx)
-                .setTitle(R.string.app_name)
-                .setMessage("Ocurrió un error")
-                .setColoredCircle(R.color.dialogErrorBackgroundColor)
-                .setDialogIconAndColor(R.drawable.ic_dialog_error,R.color.white)
-                .setCancelable(false);
-
-        //create info dialog
-        aid=new AwesomeInfoDialog(ctx)
-                .setTitle(R.string.app_name)
-                .setMessage("Inicie sesión nuevamente por favor")
-                .setColoredCircle(R.color.dialogInfoBackgroundColor)
-                .setDialogIconAndColor(R.drawable.ic_dialog_info,R.color.white)
-                .setCancelable(false);
 
 
         version_name=findViewById(R.id.tv_version);
         version_name.setText("V."+BuildConfig.VERSION_NAME);
         version_name.setTextColor(Color.BLACK);
         version_name.setTypeface(version_name.getTypeface(),Typeface.BOLD);
-
-        //Init Cloudinary
-        MediaManager.init(ctx);
 
         checkPermissions();
     }
 
     public void redirect(Class activity_class){
-        apd.hide();
         Intent i=new Intent(ctx,activity_class);
         startActivity(i);
         MainActivity.this.finish();
     }
 
     public void validateSession(){
-        apd.setMessage("Validando sesión...");
-        apd.show();
+        viewDialog.showDialog();
 
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -103,17 +63,17 @@ public class MainActivity extends AppCompatActivity {
                 String full_name=cred.getFullName();
                 String login_status=cred.getLoginStatus();
                 if(login_status.equals("0")){
-                    apd.hide();
-                    aid.setMessage("Inicie sesión nuevamente por favor");
+                    viewDialog.hideDialog(0);
+                    new Utils().createAlert(ctx,"Inicie sesión nuevamente por favor",1);
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            aid.hide();
                             cred.logout();
                         }
                     }, 1500);
 
                 }else{
+                    viewDialog.hideDialog(0);
                     activity=(user_id.equals("0") || user_id==null)?LoginActivity.class:FirstActivity.class;
                     redirect(activity);
                 }

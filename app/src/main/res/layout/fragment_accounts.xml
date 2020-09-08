@@ -1,41 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragment_accounts"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AccountsFragment">
+    tools:context=".fragments.AccountsFragment">
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_refresh_account"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:paddingBottom="10dp">
 
-        <ScrollView
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view_accounts"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5sp"
+            android:layout_marginTop="5sp"
+            android:layout_marginEnd="5sp" />
+    </ScrollView>
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/recycler_view_accounts"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5sp"
-                android:layout_marginTop="5sp"
-                android:layout_marginRight="5sp" />
-        </ScrollView>
-    </android.support.v4.widget.SwipeRefreshLayout>
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/float_add_new_account"
-        android:layout_width="50dp"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@color/colorPrimary"
-        android:src="@drawable/ic_add_account_white"
-        app:layout_constraintBottom_toTopOf="@+id/swipe_refresh_account"
-        app:layout_constraintEnd_toStartOf="@+id/swipe_refresh_account"
-        app:layout_constraintHorizontal_bias="0.115"
-        app:layout_constraintStart_toEndOf="@+id/swipe_refresh_account"
-        app:layout_constraintTop_toBottomOf="@+id/swipe_refresh_account"
-        app:layout_constraintVertical_bias="0.549" />
-</android.support.constraint.ConstraintLayout>
+</LinearLayout>

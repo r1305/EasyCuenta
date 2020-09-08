@@ -1,4 +1,4 @@
-package com.solution.tecno.androidanimations;
+package com.solution.tecno.androidanimations.utils;
 
 import android.app.PendingIntent;
 import android.content.Context;
@@ -8,9 +8,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -20,9 +17,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeInfoDialog;
-import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
 import com.solution.tecno.androidanimations.Firebase.Constants;
+import com.solution.tecno.androidanimations.activities.LoginActivity;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -41,7 +37,6 @@ public class Credentials {
     public String json_response;
     public String network_status;
     private Context ctx;
-    AwesomeInfoDialog aid;
 
     public Credentials(Context ctx) {
         this.ctx = ctx;
@@ -142,7 +137,7 @@ public class Credentials {
         Ed.putString("login_status","0");
         Ed.commit();
 
-        Intent i=new Intent(ctx,LoginActivity.class);
+        Intent i=new Intent(ctx, LoginActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pi = PendingIntent.getActivity(ctx, 0, i, 0);
         ctx.startActivity(i);
@@ -162,13 +157,6 @@ public class Credentials {
     }
 
     public void validateSession(){
-        //create info dialog
-        aid=new AwesomeInfoDialog(ctx)
-                .setTitle(R.string.app_name)
-                .setMessage("Su sesión ha caducado")
-                .setColoredCircle(R.color.dialogInfoBackgroundColor)
-                .setDialogIconAndColor(R.drawable.ic_dialog_warning,R.color.white)
-                .setCancelable(true);
         isNetworkAvailable();
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -176,11 +164,10 @@ public class Credentials {
                 if(network_status.equals("1")){
                     getUserLoginStatus();
                     if(login_status.equals("0")){
-                        aid.show();
+                        new Utils().createAlert(ctx,"Su sesión ha caducado",1);
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                aid.hide();
                                 logout();
                             }
                         }, 1500);

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="round_linear_height">45dp</dimen>
+    <dimen name="margin_start_inputs">45dp</dimen>
+    <dimen name="margin_end_inputs">45dp</dimen>
+
+    <dimen name="margin_start_buttons">45dp</dimen>
+    <dimen name="margin_end_buttons">45dp</dimen>
+</resources>

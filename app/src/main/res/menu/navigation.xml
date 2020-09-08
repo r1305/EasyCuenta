@@ -5,12 +5,6 @@
         android:title="Mi Perfil"
         android:icon="@drawable/ic_profile"
         />
-    <item
-        android:id="@+id/menu_contacts"
-        android:title="Notificar"
-        android:icon="@drawable/ic_notification"
-        android:visible="true"
-        />
 
     <item
         android:id="@+id/menu_accounts"

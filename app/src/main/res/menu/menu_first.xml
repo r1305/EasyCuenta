@@ -1,8 +1,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.solution.tecno.androidanimations.FirstActivity">
+    tools:context="com.solution.tecno.androidanimations.activities.FirstActivity">
 
+    <item
+        android:id="@+id/action_refresh_accounts"
+        android:title="Actualizar cuentas"
+        android:icon="@drawable/ic_refresh"
+        app:showAsAction="always"
+        android:orderInCategory="1"
+        />
+    <item
+        android:id="@+id/action_new_account"
+        android:title="Nueva cuenta"
+        android:icon="@drawable/ic_add_account_white"
+        app:showAsAction="ifRoom"
+        android:orderInCategory="2"
+        />
     <item
         android:id="@+id/action_log_out"
         android:title="Cerrar Sesión"

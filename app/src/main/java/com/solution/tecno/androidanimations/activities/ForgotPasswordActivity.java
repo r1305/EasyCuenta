@@ -1,25 +1,25 @@
-package com.solution.tecno.androidanimations;
+package com.solution.tecno.androidanimations.activities;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.alirezaahmadi.progressbutton.ProgressButtonComponent;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeErrorDialog;
-import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeProgressDialog;
-import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
+import com.solution.tecno.androidanimations.R;
+import com.solution.tecno.androidanimations.utils.Credentials;
+import com.solution.tecno.androidanimations.utils.Utils;
+import com.solution.tecno.androidanimations.utils.ViewDialog;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -28,11 +28,11 @@ import org.json.simple.parser.JSONParser;
 public class ForgotPasswordActivity extends AppCompatActivity {
 
     EditText forgot_email,forgot_number;
-
+    ViewDialog viewDialog;
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        Intent i = new Intent(ctx,LoginActivity.class);
+        Intent i = new Intent(ctx, LoginActivity.class);
         startActivity(i);
         ForgotPasswordActivity.this.finish();
     }
@@ -41,10 +41,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     Button btn_forgot_reset,btn_forgot_cancel;
     Context ctx;
     Credentials cred;
-    String base_url="https://www.jadconsultores.com.pe/php_connection/app/bancos_resumen/";
-    AwesomeProgressDialog apd;
-    AwesomeSuccessDialog asd;
-    AwesomeErrorDialog aed;
+    String base_url;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,30 +49,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
         ctx=ForgotPasswordActivity.this;
         cred=new Credentials(ctx);
-        //create progress dialog
-        apd=new AwesomeProgressDialog(ctx)
-                .setTitle(R.string.app_name)
-                .setMessage("Cargando")
-                .setColoredCircle(R.color.dialogInfoBackgroundColor)
-                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
-                .setCancelable(false);
-
-        //create success dialog
-        asd=new AwesomeSuccessDialog(ctx)
-                .setTitle(R.string.app_name)
-                .setMessage("Listo!")
-                .setColoredCircle(R.color.dialogSuccessBackgroundColor)
-                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
-                .setCancelable(false);
-
-        //create error dialog
-        aed=new AwesomeErrorDialog(ctx)
-                .setTitle(R.string.app_name)
-                .setMessage("Ocurrió un error")
-                .setColoredCircle(R.color.dialogErrorBackgroundColor)
-                .setDialogIconAndColor(R.drawable.ic_dialog_error,R.color.white)
-                .setCancelable(false);
-
+        base_url = ctx.getResources().getString(R.string.base_url);
         forgot_email = findViewById(R.id.forgot_et_email);
         forgot_number = findViewById(R.id.forgot_et_phone);
         btn_forgot_reset = findViewById(R.id.btn_forgot_reset);
@@ -95,44 +69,36 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                 String email = forgot_email.getText().toString();
                 String number = forgot_number.getText().toString();
                 if(!isValidEmail(email)){
-                    aed.setMessage("Ingrese un correo válido");
-                    aed.show();
+                    new Utils().createAlert(ctx,"Ingrese un correo válido",1);
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            aed.hide();
                             forgot_email.setError("Ingrese un correo válido");
                             forgot_email.requestFocus();
                         }
-                    }, 2500);
+                    }, 1500);
                     return;
                 }else if(number.isEmpty()){
-                    aed.setMessage("Ingrese su número de celular");
-                    aed.show();
+                    new Utils().createAlert(ctx,"Ingrese su número de celular",1);
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            aed.hide();
                             forgot_number.setError("Ingrese un número de celular");
                             forgot_number.requestFocus();
                         }
-                    }, 2500);
+                    }, 1500);
                     return;
                 }else if(number.length()<9){
-                    aed.setMessage("Ingrese un número válido");
-                    aed.show();
+                    new Utils().createAlert(ctx,"Ingrese un número válido",1);
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            aed.hide();
                             forgot_number.setError("Ingrese un número de celular válido");
                             forgot_number.requestFocus();
                         }
-                    }, 2500);
+                    }, 1500);
                     return;
                 }else{
-                    apd.setMessage("Validando...");
-                    apd.show();
                     resetPassword(email,number);
                 }
             }
@@ -144,8 +110,9 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
     }
 
-    public void resetPassword(final String email, String phone) {
-
+    public void resetPassword(final String email, String phone)
+    {
+        viewDialog.showDialog();
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?email="+email+
                 "&phone="+phone;
@@ -160,26 +127,17 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                             JSONObject item=(JSONObject)ja.get(0);
                             String find=item.get("encontrado").toString();
                             if(find.equals("0")){
-                                apd.hide();
-                                aed.setMessage("No se pudo encontrar el usuario ");
-                                aed.show();
-                                new Handler().postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        aed.hide();
-                                    }
-                                }, 1500);
-
+                                viewDialog.hideDialog(0);
+                                new Utils().createAlert(ctx,"No se pudo encontrar el usuario",1);
                             }else{
                                 final String find_id=item.get("id").toString();
                                 final String find_email=item.get("email").toString();
-                                apd.hide();
-                                asd.setMessage("Hemos enviado un email al correo registrado!");
-                                asd.show();
+                                viewDialog.hideDialog(0);
+                                new Utils().createAlert(ctx,"Hemos enviado un email al correo registrado!",2);
+
                                 new Handler().postDelayed(new Runnable() {
                                     @Override
                                     public void run() {
-                                        asd.hide();
                                         updatePassword(find_id,find_email);
                                         Intent i=new Intent(ctx,LoginActivity.class);
                                         startActivity(i);
@@ -188,7 +146,8 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                                 }, 1500);
                             }
                         }catch (Exception e){
-
+                            viewDialog.hideDialog(0);
+                            new Utils().createAlert(ctx,e.getMessage(),1);
                         }
                     }
                 },
@@ -196,23 +155,17 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         // error
-                        apd.hide();
-                        aed.setMessage("Ocurrió un error al registrar su cuenta!\n"+error.getMessage());
-                        aed.show();
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                aed.hide();
-                            }
-                        }, 1500);
+                        viewDialog.hideDialog(0);
+                        new Utils().createAlert(ctx,error.getMessage(),1);
                     }
                 }
         );
         queue.add(postRequest);
     }
 
-    public void updatePassword(final String id,final String email) {
-
+    public void updatePassword(final String id,final String email)
+    {
+        viewDialog.showDialog();
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?id="+id+"&email="+email;
         String url = base_url+"sendMail.php"+params;
@@ -226,45 +179,23 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                             JSONObject item=(JSONObject)ja.get(0);
                             String find=item.get("encontrado").toString();
                             if(find.equals("0")){
-                                apd.hide();
-                                aed.setMessage("No se pudo encontrar el usuario ");
-                                aed.show();
-                                new Handler().postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        aed.hide();
-                                    }
-                                }, 1500);
-
+                                viewDialog.hideDialog(0);
+                                new Utils().createAlert(ctx,"No se pudo encontrar el usuario ",1);
                             }else{
-                                apd.hide();
-                                asd.setMessage("Hemos enviado un email al correo registrado!");
-                                asd.show();
-                                new Handler().postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        asd.hide();
-                                    }
-                                }, 1500);
+                                viewDialog.hideDialog(0);
+                                new Utils().createAlert(ctx,"Hemos enviado un email al correo registrado!",1);
                             }
                         }catch (Exception e){
-
+                            viewDialog.hideDialog(0);
+                            new Utils().createAlert(ctx,e.getMessage(),1);
                         }
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        // error
-                        apd.hide();
-                        aed.setMessage("Ocurrió un error al registrar su cuenta!\n"+error.getMessage());
-                        aed.show();
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                aed.hide();
-                            }
-                        }, 1500);
+                        viewDialog.hideDialog(0);
+                        new Utils().createAlert(ctx,error.getMessage(),1);
                     }
                 }
         );

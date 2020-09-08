@@ -1,11 +1,10 @@
-package com.solution.tecno.androidanimations;
+package com.solution.tecno.androidanimations.activities;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -13,34 +12,29 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.alirezaahmadi.progressbutton.ProgressButtonComponent;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeErrorDialog;
-import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeProgressDialog;
-import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
+import com.solution.tecno.androidanimations.R;
+import com.solution.tecno.androidanimations.utils.Credentials;
+import com.solution.tecno.androidanimations.utils.Utils;
+import com.solution.tecno.androidanimations.utils.ViewDialog;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-
-import static java.security.AccessController.getContext;
 
 public class RegisterActivity extends AppCompatActivity {
 
     EditText reg_username,reg_psw,reg_full_name,reg_phone,reg_email;
     Context ctx;
     Credentials cred;
-//    ProgressButtonComponent reg_button,cancel_button;
+    ViewDialog viewDialog;
     Button reg_button,cancel_button;
-    String base_url="https://www.jadconsultores.com.pe/php_connection/app/bancos_resumen/";
-    AwesomeProgressDialog apd;
-    AwesomeSuccessDialog asd;
-    AwesomeErrorDialog aed;
+    String base_url;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,30 +42,8 @@ public class RegisterActivity extends AppCompatActivity {
 
         ctx = this;
         cred = new Credentials(ctx);
-
-        //create progress dialog
-        apd=new AwesomeProgressDialog(ctx)
-                .setTitle(R.string.app_name)
-                .setMessage("Cargando")
-                .setColoredCircle(R.color.dialogInfoBackgroundColor)
-                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
-                .setCancelable(false);
-
-        //create success dialog
-        asd=new AwesomeSuccessDialog(ctx)
-                .setTitle(R.string.app_name)
-                .setMessage("Listo!")
-                .setColoredCircle(R.color.dialogSuccessBackgroundColor)
-                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
-                .setCancelable(false);
-
-        //create error dialog
-        aed=new AwesomeErrorDialog(ctx)
-                .setTitle(R.string.app_name)
-                .setMessage("Ocurrió un error")
-                .setColoredCircle(R.color.dialogErrorBackgroundColor)
-                .setDialogIconAndColor(R.drawable.ic_dialog_error,R.color.white)
-                .setCancelable(false);
+        viewDialog = new ViewDialog(this);
+        base_url = ctx.getResources().getString(R.string.base_url);
 
         reg_full_name = findViewById(R.id.diag_et_name);
         reg_username = findViewById(R.id.diag_et_user);
@@ -140,8 +112,6 @@ public class RegisterActivity extends AppCompatActivity {
                 if(!name.isEmpty() && !username.isEmpty() &&
                         (!phone.isEmpty() && phone.length()>=9) &&
                         !psw.isEmpty() && !email.isEmpty() && isValidEmail(email)){
-                    apd.setMessage("Registrando...");
-                    apd.show();
                     validatePhone(username,psw,name,phone,email);
                 }
             }
@@ -149,6 +119,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     public void validatePhone(final String user,final String psw,final String name,final String phone,final String email) {
+        viewDialog.showDialog();
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?phone="+Uri.encode(phone);
         String url = base_url+"findPhoneNumber.php"+params;
@@ -162,31 +133,23 @@ public class RegisterActivity extends AppCompatActivity {
                             JSONObject item=(JSONObject)ja.get(0);
                             int encontrado=Integer.parseInt(item.get("encontrado").toString());
                             if(encontrado==0){
+                                viewDialog.hideDialog(0);
                                 register(user,psw,name,phone,email);
                             }else{
-                                apd.hide();
-                                aed.setMessage("# Celular ya registrado");
-                                aed.show();
+                                viewDialog.hideDialog(0);
+                                new Utils().createAlert(ctx,"# Celular ya registrado",1);
 
                                 new Handler().postDelayed(new Runnable() {
                                     @Override
                                     public void run() {
-                                        aed.hide();
                                         reg_phone.setError("Número ya registrado");
                                         reg_phone.requestFocus();
                                     }
-                                }, 3000);
+                                }, 1500);
                             }
                         } catch (Exception e) {
-                            apd.hide();
-                            aed.setMessage("Ocurrió un error al registrar\n"+e.getMessage());
-                            aed.show();
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    aed.hide();
-                                }
-                            }, 3000);
+                            viewDialog.hideDialog(0);
+                            new Utils().createAlert(ctx,e.getMessage(),1);
                             e.printStackTrace();
                         }
                     }
@@ -196,7 +159,8 @@ public class RegisterActivity extends AppCompatActivity {
                     public void onErrorResponse(VolleyError error) {
                         // error
                         Log.d("Error.Response", error.toString());
-                        Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
+                        viewDialog.hideDialog(0);
+                        new Utils().createAlert(ctx,error.getMessage(),1);
                     }
                 }
         );
@@ -204,6 +168,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     public void register(final String user,final String psw,String name,String phone,String email) {
+        viewDialog.showDialog();
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?username="+user+"&psw="+psw+"&name="+ Uri.encode(name)+
                 "&phone="+Uri.encode(phone)+"&email="+email;
@@ -214,37 +179,21 @@ public class RegisterActivity extends AppCompatActivity {
                     public void onResponse(String response) {
                         try {
                             if(response.equals("true")){
-                                apd.hide();
-                                asd.show();
+                                viewDialog.hideDialog(1.5);
                                 new Handler().postDelayed(new Runnable() {
                                     @Override
                                     public void run() {
-                                        asd.hide();
                                         login(user,psw);
                                     }
-                                }, 3000);
+                                }, 1500);
 
                             }else{
-                                apd.hide();
-                                aed.setMessage("Ocurrió un error");
-                                aed.show();
-                                new Handler().postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        aed.hide();
-                                    }
-                                }, 3000);
+                                viewDialog.hideDialog(0);
+                                new Utils().createAlert(ctx,"Ocurrió un error",1);
                             }
                         } catch (Exception e) {
-                            apd.hide();
-                            aed.setMessage(e.getMessage());
-                            aed.show();
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    aed.hide();
-                                }
-                            }, 3000);
+                            viewDialog.hideDialog(0);
+                            new Utils().createAlert(ctx,e.getMessage(),1);
                             e.printStackTrace();
                         }
                     }
@@ -254,7 +203,8 @@ public class RegisterActivity extends AppCompatActivity {
                     public void onErrorResponse(VolleyError error) {
                         // error
                         Log.d("Error.Response", error.toString());
-                        Toast.makeText(ctx, error.toString(), Toast.LENGTH_SHORT).show();
+                        viewDialog.hideDialog(0);
+                        new Utils().createAlert(ctx,error.getMessage(),1);
                     }
                 }
         );
@@ -262,8 +212,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     public void login(String user,String psw) {
-        apd.setMessage("Ingresando...");
-        apd.show();
+        viewDialog.showDialog();
         RequestQueue queue = Volley.newRequestQueue(this);
         String params="?username="+user+"&psw="+psw;
         String url = base_url+"login.php"+params;
@@ -283,28 +232,18 @@ public class RegisterActivity extends AppCompatActivity {
                             String email=item.get("email").toString();
                             String photo=item.get("profile_photo").toString();
                             cred.save_credentials(id,full_name,user_name,phone_number,email,photo,"1");
-                            apd.hide();
-                            asd.show();
-
+                            viewDialog.hideDialog(1.5);
                             new Handler().postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
-                                    asd.hide();
                                     Intent i=new Intent(ctx,FirstActivity.class);
                                     startActivity(i);
                                     RegisterActivity.this.finish();
                                 }
-                            }, 3000);
+                            }, 1500);
                         } catch (Exception e) {
-                            apd.hide();
-                            aed.setMessage("Ocurrió un error al registrar\n"+e.getMessage());
-                            aed.show();
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    aed.hide();
-                                }
-                            }, 3000);
+                            viewDialog.hideDialog(0);
+                            new Utils().createAlert(ctx,e.getMessage(),1);
                             e.printStackTrace();
                         }
                     }
@@ -312,15 +251,8 @@ public class RegisterActivity extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        apd.hide();
-                        aed.setMessage("Ocurrió un error al registrar\n"+error.toString());
-                        aed.show();
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                aed.hide();
-                            }
-                        }, 3000);
+                        viewDialog.hideDialog(0);
+                        new Utils().createAlert(ctx,error.getMessage(),1);
                         // error
                         Log.d("Error.Response", error.toString());
                     }

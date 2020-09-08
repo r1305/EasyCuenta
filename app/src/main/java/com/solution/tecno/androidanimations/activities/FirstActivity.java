@@ -1,23 +1,34 @@
-package com.solution.tecno.androidanimations;
+package com.solution.tecno.androidanimations.activities;
 
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.navigation.NavigationView;
+
+import androidx.annotation.RequiresApi;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -27,22 +38,23 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeErrorDialog;
-import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeProgressDialog;
-import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+import com.solution.tecno.androidanimations.fragments.AccountsFragment;
 import com.solution.tecno.androidanimations.Firebase.Constants;
-import com.solution.tecno.androidanimations.Firebase.MyFirebaseInstanceIdService;
+import com.solution.tecno.androidanimations.fragments.ProfileFragment;
+import com.solution.tecno.androidanimations.R;
+import com.solution.tecno.androidanimations.utils.Credentials;
+import com.solution.tecno.androidanimations.utils.Utils;
+import com.solution.tecno.androidanimations.utils.ViewDialog;
 import com.squareup.picasso.Picasso;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class FirstActivity extends AppCompatActivity  implements NavigationView.OnNavigationItemSelectedListener{
 
     Context ctx;
+    ViewDialog viewDialog;
     Toolbar toolbar;
     DrawerLayout drawer;
     String user_id,full_name,user_name,user_photo;
@@ -51,18 +63,27 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
     TextView header_name,header_username;
     CircleImageView header_photo;
 
-    AwesomeProgressDialog apd;
-    AwesomeSuccessDialog asd;
-    AwesomeErrorDialog aed;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_first);
         ctx=FirstActivity.this;
         cred = new Credentials(ctx);
-        MyFirebaseInstanceIdService serv=new MyFirebaseInstanceIdService();
-        serv.onTokenRefresh2(ctx);
+        viewDialog = new ViewDialog(this);
+        FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+            @Override
+            public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                if (!task.isSuccessful()) {
+                    Log.w("fcm_instance", "getInstanceId failed", task.getException());
+                    return;
+                }
+                String token = task.getResult().getToken();
+                String msg = token;
+                Log.e("fcm_token", msg);
+                new Utils(ctx).updateToken(msg);
+            }
+        });
         user_id=cred.getUserId();
         full_name=cred.getFullName();
         user_name=cred.getUserName();
@@ -70,30 +91,6 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
         if(user_photo==""){
             user_photo=Constants.BASE_PHOTO;
         }
-
-        //create progress dialog
-        apd=new AwesomeProgressDialog(ctx)
-                .setTitle(R.string.app_name)
-                .setMessage("Cargando")
-                .setColoredCircle(R.color.dialogInfoBackgroundColor)
-                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
-                .setCancelable(false);
-
-        //create success dialog
-        asd=new AwesomeSuccessDialog(ctx)
-                .setTitle(R.string.app_name)
-                .setMessage("Listo!")
-                .setColoredCircle(R.color.dialogSuccessBackgroundColor)
-                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
-                .setCancelable(false);
-
-        //create error dialog
-        aed=new AwesomeErrorDialog(ctx)
-                .setTitle(R.string.app_name)
-                .setMessage("Ocurrió un error")
-                .setColoredCircle(R.color.dialogErrorBackgroundColor)
-                .setDialogIconAndColor(R.drawable.ic_dialog_error,R.color.white)
-                .setCancelable(false);
 
         toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_menu_white);
@@ -123,6 +120,7 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
         });
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @SuppressLint("WrongConstant")
             @Override
             public void onClick(View v) {
                 if(drawer.isDrawerOpen(Gravity.START)){
@@ -151,7 +149,7 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
 
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fm.beginTransaction();
-        Fragment fr=AccountsFragment.newInstance();
+        Fragment fr= AccountsFragment.newInstance();
         fragmentTransaction.replace(R.id.container,fr);
         fragmentTransaction.commit();
 
@@ -170,14 +168,96 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifpest.xml.
         int id = item.getItemId();
-
-        if(id == R.id.action_log_out){
-            apd.setMessage("Cerrando Sesión");
-            apd.show();
-            logout(user_id,"0");
+        switch (id){
+            case R.id.action_log_out:
+                new Utils().createAlert(ctx,"Cerrando Sesión",1);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        logout(user_id,"0");
+                    }
+                }, 1500);
+                break;
+            case R.id.action_refresh_accounts:
+                FragmentManager fm = getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fm.beginTransaction();
+                Fragment fr= AccountsFragment.newInstance();
+                fragmentTransaction.replace(R.id.container,fr);
+                fragmentTransaction.commit();
+                break;
+            case R.id.action_new_account:
+                if(cred.getNetworkStatus().equals("0")){
+                    new Utils().createAlert(ctx,"Red no disponible",1);
+                }else{
+                    final View layout= LayoutInflater.from(ctx).inflate(R.layout.new_account_view,null);
+                    new AlertDialog.Builder(ctx)
+                            .setTitle("Nueva cuenta")
+                            .setMessage("Añade una nueva cuenta para compartirla rápidamente")
+                            .setPositiveButton("Agregar", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                    EditText diag_et_bank=layout.findViewById(R.id.diag_et_bank);
+                                    EditText diag_et_number=layout.findViewById(R.id.diag_et_account);
+                                    EditText diag_et_user_name=layout.findViewById(R.id.diag_et_titular);
+                                    EditText diag_et_cci=layout.findViewById(R.id.diag_et_cci);
+                                    String bank = diag_et_bank.getText().toString();
+                                    String number = diag_et_number.getText().toString();
+                                    String user_name = diag_et_user_name.getText().toString();
+                                    String cci = diag_et_cci.getText().toString();
+                                    addAccount(user_id,bank,number,user_name,cci);
+                                }
+                            })
+                            .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            })
+                            .setView(layout) // Old standard padding: .setCustomView(your_custom_view, 20, 20, 20, 0)
+                            //.setCustomView(your_custom_view, 10, 20, 10, 20) // int left, int top, int right, int bottom
+                            .show();
+                }
+                break;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void addAccount(final String user_id, String bank, String number,String user_name,String cci) {
+        viewDialog.showDialog();
+        RequestQueue queue = Volley.newRequestQueue(ctx);
+        String params="?user_id="+Integer.parseInt(user_id)+"" +
+                "&bank="+Uri.encode(bank)+
+                "&account="+number+
+                "&name="+user_name+
+                "&cci="+cci;
+        String url = base_url+"addAccount.php"+params;
+        StringRequest postRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        if(response.equals("true")){
+                            viewDialog.hideDialog(0);
+                            new Utils().createAlert(ctx, "!Registro exitoso!",2);
+
+                        }else{
+                            viewDialog.hideDialog(0);
+                            new Utils().createAlert(ctx, "Ocurrió un error al registrar su cuenta!\nIntentelo nuevamente",2);
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // error
+                        cred.registerError(error.getMessage(),user_id);
+                        viewDialog.hideDialog(0);
+                        new Utils().createAlert(ctx, error.getMessage(),1);
+                    }
+                }
+        );
+        queue.add(postRequest);
     }
 
     public void startNewActivity(Context context, String packageName) {
@@ -191,6 +271,10 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
         context.startActivity(intent);
     }
 
+
+
+
+    @SuppressLint("WrongConstant")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
@@ -203,29 +287,14 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
                 fr=AccountsFragment.newInstance();
                 fragmentTransaction.replace(R.id.container,fr);
             break;
-            case R.id.menu_contacts:
-                fr=ContactFragment.newInstance();
-                fragmentTransaction.replace(R.id.container,fr);
-            break;
             case R.id.menu_profile:
                 if(cred.getNetworkStatus().equals("1")){
-                    fr=ProfileFragment.newInstance();
+                    fr= ProfileFragment.newInstance();
                     fragmentTransaction.replace(R.id.container,fr);
                 }else{
-                    aed.setMessage("Red no disponible");
-                    aed.show();
-                    Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        public void run() {
-                            aed.hide();
-                        }
-                    }, 1500);
+                    new Utils().createAlert(ctx,"Red no disponible",1);
                 }
 
-            break;
-            default:
-                fr=AccountsFragment.newInstance();
-                fragmentTransaction.replace(R.id.container,fr);
             break;
         }
         drawer.closeDrawer(Gravity.START);
@@ -253,6 +322,7 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
     }
 
     public void logout(final String user_id, String status) {
+        viewDialog.showDialog();
         RequestQueue queue = Volley.newRequestQueue(ctx);
         String params="?user_id="+user_id+"&status="+status;
         String url = base_url+"login.php"+params;
@@ -263,27 +333,18 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
                     @Override
                     public void onResponse(String response) {
                         try {
-                            apd.hide();
-                            asd.show();
+                            viewDialog.hideDialog(1.5);
                             new Handler().postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
-                                    asd.hide();
                                     cred.logout();
                                 }
                             }, 1500);
 
 
                         } catch (Exception e) {
-                            apd.hide();
-                            aed.setMessage(e.getMessage());
-                            aed.show();
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    aed.hide();
-                                }
-                            }, 2000);
+                            viewDialog.hideDialog(0);
+                            new Utils().createAlert(ctx,e.getMessage(),1);
                             System.out.println(e);
                         }
                     }
@@ -291,26 +352,10 @@ public class FirstActivity extends AppCompatActivity  implements NavigationView.
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        apd.hide();
-                        aed.setMessage(error.toString());
-                        aed.show();
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                aed.hide();
-                            }
-                        }, 2000);
+                        viewDialog.hideDialog(0);
+                        new Utils().createAlert(ctx,error.getMessage(),1);
                         // error
                         Log.d("Error.Response", error.toString());
-                        apd.hide();
-                        aed.setMessage(error.toString());
-                        aed.show();
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                aed.hide();
-                            }
-                        }, 2000);
                     }
                 }
         );
