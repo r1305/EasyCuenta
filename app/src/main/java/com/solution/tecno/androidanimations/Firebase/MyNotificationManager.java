@@ -7,7 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import androidx.core.app.NotificationCompat;
 
-import com.solution.tecno.androidanimations.activities.FirstActivity;
+import com.solution.tecno.androidanimations.activities.MainActivity;
 import com.solution.tecno.androidanimations.R;
 
 import java.util.Random;
@@ -35,7 +35,7 @@ public class MyNotificationManager {
         // Each element then alternates between vibrate, sleep, vibrate, sleep...
         long[] pattern = {0, 500, 250, 500, 250,500, 250};
 
-        Intent intent = new Intent(mCtx, FirstActivity.class);
+        Intent intent = new Intent(mCtx, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(mCtx, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 

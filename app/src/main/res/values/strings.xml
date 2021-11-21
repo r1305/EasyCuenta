@@ -8,4 +8,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="base_url">https://www.jadconsultores.com.pe/php_connection/app/bancos_resumen/</string>
+    <string name="firebase_database">https://easycuenta-6c1dd-default-rtdb.firebaseio.com/</string>
+    <string name="login_screen">https://assets10.lottiefiles.com/private_files/lf30_m6j5igxb.json</string>
+
 </resources>

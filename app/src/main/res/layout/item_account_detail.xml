@@ -7,7 +7,7 @@
     android:paddingRight="16dp"
     android:paddingLeft="16dp"
     android:paddingTop="16dp"
-    tools:context=".activities.FirstActivity"
+    tools:context=".activities.MainActivity"
     android:orientation="vertical"
     android:gravity="center">
 

@@ -4,39 +4,31 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-import com.solution.tecno.androidanimations.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.solution.tecno.androidanimations.databinding.ActivityLoginBinding;
+import com.solution.tecno.androidanimations.model.Usuario;
 import com.solution.tecno.androidanimations.utils.Credentials;
+import com.solution.tecno.androidanimations.utils.Preferences;
 import com.solution.tecno.androidanimations.utils.Utils;
 import com.solution.tecno.androidanimations.utils.ViewDialog;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-
 public class LoginActivity extends AppCompatActivity {
 
-//    ProgressButtonComponent login_btn,register_btn;
-    Button login_btn,register_btn;
-    EditText et_user,et_psw;
-    TextView forgot_password;
     Context ctx;
     ViewDialog viewDialog;
     Credentials cred;
-    String base_url;
+    Utils utils;
+    ActivityLoginBinding binding;
 
     @Override
     public void onBackPressed() {
@@ -51,135 +43,119 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        binding = ActivityLoginBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
         ctx=LoginActivity.this;
         cred=new Credentials(ctx);
         viewDialog = new ViewDialog(this);
-        base_url = ctx.getResources().getString(R.string.base_url);
+        utils = new Utils(ctx);
 
-        et_user=findViewById(R.id.et_user);
-        et_psw=findViewById(R.id.et_psw);
-        forgot_password = findViewById(R.id.forgot_password);
-        forgot_password.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(ctx, ForgotPasswordActivity.class);
-                startActivity(i);
-                LoginActivity.this.finish();
-            }
+        binding.forgotPassword.setOnClickListener(v -> {
+            Intent i = new Intent(ctx, ForgotPasswordActivity.class);
+            startActivity(i);
+            LoginActivity.this.finish();
         });
-        login_btn = findViewById(R.id.btn_login);
-        login_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(cred.getNetworkStatus().equals("1")){
-                    final String username=et_user.getText().toString();
-                    final String psw=et_psw.getText().toString();
+        binding.btnLogin.setOnClickListener(v -> {
+            if(cred.getNetworkStatus().equals("1")){
+                final String username=binding.etUser.getText().toString();
+                final String psw=binding.etPsw.getText().toString();
 
-                    if(username.isEmpty() && psw.isEmpty()){
-                        et_user.setError("Complete el usuario");
-                        et_user.requestFocus();
-                        et_psw.setError("Ingrese contraseña");
-                        et_psw.requestFocus();
-                        return;
-                    }
-                    if(username.isEmpty()){
-                        et_user.setError("Complete el usuario");
-                        et_user.requestFocus();
-                        return;
-                    }
-                    if(psw.isEmpty()){
-                        et_psw.setError("Ingrese contraseña");
-                        et_psw.requestFocus();
-                        return;
-                    }
-
-                    if(!username.isEmpty() && !psw.isEmpty()){
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                login(username,psw);
-                            }
-                        }, 3000);
-                    }
-                }else{
-                    new Utils().createAlert(ctx,"Red no disponible",1);
+                if(username.isEmpty() && psw.isEmpty()){
+                    binding.etUser.setError("Complete el usuario");
+                    binding.etUser.requestFocus();
+                    binding.etPsw.setError("Ingrese contraseña");
+                    binding.etPsw.requestFocus();
+                    return;
                 }
-            }
-        });
-
-        register_btn = findViewById(R.id.btn_register);
-        register_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(ctx,RegisterActivity.class);
-                startActivity(i);
-                LoginActivity.this.finish();
-            }
-        });
-    }
-
-    public void login(final String user, String psw) {
-        viewDialog.showDialog();
-        RequestQueue queue = Volley.newRequestQueue(ctx);
-        String params="?username="+user+"&psw="+psw;
-        String url = base_url+"login.php"+params;
-
-        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        JSONParser jp = new JSONParser();
-                        try {
-                            JSONArray ja=(JSONArray)jp.parse(response);
-                            JSONObject item=(JSONObject)ja.get(0);
-                            String id=item.get("id").toString();
-                            String full_name=item.get("full_name").toString();
-                            String user_name=item.get("username").toString();
-                            String phone_number=item.get("phone_number").toString();
-                            String email=item.get("email").toString();
-                            String user_photo=item.get("profile_photo").toString();
-                            String login_status=item.get("login_status").toString();
-
-                            cred.save_credentials(id,full_name,user_name,phone_number,email,user_photo,login_status);
-                            viewDialog.hideDialog(1.5);
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Intent i=new Intent(ctx,FirstActivity.class);
-                                    startActivity(i);
-                                    LoginActivity.this.finish();
-                                }
-                            }, 1500);
-
-
-                        } catch (Exception e) {
-                            cred.registerError(e.getMessage(),user);
-                            viewDialog.hideDialog(0);
-                            new Utils().createAlert(ctx,e.getMessage(),1);
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        cred.registerError(error.getMessage(),user);
-                        viewDialog.hideDialog(0);
-                        new Utils().createAlert(ctx,error.getMessage(),1);
-                    }
+                if(username.isEmpty()){
+                    binding.etUser.setError("Complete el usuario");
+                    binding.etUser.requestFocus();
+                    return;
                 }
-        );
-        postRequest.setRetryPolicy(new DefaultRetryPolicy(
-                50000,
-                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        queue.add(postRequest);
+                if(psw.isEmpty()){
+                    binding.etPsw.setError("Ingrese contraseña");
+                    binding.etPsw.requestFocus();
+                    return;
+                }
+
+                if(!username.isEmpty() && !psw.isEmpty()){
+                    new Handler().postDelayed(() -> login(), 3000);
+                }
+            }else{
+                new Utils().createAlert(ctx,"Red no disponible",1);
+            }
+        });
+
+        binding.btnRegister.setOnClickListener(v -> {
+            Intent i = new Intent(ctx,RegisterActivity.class);
+            startActivity(i);
+            LoginActivity.this.finish();
+        });
     }
 
     public final static boolean isValidEmail(CharSequence target) {
         if (target == null)
             return false;
         return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
+    }
+
+    void login(){
+        viewDialog.showDialog();
+        FirebaseAuth auth = utils.initFirebaseAuth();
+        auth.signInWithEmailAndPassword(binding.etUser.getText().toString(),binding.etPsw.getText().toString())
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        LoginActivity.this.getUserDetails(binding.etUser.getText().toString());
+                        new Handler().postDelayed(() -> {
+                            cred.saveData(Preferences.LOGIN, "1");
+                            viewDialog.hideDialog(0);
+                            Toast.makeText(ctx, "Credenciales correctas", Toast.LENGTH_SHORT).show();
+                            LoginActivity.this.startActivity(new Intent(ctx, MainActivity.class));
+                            LoginActivity.this.finish();
+                        }, 1500);
+                    } else {
+                        viewDialog.hideDialog(0);
+                        Toast.makeText(ctx, "Credenciales incorrectas", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    void getUserDetails(final String email)
+    {
+        DatabaseReference reference = utils.getDatabaseReference(Preferences.FIREBASE_USUARIOS);
+        reference.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                Usuario usuario = snapshot.getValue(Usuario.class);
+                usuario.setKey(snapshot.getKey());
+                if(usuario.getCorreo().equals(email)){
+                    cred.saveData(Preferences.USER_ID,usuario.getKey());
+                    cred.saveData(Preferences.USER_NAME,usuario.getNombre());
+                    cred.saveData(Preferences.USER_PHONE,usuario.getCelular());
+                    cred.saveData(Preferences.USER_EMAIL,usuario.getCorreo());
+                }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 }
 

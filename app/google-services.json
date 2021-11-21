@@ -1,34 +1,34 @@
 {
   "project_info": {
-    "project_number": "51448507934",
-    "firebase_url": "https://aply-delivery.firebaseio.com",
-    "project_id": "aply-delivery",
-    "storage_bucket": "aply-delivery.appspot.com"
+    "project_number": "667397650984",
+    "firebase_url": "https://easycuenta-6c1dd-default-rtdb.firebaseio.com",
+    "project_id": "easycuenta-6c1dd",
+    "storage_bucket": "easycuenta-6c1dd.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:51448507934:android:9d72b8be4489c2e5a5080f",
+        "mobilesdk_app_id": "1:667397650984:android:e2d7b7f684a62bb4b2d31d",
         "android_client_info": {
           "package_name": "com.solution.tecno.androidanimations"
         }
       },
       "oauth_client": [
         {
-          "client_id": "51448507934-msrtc4j3sqha2vk40stqqcmq3v29gaae.apps.googleusercontent.com",
+          "client_id": "667397650984-d2v9fb5e1b2r9p9j0ghfdr24mvsi31m8.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyA9sdrvUJSCUU__mU_bN77doCmkfvOh3qw"
+          "current_key": "AIzaSyDfwk0KMx5nJsnM7vHnGpTJBLqgprn847Q"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "51448507934-msrtc4j3sqha2vk40stqqcmq3v29gaae.apps.googleusercontent.com",
+              "client_id": "667397650984-d2v9fb5e1b2r9p9j0ghfdr24mvsi31m8.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

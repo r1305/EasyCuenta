@@ -8,44 +8,25 @@ import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.StrictMode;
 import android.provider.MediaStore;
-import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
+
 import com.solution.tecno.androidanimations.Firebase.Constants;
 import com.solution.tecno.androidanimations.R;
-import com.solution.tecno.androidanimations.activities.FirstActivity;
-import com.solution.tecno.androidanimations.activities.FirstActivity;
+import com.solution.tecno.androidanimations.activities.MainActivity;
 import com.solution.tecno.androidanimations.utils.Credentials;
+import com.solution.tecno.androidanimations.utils.Preferences;
 import com.solution.tecno.androidanimations.utils.Utils;
 import com.solution.tecno.androidanimations.utils.ViewDialog;
-import com.squareup.picasso.Picasso;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-
-import java.util.ArrayList;
-import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import in.shadowfax.proswipebutton.ProSwipeButton;
-
 
 public class ProfileFragment extends Fragment {
     ProSwipeButton proSwipeBtn;
@@ -75,7 +56,7 @@ public class ProfileFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ctx=this.getContext();
-        viewDialog = new ViewDialog((FirstActivity)ctx);
+        viewDialog = new ViewDialog((MainActivity)ctx);
     }
 
     @Override
@@ -84,7 +65,7 @@ public class ProfileFragment extends Fragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_profile, container, false);;
         cred = new Credentials(ctx);
-        user_id = cred.getUserId();
+        user_id = cred.getData(Preferences.USER_ID);
         login_status = cred.getLoginStatus();
         proSwipeBtn = v.findViewById(R.id.profile_btn_save);
         prof_name = v.findViewById(R.id.profile_et_name);
@@ -100,8 +81,6 @@ public class ProfileFragment extends Fragment {
                 checkPermissions();
             }
         });
-
-        getUserProfile(user_id);
 
         proSwipeBtn.setOnSwipeListener(new ProSwipeButton.OnSwipeListener() {
             @Override
@@ -185,7 +164,6 @@ public class ProfileFragment extends Fragment {
                 if(!name.equals("") && !username.equals("") &&
                         !phone.equals("") && !psw.equals("") &&
                         !email.equals("") && isValidEmail(email)){
-                    updateUser(user_id,username,phone,name,psw,email);
                 }else{
                     viewDialog.hideDialog(0);
                     new Utils().createAlert(ctx,"Complete los datos",1);
@@ -194,124 +172,6 @@ public class ProfileFragment extends Fragment {
             }
         });
         return v;
-    }
-
-    public void updateUser(final String id, final String username,
-                           final String phone_number,final String full_name,
-                           final String psw,final String email) {
-        viewDialog.showDialog();
-        RequestQueue queue = Volley.newRequestQueue(ctx);
-        if(user_photo==""){
-            user_photo= Constants.BASE_PHOTO;
-        }
-        String params="?id="+id+
-                "&username="+Uri.encode(username)+
-                "&phone="+Uri.encode(phone_number)+
-                "&name="+Uri.encode(full_name)+
-                "&psw="+Uri.encode(psw)+
-                "&email="+email+
-                "&photo="+Uri.encode(user_photo)+
-                "&photo_id="+photo_id
-                ;
-
-        String url = base_url+"updateUser.php"+params;
-        StringRequest postRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            if(response.equals("true")){
-                                FragmentManager fm = getActivity().getSupportFragmentManager();
-                                FragmentTransaction fragmentTransaction = fm.beginTransaction();
-                                Fragment fr=ProfileFragment.newInstance();
-                                fragmentTransaction.replace(R.id.container,fr);
-                                fragmentTransaction.commit();
-
-                                viewDialog.hideDialog(1.5);
-                                cred.save_credentials(id,full_name,username,phone_number,email,user_photo,login_status);
-                                ((FirstActivity)getContext()).updateHeader(full_name,username,user_photo);
-                            }else{
-                                viewDialog.hideDialog(0);
-                                proSwipeBtn.showResultIcon(false); // false if task failed
-                            }
-                        } catch (Exception e) {
-                            viewDialog.hideDialog(0);
-                            new Utils().createAlert(ctx,e.getMessage(),1);
-                            proSwipeBtn.showResultIcon(false); // false if task failed
-                            e.printStackTrace();
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        viewDialog.hideDialog(0);
-                        new Utils().createAlert(ctx,error.getMessage(),1);
-                        proSwipeBtn.showResultIcon(false); // false if task failed
-                        // error
-                        Log.d("Error.Response", error.toString());
-                    }
-                }
-        );
-        queue.add(postRequest);
-    }
-
-    public void getUserProfile(String user_id) {
-        viewDialog.showDialog();
-
-        RequestQueue queue = Volley.newRequestQueue(ctx);
-        String params="?id="+Integer.parseInt(user_id);
-        String url = base_url+"getUserProfile.php"+params;
-        StringRequest postRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        JSONParser jp = new JSONParser();
-                        try {
-                            JSONArray ja=(JSONArray)jp.parse(response);
-                            for(int i=0;i<ja.size();i++){
-                                JSONObject item=(JSONObject)ja.get(i);
-                                String name=item.get("full_name").toString();
-                                String user=item.get("username").toString();
-                                String psw=item.get("clave").toString();
-                                String phone=item.get("phone_number").toString();
-                                String email=item.get("email").toString();
-                                String url = item.get("profile_photo").toString();
-                                photo_id = item.get("photo_id").toString();
-                                if(url!="" && !url.isEmpty()){
-                                    Picasso.get()
-                                            .load(url)
-                                            .resize(200, 200)
-                                            .centerCrop()
-                                            .into(prof_photo);
-                                }
-
-                                prof_name.setText(name);
-                                prof_user_name.setText(user);
-                                prof_psw.setText(psw);
-                                prof_phone.setText(phone);
-                                prof_email.setText(email);
-
-                                ((FirstActivity)getContext()).updateHeader(name,user,url);
-                            }
-                            viewDialog.hideDialog(0);
-                        } catch (Exception e) {
-                            viewDialog.hideDialog(0);
-                            new Utils().createAlert(ctx,e.getMessage(),1);
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // error
-                        Log.d("Error.Response", error.toString());
-                        viewDialog.hideDialog(0);
-                        new Utils().createAlert(ctx,error.getMessage(),1);
-                    }
-                }
-        );
-        queue.add(postRequest);
     }
 
     public final static boolean isValidEmail(CharSequence target) {

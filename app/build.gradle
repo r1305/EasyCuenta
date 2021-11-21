@@ -1,11 +1,14 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+    id 'com.google.gms.google-services'
+}
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
     defaultConfig {
         applicationId "com.solution.tecno.androidanimations"
-        minSdkVersion 19
-        targetSdkVersion 29
+        minSdkVersion 21
+        targetSdkVersion 30
         versionCode 37
         versionName "3.0.2"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
@@ -15,6 +18,15 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildFeatures {
+        viewBinding true
     }
 }
 
@@ -28,27 +40,40 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
-    //Extras
-    implementation 'com.android.volley:volley:1.1.1'
-    implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
     //edit text material design
     implementation 'com.rengwuxian.materialedittext:library:2.1.4'
+
     //progress button
     implementation 'com.alirezaahmadi:progress-button:1.1.2'
-    //Firebase Notification
-    implementation 'com.google.firebase:firebase-messaging:20.2.1'
-    //Circle Image
-    implementation 'de.hdodenhof:circleimageview:2.1.0'
-    //Card vie
-    implementation 'androidx.cardview:cardview:1.0.0'
-    //SWIPE button
-    implementation 'in.shadowfax:proswipebutton:1.1'
-    //FAVORITE BUTTON
-    implementation 'com.github.ivbaranov:materialfavoritebutton:0.1.5'
-    //PICASSO
-    implementation 'com.squareup.picasso:picasso:2.71828'
+
     //GSON
     implementation 'com.google.code.gson:gson:2.8.6'
+
+    //Firebase Notification
+    implementation 'com.google.firebase:firebase-messaging:20.1.4'
+    implementation 'com.google.firebase:firebase-analytics:17.3.0'
+    implementation 'com.google.firebase:firebase-database:19.3.1'
+    implementation 'com.google.firebase:firebase-firestore:21.4.3'
+    implementation 'com.google.firebase:firebase-core:17.0.0'
+    implementation 'com.google.firebase:firebase-auth:21.0.1'
+
+    //Circle Image
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
+
+    //Card vie
+    implementation 'androidx.cardview:cardview:1.0.0'
+
+    //SWIPE button
+    implementation 'in.shadowfax:proswipebutton:1.1'
+
+    //FAVORITE BUTTON
+    implementation 'com.github.ivbaranov:materialfavoritebutton:0.1.5'
+
+    //PICASSO
+    implementation 'com.squareup.picasso:picasso:2.71828'
+
+    //LOTTIE
+    implementation "com.airbnb.android:lottie:3.4.0"
 }
 
 apply plugin: 'com.google.gms.google-services'

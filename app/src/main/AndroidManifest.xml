@@ -16,7 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".activities.MainActivity">
+        <activity android:name=".activities.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -31,8 +31,7 @@
         </service>
 
         <activity android:name=".activities.LoginActivity" />
-        <activity android:name=".activities.FirstActivity" />
-        <activity android:name=".activities.SecondActivity" />
+        <activity android:name=".activities.MainActivity" />
         <activity android:name=".activities.RegisterActivity" />
         <activity android:name=".activities.ForgotPasswordActivity"/>
     </application>

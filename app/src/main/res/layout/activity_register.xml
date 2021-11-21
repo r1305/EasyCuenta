@@ -12,11 +12,20 @@
         android:paddingRight="16dp"
         android:paddingLeft="16dp"
         android:paddingTop="16dp"
-        tools:context=".activities.FirstActivity"
+        tools:context=".activities.MainActivity"
         android:orientation="vertical"
         android:gravity="center">
 
+        <com.airbnb.lottie.LottieAnimationView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:lottie_rawRes="@raw/lottie_register_screen"
+            android:adjustViewBounds="true"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"/>
+
         <ImageView
+            android:visibility="gone"
             android:layout_width="200dp"
             android:layout_height="200dp"
             android:src="@drawable/ic_bank_app"
@@ -31,16 +40,6 @@
             app:met_iconLeft="@drawable/ic_user"
             app:met_iconPadding="0dp"
             android:inputType="text|textCapWords"/>
-
-        <com.rengwuxian.materialedittext.MaterialEditText
-            android:id="@+id/diag_et_user"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Usuario"
-            app:met_floatingLabel="highlight"
-            app:met_iconLeft="@drawable/ic_username"
-            app:met_iconPadding="0dp"
-            android:inputType="text"/>
 
         <com.rengwuxian.materialedittext.MaterialEditText
             android:id="@+id/diag_et_email"
