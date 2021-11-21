@@ -10,8 +10,7 @@
     tools:context=".activities.MainActivity"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="@drawable/border_blue"
-    app:cardCornerRadius="10dp"
+    app:cardCornerRadius="12dp"
     android:id="@+id/item_card_view">
 
     <LinearLayout

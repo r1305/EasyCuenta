@@ -5,7 +5,40 @@
     android:id="@+id/fragment_accounts"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".fragments.AccountsFragment">
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_marginHorizontal="5dp"
+        android:paddingVertical="10dp"
+        android:paddingHorizontal="5dp"
+        app:cardCornerRadius="15dp"
+        android:elevation="10dp"
+        app:cardElevation="10dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal">
+            <EditText
+                android:id="@+id/tv_search"
+                android:paddingHorizontal="5dp"
+                android:gravity="center|start"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:lines="1"
+                android:inputType="text"
+                android:hint="Buscar..."/>
+            <ImageView
+                android:id="@+id/img_search"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/icon_close"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -16,9 +49,8 @@
             android:id="@+id/recycler_view_accounts"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="5sp"
-            android:layout_marginTop="5sp"
-            android:layout_marginEnd="5sp" />
+            android:layout_marginHorizontal="5sp"
+            android:layout_marginTop="5sp" />
     </ScrollView>
 
 </LinearLayout>

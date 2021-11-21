@@ -2,9 +2,14 @@ package com.solution.tecno.androidanimations.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,6 +34,7 @@ import com.solution.tecno.androidanimations.utils.ViewDialog;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class AccountsFragment extends Fragment {
 
@@ -43,6 +49,9 @@ public class AccountsFragment extends Fragment {
     RecyclerView activity;
     List<Tarjeta> l=new ArrayList<>();
     DatabaseReference reference;
+    EditText et_search;
+    ImageView icon_close;
+    List<Tarjeta> tarjetas_offline;
 
     public AccountsFragment() {
     }
@@ -72,23 +81,59 @@ public class AccountsFragment extends Fragment {
         activity.setLayoutManager(new LinearLayoutManager(ctx));
         adapter=new AccountAdapter(l);
         viewDialog.showDialog();
-        System.out.println("network_status: "+cred.getNetworkStatus());
         if(cred.getNetworkStatus().equals("1")){
             getAccounts();
         }else{
-            System.out.println("offline: "+cred.getData(Preferences.TARJETAS_OFFLINE));
-            List<Tarjeta> tarjetas_offline = new Gson().fromJson(cred.getData(Preferences.TARJETAS_OFFLINE),new TypeToken<List<Tarjeta>>(){}.getType());
+            tarjetas_offline = new Gson().fromJson(cred.getData(Preferences.TARJETAS_OFFLINE),new TypeToken<List<Tarjeta>>(){}.getType());
             l.addAll(tarjetas_offline);
-            adapter.notifyItemChanged(l.size()-1);
+            adapter.notifyDataSetChanged();
             viewDialog.hideDialog(0);
         }
         activity.setAdapter(adapter);
+        et_search = v.findViewById(R.id.tv_search);
+        et_search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                tarjetas_offline = new Gson().fromJson(cred.getData(Preferences.TARJETAS_OFFLINE),new TypeToken<List<Tarjeta>>(){}.getType());
+                l.clear();
+                l.addAll(tarjetas_offline);
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                List<Tarjeta> filter = new ArrayList<>();
+                if(!s.toString().isEmpty()){
+                    for(Tarjeta t : l)
+                    {
+                        if(
+                            t.getTitular().toLowerCase(Locale.ROOT).contains(s.toString().toLowerCase(Locale.ROOT)) ||
+                            t.getBanco().toLowerCase(Locale.ROOT).contains(s.toString().toLowerCase(Locale.ROOT)) ||
+                            t.getMoneda().toLowerCase(Locale.ROOT).contains(s.toString().toLowerCase(Locale.ROOT))
+                        ){
+                            filter.add(t);
+                        }
+                    }
+                    l.clear();
+                    l.addAll(filter);
+                }else{
+                    l.clear();
+                    l.addAll(tarjetas_offline);
+                }
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+        icon_close = v.findViewById(R.id.img_search);
+        icon_close.setOnClickListener(v -> et_search.setText(""));
         return v;
     }
 
     void getAccounts() {
         reference = utils.getDatabaseReference(Preferences.FIREBASE_TARJETAS);
-        System.out.println("userId: " + cred.getData(Preferences.USER_ID));
         reference.orderByChild("userId").equalTo(cred.getData(Preferences.USER_ID)).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
