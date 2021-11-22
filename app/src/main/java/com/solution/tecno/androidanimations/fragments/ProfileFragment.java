@@ -244,6 +244,7 @@ public class ProfileFragment extends Fragment {
         }
         System.out.println("same_email");
 
+        usuario.setKey(cred.getData(Preferences.USER_ID));
         usuario.setCelular(prof_phone.getText().toString());
         usuario.setNombre(prof_name.getText().toString());
         DatabaseReference reference = utils.getDatabaseReference(Preferences.FIREBASE_USUARIOS);

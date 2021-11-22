@@ -160,7 +160,6 @@ public class RegisterActivity extends AppCompatActivity {
         usuario.setNombre(binding.diagEtName.getText().toString());
         usuario.setCelular(binding.diagEtPhone.getText().toString());
         usuario.setCorreo(binding.diagEtEmail.getText().toString());
-        usuario.setPassword(binding.diagEtPassword.getText().toString());
         database.child(usuario.getKey()).setValue(usuario).addOnSuccessListener(unused -> {
             cred.saveData(Preferences.LOGIN,"1");
             cred.saveData(Preferences.USER_ID,usuario.getKey());

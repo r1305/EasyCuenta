@@ -6,7 +6,6 @@ public class Usuario {
     String apellido;
     String celular;
     String correo;
-    String password;
 
     public String getKey() {
         return key;
@@ -46,13 +45,5 @@ public class Usuario {
 
     public void setCorreo(String correo) {
         this.correo = correo;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 }
