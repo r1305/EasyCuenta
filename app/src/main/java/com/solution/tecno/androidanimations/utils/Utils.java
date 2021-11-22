@@ -1,16 +1,22 @@
 package com.solution.tecno.androidanimations.utils;
 
 import android.app.AlertDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.core.app.NotificationCompat;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
+import com.solution.tecno.androidanimations.Firebase.MyNotificationManager;
 import com.solution.tecno.androidanimations.R;
 
 import java.util.Locale;
@@ -34,13 +40,13 @@ public class Utils {
     }
 
     public String generateToken(int size) {
-        String token = "";
+        StringBuilder token = new StringBuilder();
         for(int i=0;i<size;i++){
             Random rand = new Random();
             int character = rand.nextInt(ALPHA_NUMERIC_STRING.length);
-            token+=(ALPHA_NUMERIC_STRING[character]);
+            token.append(ALPHA_NUMERIC_STRING[character]);
         }
-        return token;
+        return token.toString();
     }
 
     public void createAlert(Context ctx, String error,int type){
@@ -92,5 +98,37 @@ public class Utils {
     {
         FirebaseDatabase databaseReference = FirebaseDatabase.getInstance(ctx.getString(R.string.firebase_database));
         return databaseReference.getReference(database);
+    }
+
+    public void showNotification(Context ctx,String title, String body)
+    {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationManager mNotificationManager =
+                    (NotificationManager)ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel mChannel = new NotificationChannel("1", "1",importance);
+            mChannel.setDescription("1");
+            mChannel.enableLights(true);
+            mChannel.setLightColor(Color.RED);
+            mChannel.enableVibration(true);
+            mChannel.setVibrationPattern(new long[]{0, 500, 250, 500, 250,500, 250});
+            assert mNotificationManager != null;
+            mNotificationManager.createNotificationChannel(mChannel);
+            MyNotificationManager.getInstance(ctx).displayNotification(title,body);
+        }else{
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(ctx)
+                    .setSmallIcon(R.drawable.ic_bank_app)
+                    .setContentTitle(title)
+                    .setContentText(body)
+                    .setVibrate(new long[]{0, 500, 250, 500, 250,500, 250})
+                    .setPriority(importance)
+                    .setAutoCancel(true)
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+            NotificationManager notificationManager =
+                    (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+
+            notificationManager.notify(0, notificationBuilder.build());
+        }
     }
 }

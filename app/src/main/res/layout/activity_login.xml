@@ -42,15 +42,28 @@
             app:met_iconLeft="@drawable/ic_user"
             app:met_iconPadding="0dp" />
 
-        <com.rengwuxian.materialedittext.MaterialEditText
-            android:id="@+id/et_psw"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Contraseña"
-            android:inputType="textPassword"
-            app:met_floatingLabel="highlight"
-            app:met_iconLeft="@drawable/ic_psw"
-            app:met_iconPadding="0dp" />
+            android:orientation="horizontal">
+            <com.rengwuxian.materialedittext.MaterialEditText
+                android:layout_weight="1"
+                android:id="@+id/et_psw"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Contraseña"
+                android:inputType="textPassword"
+                app:met_floatingLabel="highlight"
+                app:met_iconLeft="@drawable/ic_psw"
+                app:met_iconPadding="0dp" />
+            <ImageView
+                android:id="@+id/show_hide_password"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:src="@drawable/icon_visible_password"/>
+        </LinearLayout>
+
 
         <LinearLayout
             android:layout_width="match_parent"

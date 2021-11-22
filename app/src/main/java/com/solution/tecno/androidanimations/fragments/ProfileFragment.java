@@ -8,18 +8,29 @@ import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.PhoneAuthCredential;
+import com.google.firebase.database.DatabaseReference;
 import com.solution.tecno.androidanimations.Firebase.Constants;
 import com.solution.tecno.androidanimations.R;
 import com.solution.tecno.androidanimations.activities.MainActivity;
+import com.solution.tecno.androidanimations.model.Usuario;
 import com.solution.tecno.androidanimations.utils.Credentials;
 import com.solution.tecno.androidanimations.utils.Preferences;
 import com.solution.tecno.androidanimations.utils.Utils;
@@ -33,15 +44,18 @@ public class ProfileFragment extends Fragment {
     public static final int PICK_IMAGE = 1;
     Context ctx;
     ViewDialog viewDialog;
-    EditText prof_name,prof_user_name,prof_phone,prof_psw,prof_email;
+    Utils utils;
+    EditText prof_name,prof_phone,prof_email;
     Credentials cred;
-    String base_url=Constants.BASE_URL;
     String user_id;
-    String user_photo="",photo_id="",login_status="";
+    String login_status="";
     CircleImageView prof_photo;
     String photo_path;
     boolean new_photo=false;
     public static int MY_PERMISSIONS_REQUEST_ACCESS= 1;
+    Usuario usuario;
+    FirebaseUser user;
+
     public ProfileFragment() {
         // Required empty public constructor
     }
@@ -63,118 +77,79 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_profile, container, false);;
+        View v = inflater.inflate(R.layout.fragment_profile, container, false);
         cred = new Credentials(ctx);
+        utils = new Utils(ctx);
         user_id = cred.getData(Preferences.USER_ID);
         login_status = cred.getLoginStatus();
+        user = FirebaseAuth.getInstance().getCurrentUser();
         proSwipeBtn = v.findViewById(R.id.profile_btn_save);
         prof_name = v.findViewById(R.id.profile_et_name);
-        prof_user_name = v.findViewById(R.id.profile_et_user);
         prof_phone = v.findViewById(R.id.profile_et_phone);
-        prof_psw = v.findViewById(R.id.profile_et_password);
         prof_email = v.findViewById(R.id.profile_et_email);
         prof_photo = v.findViewById(R.id.profile_photo);
 
-        prof_photo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                checkPermissions();
-            }
-        });
+        setData();
 
-        proSwipeBtn.setOnSwipeListener(new ProSwipeButton.OnSwipeListener() {
-            @Override
-            public void onSwipeConfirm() {
-                // user has swiped the btn. Perform your async operation now
-                viewDialog.showDialog();
-                String name = prof_name.getText().toString();
-                String username = prof_user_name.getText().toString();
-                String phone = prof_phone.getText().toString();
-                String psw = prof_psw.getText().toString();
-                String email = prof_email.getText().toString();
-                if(name.isEmpty() && username.isEmpty() && psw.isEmpty() && phone.isEmpty() && email.isEmpty()){
-                    prof_name.setError("Complete el nombre");
-                    prof_name.requestFocus();
-                    prof_user_name.setError("Complete el usuario");
-                    prof_user_name.requestFocus();
-                    prof_psw.setError("Ingrese contraseña");
-                    prof_psw.requestFocus();
-                    prof_phone.setError("Ingrese un número celular");
-                    prof_phone.requestFocus();
-                    prof_email.setError("Ingrese un correo");
-                    prof_email.requestFocus();
-                    proSwipeBtn.showResultIcon(false);
-                    return;
-                }
-                if(name.isEmpty()){
-                    prof_name.setError("Complete el nombre");
-                    prof_name.requestFocus();
-                    viewDialog.hideDialog(0);
-                    new Utils().createAlert(ctx,"Complete el nombre",1);
-                    proSwipeBtn.showResultIcon(false);
-                    return;
-                }
-                if(username.isEmpty()){
-                    prof_user_name.setError("Complete el usuario");
-                    prof_user_name.requestFocus();
-                    viewDialog.hideDialog(0);
-                    new Utils().createAlert(ctx,"Complete el usuario",1);
-                    proSwipeBtn.showResultIcon(false);
-                    return;
-                }
-                if(email.isEmpty()){
-                    prof_email.setError("Complete el correo");
-                    prof_email.requestFocus();
-                    viewDialog.hideDialog(0);
-                    new Utils().createAlert(ctx,"Complete el correo",1);
-                    proSwipeBtn.showResultIcon(false);
-                    return;
-                }else if(!isValidEmail(email)){
-                    prof_email.setError("Ingrese un correo válido");
-                    prof_email.requestFocus();
-                    viewDialog.hideDialog(0);
-                    new Utils().createAlert(ctx,"Ingrese un correo válido",1);
-                    proSwipeBtn.showResultIcon(false);
-                    return;
-                }
-                if(phone.isEmpty()){
-                    prof_phone.setError("Complete su celular");
-                    prof_phone.requestFocus();
-                    viewDialog.hideDialog(0);
-                    new Utils().createAlert(ctx,"Complete su celular",1);
-                    proSwipeBtn.showResultIcon(false);
-                    return;
-                }else if(phone.length()<9){
-                    prof_phone.setError("Ingrese un número de celular válido");
-                    prof_phone.requestFocus();
-                    viewDialog.hideDialog(0);
-                    new Utils().createAlert(ctx,"Ingrese un número de celular válido",1);
-                    proSwipeBtn.showResultIcon(false);
-                    return;
-                }
-                if(psw.isEmpty()){
-                    prof_psw.setError("Ingrese contraseña");
-                    prof_psw.requestFocus();
-                    viewDialog.hideDialog(0);
-                    new Utils().createAlert(ctx,"Ingrese contraseña",1);
-                    proSwipeBtn.showResultIcon(false);
-                    return;
-                }
+        prof_photo.setOnClickListener(view -> checkPermissions());
 
-                if(!name.equals("") && !username.equals("") &&
-                        !phone.equals("") && !psw.equals("") &&
-                        !email.equals("") && isValidEmail(email)){
-                }else{
-                    viewDialog.hideDialog(0);
-                    new Utils().createAlert(ctx,"Complete los datos",1);
-                    proSwipeBtn.showResultIcon(false);
-                }
+        proSwipeBtn.setOnSwipeListener(() -> {
+            // user has swiped the btn. Perform your async operation now
+            String name = prof_name.getText().toString();
+            String phone = prof_phone.getText().toString();
+            String email = prof_email.getText().toString();
+
+            if(name.isEmpty()){
+                prof_name.setError("Complete el nombre");
+                prof_name.requestFocus();
+                proSwipeBtn.showResultIcon(false);
+                return;
             }
+
+            if(email.isEmpty()){
+                prof_email.setError("Complete el correo");
+                prof_email.requestFocus();
+                proSwipeBtn.showResultIcon(false);
+                return;
+            }else if(!isValidEmail(email)){
+                prof_email.setError("Ingrese un correo válido");
+                prof_email.requestFocus();
+                proSwipeBtn.showResultIcon(false);
+                return;
+            }
+
+            if(phone.isEmpty()){
+                prof_phone.setError("Complete su celular");
+                prof_phone.requestFocus();
+                proSwipeBtn.showResultIcon(false);
+                return;
+            }else if(phone.length()<9){
+                prof_phone.setError("Ingrese un número de celular válido");
+                prof_phone.requestFocus();
+                proSwipeBtn.showResultIcon(false);
+                return;
+            }
+
+            viewDialog.showDialog("Actualizando perfil...");
+            updateProfile();
         });
         return v;
     }
 
-    public final static boolean isValidEmail(CharSequence target) {
+    void setData()
+    {
+        usuario = new Usuario();
+        usuario.setCelular(cred.getData(Preferences.USER_PHONE));
+        usuario.setCorreo(cred.getData(Preferences.USER_EMAIL));
+        usuario.setNombre(cred.getData(Preferences.USER_NAME));
+        usuario.setCelular(cred.getData(Preferences.USER_PHONE));
+
+        prof_email.setText(usuario.getCorreo());
+        prof_name.setText(usuario.getNombre());
+        prof_phone.setText(usuario.getCelular());
+    }
+
+    static boolean isValidEmail(CharSequence target) {
         if (target == null)
             return false;
         return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
@@ -185,7 +160,6 @@ public class ProfileFragment extends Fragment {
     {
 
         if (requestCode == PICK_IMAGE && data!=null) {
-
 
             Uri selectedImage = data.getData();
             String[] filePathColumn = { MediaStore.Images.Media.DATA };
@@ -236,5 +210,59 @@ public class ProfileFragment extends Fragment {
                 }
                 break;
         }
+    }
+
+    boolean updatedEmail = false;
+    boolean updateEmail(String email)
+    {
+        user.updateEmail(email).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(!task.isSuccessful()){
+                    viewDialog.showDialog(task.getException().getMessage());
+                    viewDialog.showFail(task.getException().getMessage());
+                    viewDialog.hideDialog(3);
+                    updatedEmail = false;
+                }else{
+                    usuario.setCorreo(email);
+                    updatedEmail = true;
+                }
+            }
+        });
+        return updatedEmail;
+    }
+
+    void updateProfile()
+    {
+        System.out.println("updateProfile");
+        if(!prof_email.getText().toString().equals(usuario.getCorreo())){
+            if(!updateEmail(prof_email.getText().toString())) {
+                viewDialog.showFail("¡Ocurrió un error al actualizar el perfil!");
+                viewDialog.hideDialog(3);
+                return;
+            }
+        }
+        System.out.println("same_email");
+
+        usuario.setCelular(prof_phone.getText().toString());
+        usuario.setNombre(prof_name.getText().toString());
+        DatabaseReference reference = utils.getDatabaseReference(Preferences.FIREBASE_USUARIOS);
+        reference.child(cred.getData(Preferences.USER_ID)).setValue(usuario);
+        cred.saveData(Preferences.USER_EMAIL,usuario.getCorreo());
+        cred.saveData(Preferences.USER_PHONE,usuario.getCelular());
+        cred.saveData(Preferences.USER_NAME,usuario.getNombre());
+        viewDialog.showSuccess("¡Perfil actualizado!");
+        viewDialog.hideDialog(3);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                proSwipeBtn.showResultIcon(true);
+                FragmentManager fm = ((MainActivity)ctx).getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fm.beginTransaction();
+                Fragment fr= AccountsFragment.newInstance();
+                fragmentTransaction.replace(R.id.container,fr);
+                fragmentTransaction.commit();
+            }
+        }, 3000);
     }
 }

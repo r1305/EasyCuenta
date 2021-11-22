@@ -61,15 +61,27 @@
             app:met_iconPadding="0dp"
             android:inputType="number|phone"/>
 
-        <com.rengwuxian.materialedittext.MaterialEditText
-            android:id="@+id/diag_et_password"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Contraseña"
-            app:met_iconLeft="@drawable/ic_psw"
-            app:met_floatingLabel="highlight"
-            app:met_iconPadding="0dp"
-            android:inputType="textPassword"/>
+            android:orientation="horizontal">
+            <com.rengwuxian.materialedittext.MaterialEditText
+                android:layout_weight="1"
+                android:id="@+id/diag_et_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Contraseña"
+                app:met_iconLeft="@drawable/ic_psw"
+                app:met_floatingLabel="highlight"
+                app:met_iconPadding="0dp"
+                android:inputType="textPassword"/>
+            <ImageView
+                android:id="@+id/show_hide_password"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:src="@drawable/icon_visible_password"/>
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

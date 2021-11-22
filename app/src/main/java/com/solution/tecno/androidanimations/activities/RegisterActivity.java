@@ -4,7 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Patterns;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
+import com.solution.tecno.androidanimations.R;
 import com.solution.tecno.androidanimations.databinding.ActivityRegisterBinding;
 import com.solution.tecno.androidanimations.model.Usuario;
 import com.solution.tecno.androidanimations.utils.Credentials;
@@ -26,6 +30,7 @@ public class RegisterActivity extends AppCompatActivity {
     Credentials cred;
     ViewDialog viewDialog;
     Utils utils;
+    int password_visible = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,6 +94,19 @@ public class RegisterActivity extends AppCompatActivity {
                 register();
             }
         });
+
+        binding.showHidePassword.setOnClickListener(v -> {
+            if(password_visible==0){
+                password_visible=1;
+                binding.showHidePassword.setImageResource(R.drawable.icon_invisible_password);
+                binding.diagEtPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+            }else{
+                password_visible=0;
+                binding.showHidePassword.setImageResource(R.drawable.icon_visible_password);
+                binding.diagEtPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+            }
+            binding.diagEtPassword.setSelection(binding.diagEtPassword.getText().length());
+        });
     }
 
 
@@ -119,21 +137,21 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     void register(){
-        viewDialog.showDialog();
+        viewDialog.showDialog("");
         Usuario conductor = new Usuario();
         FirebaseAuth auth = utils.initFirebaseAuth();
         auth.createUserWithEmailAndPassword(binding.diagEtEmail.getText().toString(),binding.diagEtPassword.getText().toString())
                 .addOnCompleteListener(task -> {
                     if(task.isSuccessful()){
+                        viewDialog.showSuccess("¡Registro exitoso!");
                         FirebaseUser user = auth.getCurrentUser();
                         conductor.setKey(user.getUid());
                         conductor.setCelular(binding.diagEtPhone.getText().toString());
                         createUser(conductor);
                     }else{
-                        viewDialog.hideDialog(0);
-                        Toast.makeText(ctx, "Usuario ya existe\n"+task.getException(), Toast.LENGTH_SHORT).show();
+                        viewDialog.showFail("¡Usuario ya registrado!");
+                        viewDialog.hideDialog(3);
                     }
-
                 });
     }
 
@@ -143,16 +161,17 @@ public class RegisterActivity extends AppCompatActivity {
         usuario.setCelular(binding.diagEtPhone.getText().toString());
         usuario.setCorreo(binding.diagEtEmail.getText().toString());
         usuario.setPassword(binding.diagEtPassword.getText().toString());
-        new Handler().postDelayed(() -> {
-            database.child(usuario.getKey()).setValue(usuario).addOnSuccessListener(unused -> {
-                cred.saveData(Preferences.LOGIN,"1");
-                cred.saveData(Preferences.USER_ID,usuario.getKey());
-                cred.saveData(Preferences.USER_EMAIL,usuario.getCorreo());
-                cred.saveData(Preferences.USER_PHONE,usuario.getCelular());
-                cred.saveData(Preferences.USER_NAME,usuario.getNombre());
-                viewDialog.hideDialog(0);
+        database.child(usuario.getKey()).setValue(usuario).addOnSuccessListener(unused -> {
+            cred.saveData(Preferences.LOGIN,"1");
+            cred.saveData(Preferences.USER_ID,usuario.getKey());
+            cred.saveData(Preferences.USER_EMAIL,usuario.getCorreo());
+            cred.saveData(Preferences.USER_PHONE,usuario.getCelular());
+            cred.saveData(Preferences.USER_NAME,usuario.getNombre());
+            viewDialog.hideDialog(2);
+            new Handler().postDelayed(() -> {
                 startActivity(new Intent(RegisterActivity.this, MainActivity.class));
-            });
-        }, 2000);
+            }, 2000);
+        });
+
     }
 }

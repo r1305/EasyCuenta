@@ -60,7 +60,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     public void validateSession(){
-        viewDialog.showDialog();
+        viewDialog.showDialog("");
 
         new Handler().postDelayed(() -> {
             String userId=cred.getData(Preferences.USER_ID);

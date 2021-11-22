@@ -4,13 +4,6 @@
     tools:context="com.solution.tecno.androidanimations.activities.MainActivity">
 
     <item
-        android:id="@+id/action_refresh_accounts"
-        android:title="Actualizar cuentas"
-        android:icon="@drawable/ic_refresh"
-        app:showAsAction="always"
-        android:orderInCategory="1"
-        />
-    <item
         android:id="@+id/action_new_account"
         android:title="Nueva cuenta"
         android:icon="@drawable/ic_add_account_white"

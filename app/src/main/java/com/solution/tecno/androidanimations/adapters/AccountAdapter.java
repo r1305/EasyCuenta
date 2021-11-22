@@ -141,7 +141,7 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.ViewHold
                 viewDialog.hideDialog(0);
                 new Utils().createAlert(ctx,"Red no disponible",1);
             }else{
-                viewDialog.showDialog();
+                viewDialog.showDialog("");
                 viewDialog.hideDialog(1.5);
                 new Handler().postDelayed(() -> {
                     final View layout = LayoutInflater.from(ctx).inflate(R.layout.edit_account_view, null);

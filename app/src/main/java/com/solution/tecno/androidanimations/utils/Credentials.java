@@ -48,10 +48,10 @@ public class Credentials {
     public void logout(){
         SharedPreferences sp=ctx.getSharedPreferences("Login", MODE_PRIVATE);
         SharedPreferences.Editor Ed=sp.edit();
-        Ed.putString(Preferences.USER_ID,"0");
-        Ed.putString(Preferences.USER_PHONE,"0");
-        Ed.putString(Preferences.USER_NAME,"0");
-        Ed.putString(Preferences.USER_EMAIL,"0");
+        Ed.putString(Preferences.USER_ID,"");
+        Ed.putString(Preferences.USER_PHONE,"");
+        Ed.putString(Preferences.USER_NAME,"");
+        Ed.putString(Preferences.USER_EMAIL,"");
         Ed.putString(Preferences.LOGIN,"0");
         Ed.commit();
 

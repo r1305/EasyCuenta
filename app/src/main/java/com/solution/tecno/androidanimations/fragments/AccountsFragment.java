@@ -33,6 +33,8 @@ import com.solution.tecno.androidanimations.utils.Utils;
 import com.solution.tecno.androidanimations.utils.ViewDialog;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -80,7 +82,7 @@ public class AccountsFragment extends Fragment {
         activity=v.findViewById(R.id.recycler_view_accounts);
         activity.setLayoutManager(new LinearLayoutManager(ctx));
         adapter=new AccountAdapter(l);
-        viewDialog.showDialog();
+        viewDialog.showDialog("");
         if(cred.getNetworkStatus().equals("1")){
             getAccounts();
         }else{
@@ -134,7 +136,8 @@ public class AccountsFragment extends Fragment {
 
     void getAccounts() {
         reference = utils.getDatabaseReference(Preferences.FIREBASE_TARJETAS);
-        reference.orderByChild("userId").equalTo(cred.getData(Preferences.USER_ID)).addChildEventListener(new ChildEventListener() {
+        reference.orderByChild("userId").equalTo(cred.getData(Preferences.USER_ID))
+                .addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 Tarjeta tarjeta = snapshot.getValue(Tarjeta.class);
@@ -166,7 +169,7 @@ public class AccountsFragment extends Fragment {
                     if (l.get(index).getId().equals(snapshot.getKey())) {
                         find = true;
                         l.remove(index);
-                        adapter.notifyItemChanged(index);
+                        adapter.notifyDataSetChanged();
                     }else{
                         index++;
                     }
@@ -175,10 +178,15 @@ public class AccountsFragment extends Fragment {
 
             @Override
             public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                for (int i = 0; i < l.size(); i++) {
-                    if (l.get(i).getId().equals(snapshot.getKey())) {
-                        l.remove(i);
-                        adapter.notifyItemChanged(i);
+                boolean find = false;
+                int index = 0;
+                while(!find){
+                    if (l.get(index).getId().equals(snapshot.getKey())) {
+                        find = true;
+                        l.remove(index);
+                        adapter.notifyDataSetChanged();
+                    }else{
+                        index++;
                     }
                 }
             }

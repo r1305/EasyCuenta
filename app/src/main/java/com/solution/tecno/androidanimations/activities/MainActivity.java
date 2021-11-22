@@ -142,28 +142,24 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
         int id = item.getItemId();
         switch (id){
             case R.id.action_log_out:
-                new Utils().createAlert(ctx,"Cerrando Sesión",1);
+                viewDialog.showDialog("Cerrando sesión...");
                 new Handler().postDelayed(() -> {
+                    viewDialog.hideDialog(0);
+                    cred.logout();
+                    MainActivity.this.finish();
                 }, 1500);
-                break;
-            case R.id.action_refresh_accounts:
-                FragmentManager fm = getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fm.beginTransaction();
-                Fragment fr= AccountsFragment.newInstance();
-                fragmentTransaction.replace(R.id.container,fr);
-                fragmentTransaction.commit();
                 break;
             case R.id.action_new_account:
                 if(cred.getNetworkStatus().equals("0")){
                     new Utils().createAlert(ctx,"Red no disponible",1);
                 }
                 else{
-                    viewDialog.showDialog();
                     final View layout= LayoutInflater.from(ctx).inflate(R.layout.new_account_view,null);
                     alertDialog = new AlertDialog.Builder(ctx)
                             .setTitle("Nueva cuenta")
                             .setMessage("Añade una nueva cuenta para compartirla rápidamente")
                             .setPositiveButton("Agregar", (dialog, which) -> {
+                                viewDialog.showDialog("Creando cuenta");
                                 dialog.dismiss();
                                 EditText diag_et_banco = layout.findViewById(R.id.diag_et_banco);
                                 EditText diag_et_moneda = layout.findViewById(R.id.diag_et_moneda);
@@ -205,12 +201,12 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
         reference.child(key).setValue(tarjeta).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                viewDialog.hideDialog(0);
                 if(task.isSuccessful()){
-                    Toast.makeText(ctx, "Cuenta agregada", Toast.LENGTH_SHORT).show();
+                    viewDialog.showSuccess("¡Cuenta creada!");
                 }else{
-                    Toast.makeText(ctx, "Cuenta agregada", Toast.LENGTH_SHORT).show();
+                    viewDialog.showSuccess("¡No se pudo crear la cuenta!");
                 }
+                viewDialog.hideDialog(3);
             }
         });
     }

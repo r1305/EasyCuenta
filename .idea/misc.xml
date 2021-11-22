@@ -13,8 +13,11 @@
         <entry key="..\:/AndroidProjects/EasyCuenta/app/src/main/res/layout/dialog_logout.xml" value="0.11548913043478261" />
         <entry key="..\:/AndroidProjects/EasyCuenta/app/src/main/res/layout/edit_account_view.xml" value="0.11548913043478261" />
         <entry key="..\:/AndroidProjects/EasyCuenta/app/src/main/res/layout/fragment_accounts.xml" value="0.36752136752136755" />
+        <entry key="..\:/AndroidProjects/EasyCuenta/app/src/main/res/layout/fragment_profile.xml" value="0.18" />
         <entry key="..\:/AndroidProjects/EasyCuenta/app/src/main/res/layout/item_account.xml" value="0.25" />
+        <entry key="..\:/AndroidProjects/EasyCuenta/app/src/main/res/layout/nav_header.xml" value="0.11548913043478261" />
         <entry key="..\:/AndroidProjects/EasyCuenta/app/src/main/res/layout/new_account_view.xml" value="0.11548913043478261" />
+        <entry key="..\:/AndroidProjects/EasyCuenta/app/src/main/res/menu/menu_first.xml" value="0.2" />
       </map>
     </option>
   </component>

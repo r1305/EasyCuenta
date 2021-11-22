@@ -4,17 +4,24 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.solution.tecno.androidanimations.R;
 import com.solution.tecno.androidanimations.databinding.ActivityLoginBinding;
 import com.solution.tecno.androidanimations.model.Usuario;
 import com.solution.tecno.androidanimations.utils.Credentials;
@@ -29,6 +36,7 @@ public class LoginActivity extends AppCompatActivity {
     Credentials cred;
     Utils utils;
     ActivityLoginBinding binding;
+    int password_visible = 0;
 
     @Override
     public void onBackPressed() {
@@ -51,9 +59,8 @@ public class LoginActivity extends AppCompatActivity {
         utils = new Utils(ctx);
 
         binding.forgotPassword.setOnClickListener(v -> {
-            Intent i = new Intent(ctx, ForgotPasswordActivity.class);
-            startActivity(i);
-            LoginActivity.this.finish();
+            viewDialog.showDialog("Restableciendo contraseña...");
+            resetPassword();
         });
         binding.btnLogin.setOnClickListener(v -> {
             if(cred.getNetworkStatus().equals("1")){
@@ -78,9 +85,8 @@ public class LoginActivity extends AppCompatActivity {
                     return;
                 }
 
-                if(!username.isEmpty() && !psw.isEmpty()){
-                    new Handler().postDelayed(() -> login(), 3000);
-                }
+                viewDialog.showDialog("");
+                new Handler().postDelayed(this::login,3000);
             }else{
                 new Utils().createAlert(ctx,"Red no disponible",1);
             }
@@ -91,6 +97,19 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(i);
             LoginActivity.this.finish();
         });
+
+        binding.showHidePassword.setOnClickListener(v -> {
+            if(password_visible==0){
+                password_visible=1;
+                binding.showHidePassword.setImageResource(R.drawable.icon_invisible_password);
+                binding.etPsw.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+            }else{
+                password_visible=0;
+                binding.showHidePassword.setImageResource(R.drawable.icon_visible_password);
+                binding.etPsw.setTransformationMethod(PasswordTransformationMethod.getInstance());
+            }
+            binding.etPsw.setSelection(binding.etPsw.getText().length());
+        });
     }
 
     public final static boolean isValidEmail(CharSequence target) {
@@ -100,24 +119,47 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     void login(){
-        viewDialog.showDialog();
         FirebaseAuth auth = utils.initFirebaseAuth();
         auth.signInWithEmailAndPassword(binding.etUser.getText().toString(),binding.etPsw.getText().toString())
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
+                        viewDialog.showSuccess("");
                         LoginActivity.this.getUserDetails(binding.etUser.getText().toString());
                         new Handler().postDelayed(() -> {
                             cred.saveData(Preferences.LOGIN, "1");
                             viewDialog.hideDialog(0);
-                            Toast.makeText(ctx, "Credenciales correctas", Toast.LENGTH_SHORT).show();
                             LoginActivity.this.startActivity(new Intent(ctx, MainActivity.class));
                             LoginActivity.this.finish();
-                        }, 1500);
+                        }, 3000);
                     } else {
-                        viewDialog.hideDialog(0);
-                        Toast.makeText(ctx, "Credenciales incorrectas", Toast.LENGTH_SHORT).show();
+                        viewDialog.showFail("Credenciales incorrectas");
+                        viewDialog.hideDialog(3);
                     }
                 });
+    }
+
+    void resetPassword()
+    {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if(user!=null)
+        {
+            String email = user.getEmail();
+            FirebaseAuth auth = FirebaseAuth.getInstance();
+            auth.setLanguageCode("es");
+            auth.sendPasswordResetEmail(email).addOnCompleteListener(task -> {
+                if(task.isSuccessful()){
+                    utils.showNotification(ctx,"Actualización de contraseña","Se ha enviado un correo para restablecer la contraseña");
+                    viewDialog.showSuccess("");
+                    viewDialog.hideDialog(3);
+                }else{
+                    viewDialog.showFail("");
+                    viewDialog.hideDialog(3);
+                }
+            });
+        }else{
+            utils.showNotification(ctx,"Actualización de contraseña","No se encontró usuario");
+        }
     }
 
     void getUserDetails(final String email)
