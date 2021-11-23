@@ -4,6 +4,20 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        debug {
+            storeFile file('E:\\AndroidProjects\\EasyCuenta\\key_banco.jks')
+            storePassword '451300'
+            keyPassword '451300'
+            keyAlias 'key_banco'
+        }
+        release {
+            storeFile file('E:\\AndroidProjects\\EasyCuenta\\key_banco.jks')
+            storePassword '451300'
+            keyAlias 'key_banco'
+            keyPassword '451300'
+        }
+    }
     compileSdkVersion 30
     defaultConfig {
         applicationId "com.solution.tecno.androidanimations"
@@ -12,6 +26,7 @@ android {
         versionCode 40
         versionName "3.0.5"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        signingConfig signingConfigs.release
     }
     buildTypes {
         release {
