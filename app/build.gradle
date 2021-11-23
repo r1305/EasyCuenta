@@ -23,8 +23,8 @@ android {
         applicationId "com.solution.tecno.androidanimations"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 40
-        versionName "3.0.5"
+        versionCode 41
+        versionName "3.0.6"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         signingConfig signingConfigs.release
     }
