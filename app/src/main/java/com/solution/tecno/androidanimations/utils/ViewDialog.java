@@ -59,6 +59,7 @@ public class ViewDialog {
         }
         lottie.setAnimation(R.raw.lottie_success);
         lottie.playAnimation();
+        hideDialog(3);
     }
 
     public void showFail(String msg)
@@ -71,6 +72,7 @@ public class ViewDialog {
         }
         lottie.setAnimation(R.raw.lottie_fail);
         lottie.playAnimation();
+        hideDialog(3);
     }
 
 }

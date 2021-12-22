@@ -59,8 +59,16 @@ public class LoginActivity extends AppCompatActivity {
         utils = new Utils(ctx);
 
         binding.forgotPassword.setOnClickListener(v -> {
-            viewDialog.showDialog("Restableciendo contraseña...");
-            resetPassword();
+            if(binding.etUser.getText().toString().isEmpty())
+            {
+                viewDialog.showDialog("");
+                viewDialog.showFail("Debes ingresar tu correo primero");
+                viewDialog.hideDialog(3);
+            }else{
+                viewDialog.showDialog("Restableciendo contraseña...");
+                resetPassword();
+            }
+
         });
         binding.btnLogin.setOnClickListener(v -> {
             if(cred.getNetworkStatus().equals("1")){
@@ -76,6 +84,12 @@ public class LoginActivity extends AppCompatActivity {
                 }
                 if(username.isEmpty()){
                     binding.etUser.setError("Complete el usuario");
+                    binding.etUser.requestFocus();
+                    return;
+                }
+                if(!isValidEmail(username))
+                {
+                    binding.etUser.setError("Ingrese un correo válido");
                     binding.etUser.requestFocus();
                     return;
                 }
@@ -141,25 +155,19 @@ public class LoginActivity extends AppCompatActivity {
     void resetPassword()
     {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-        if(user!=null)
-        {
-            String email = user.getEmail();
-            FirebaseAuth auth = FirebaseAuth.getInstance();
-            auth.setLanguageCode("es");
-            auth.sendPasswordResetEmail(email).addOnCompleteListener(task -> {
-                if(task.isSuccessful()){
-                    utils.showNotification(ctx,"Actualización de contraseña","Se ha enviado un correo para restablecer la contraseña");
-                    viewDialog.showSuccess("");
-                    viewDialog.hideDialog(3);
-                }else{
-                    viewDialog.showFail("");
-                    viewDialog.hideDialog(3);
-                }
-            });
-        }else{
-            utils.showNotification(ctx,"Actualización de contraseña","No se encontró usuario");
-        }
+        String email = binding.etUser.getText().toString();
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        auth.setLanguageCode("es");
+        auth.sendPasswordResetEmail(email).addOnCompleteListener(task -> {
+            if(task.isSuccessful()){
+                utils.showNotification(ctx,"Actualización de contraseña","Se ha enviado un correo para restablecer la contraseña");
+                viewDialog.showSuccess("");
+                viewDialog.hideDialog(3);
+            }else{
+                utils.showNotification(ctx,"Actualización de contraseña","No se encontró usuario");
+                viewDialog.showFail("NO se encontró tu usuario");
+            }
+        });
     }
 
     void getUserDetails(final String email)
