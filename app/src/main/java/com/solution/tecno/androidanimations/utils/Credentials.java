@@ -57,7 +57,6 @@ public class Credentials {
 
         Intent i=new Intent(ctx, LoginActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent pi = PendingIntent.getActivity(ctx, 0, i, 0);
         ctx.startActivity(i);
     }
     
